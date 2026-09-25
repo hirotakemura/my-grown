@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import Dexie from 'dexie';
 import { AppDB } from '../src/db';
-import { SEED_PRODUCTS, SEED_BY_ID } from '../src/data/products';
+import { ADDED_IN, SEED_PRODUCTS, SEED_BY_ID } from '../src/data/products';
 import { HOLIDAY_MENUS, WEEKDAY_MENUS } from '../src/data/menus';
 import { dayStatus, pfcRatio, pfcTargets, placesFor, suggestionFor } from '../src/lib/plan';
 import { importBackup, parseBackup } from '../src/lib/backup';
@@ -126,6 +126,25 @@ describe('v3：セブンの商品追加', () => {
     expect(await db.products.get('7-onigiri-saba')).toMatchObject({ store: 'seven', category: 'おにぎり' });
     expect(await db.products.get('7-nanachiki')).toBeUndefined();
     expect(await db.products.get('7-salad-chicken')).toMatchObject({ protein: 23.5, estimate: false });
+    db.close();
+  });
+});
+
+describe('v4：自炊の商品追加', () => {
+  it('v3 のDBに自炊の7品が足される', async () => {
+    const name = 'migrate-v3';
+    names.push(name);
+    const v3 = new Dexie(name);
+    v3.version(3).stores({
+      settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId',
+    });
+    await v3.table('products').bulkAdd(SEED_PRODUCTS.filter((p) => !p.id.startsWith('belc-') && !p.id.startsWith('home-savas') && p.id !== 'home-boiled-egg'));
+    v3.close();
+
+    const db = new AppDB(name);
+    const added = await db.products.bulkGet(ADDED_IN[4]);
+    expect(added.every((p) => p?.category === '自炊' && p.store === 'other' && p.estimate)).toBe(true);
+    expect(added.map((p) => p?.name)).toContain('ベルク サラダチキン ハーブ');
     db.close();
   });
 });

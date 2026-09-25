@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie';
 import type { DayRecord, Exercise, MealItem, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
-import { ADDED_IN_V3, SEED_BY_ID, SEED_PRODUCTS } from './data/products';
+import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS } from './data/products';
 import { DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
 
@@ -55,14 +55,17 @@ export class AppDB extends Dexie {
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => !have.has(p.id)));
         await tx.table<MealRecord, string>('meals').toCollection().modify((m) => { m.items = m.items.map(fillItemPFC); });
       });
-    // v3: セブンの商品を追加（ブロッコリーチキンエッグ、炭火焼さばおむすび）
-    this.version(3)
-      .stores({})
-      .upgrade(async (tx) => {
-        const products = tx.table<Product, string>('products');
-        const have = new Set(await products.toCollection().primaryKeys());
-        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN_V3.includes(p.id) && !have.has(p.id)));
-      });
+    // v3: セブンの商品（ブロッコリーチキンエッグ、炭火焼さばおむすび）
+    // v4: 自炊の商品（SAVASソイ、ゆで卵、ベルクの豚バラ・キャベツ・サラダチキン・ソーセージ）
+    for (const version of [3, 4]) {
+      this.version(version)
+        .stores({})
+        .upgrade(async (tx) => {
+          const products = tx.table<Product, string>('products');
+          const have = new Set(await products.toCollection().primaryKeys());
+          await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[version].includes(p.id) && !have.has(p.id)));
+        });
+    }
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());

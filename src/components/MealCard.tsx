@@ -22,7 +22,8 @@ const fmt = fmtNut;
 /** 提案の場所 → 「食べたものを選ぶ」を開いたときのお店タブ */
 export function storeForPlace(place?: Place): StoreFilter {
   if (place === 'lawson' || place === 'seven') return place;
-  if (place === 'eatout' || place === 'home') return 'other';
+  // 休日の自炊（ベルク）も「外食・自炊」タブを開く
+  if (place === 'eatout' || place === 'home' || place === 'belc') return 'other';
   return 'all';
 }
 
@@ -109,7 +110,7 @@ export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick
       )}
       <div className="btn-grid">
         <button className="btn primary span2" onClick={() => eat(items)}>これを食べた</button>
-        <button className="btn span2" onClick={() => onPick(slot, [], storeForPlace(place))}>{pickLabel()}</button>
+        <button className="btn span2" onClick={() => onPick(slot, [], storeForPlace(place ?? (kind === 'off' ? 'belc' : undefined)))}>{pickLabel()}</button>
         <button className="btn" onClick={nextIdea}>別の案</button>
         <button className="btn" onClick={() => skipMeal(date, slot)}>食べない</button>
       </div>

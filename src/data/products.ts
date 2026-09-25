@@ -42,8 +42,14 @@ const seven: Row[] = [
   ['7-onigiri-saba', 'セブン 長野県産コシヒカリおむすび 炭火焼さば', 'おにぎり', 220, 7, 6, 35],
 ];
 
-/** あとから追加した初期データ。既存のDBにはバージョンアップ時にこれだけ足す（消した商品は復活させない） */
-export const ADDED_IN_V3 = ['7-broccoli-chicken-egg', '7-onigiri-saba'];
+/** あとから追加した初期データ（DBのバージョン → 商品id）。既存のDBにはバージョンアップ時にこれだけ足す（消した商品は復活させない） */
+export const ADDED_IN: Record<number, string[]> = {
+  3: ['7-broccoli-chicken-egg', '7-onigiri-saba'],
+  4: [
+    'home-savas-soy-cocoa', 'home-boiled-egg', 'belc-pork-belly-karubi', 'belc-cabbage-zaku',
+    'belc-cabbage-sengiri-mini', 'belc-salad-chicken-herb', 'belc-sausage-steak',
+  ],
+};
 
 // どちらのコンビニでも買えるもの
 const common: Row[] = [
@@ -64,6 +70,13 @@ const other: Row[] = [
   ['home-chicken', '鶏むねソテー（作り置き1枚分）', '自炊', 300, 58, 5, 5],
   ['home-rice-150', 'パックご飯 150g', '自炊', 220, 3, 0.5, 51],
   ['home-broccoli', '冷凍ブロッコリー 100g', '自炊', 30, 4, 0.5, 4],
+  ['home-savas-soy-cocoa', 'SAVAS ソイプロテイン ココア味（1杯21g）', '自炊', 80, 15, 0.5, 3.5],
+  ['home-boiled-egg', 'ゆで卵（自炊・1個）', '自炊', 75, 6, 5, 0.3],
+  ['belc-pork-belly-karubi', 'ベルク メキシコ産豚肉バラカルビ 焼肉 小（1パック）', '自炊', 550, 21, 53, 0.2],
+  ['belc-cabbage-zaku', 'ベルク ざく切りキャベツ（1袋）', '自炊', 32, 2, 0.3, 8],
+  ['belc-cabbage-sengiri-mini', 'ベルク 千切りキャベツ ミニ（1袋）', '自炊', 20, 1, 0.2, 5],
+  ['belc-salad-chicken-herb', 'ベルク サラダチキン ハーブ', '自炊', 110, 24, 1.5, 1],
+  ['belc-sausage-steak', 'ベルク あらびきソーセージステーキ（100g）', '自炊', 320, 12, 29, 3],
 ];
 
 const build = (rows: Row[], store: Store): Product[] =>
