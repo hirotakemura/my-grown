@@ -49,6 +49,7 @@ export const ADDED_IN: Record<number, string[]> = {
     'home-savas-soy-cocoa', 'home-boiled-egg', 'belc-pork-belly-karubi', 'belc-cabbage-zaku',
     'belc-cabbage-sengiri-mini', 'belc-salad-chicken-herb', 'belc-sausage-steak',
   ],
+  5: ['home-alpron-soy-cookie'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -77,6 +78,7 @@ const other: Row[] = [
   ['belc-cabbage-sengiri-mini', 'ベルク 千切りキャベツ ミニ（1袋）', '自炊', 20, 1, 0.2, 5],
   ['belc-salad-chicken-herb', 'ベルク サラダチキン ハーブ', '自炊', 110, 24, 1.5, 1],
   ['belc-sausage-steak', 'ベルク あらびきソーセージステーキ（100g）', '自炊', 320, 12, 29, 3],
+  ['home-alpron-soy-cookie', 'ALPRON ソイプロテイン クッキー&クリーム味（1杯30g）', '自炊', 115, 20, 2, 4.5],
 ];
 
 const build = (rows: Row[], store: Store): Product[] =>
