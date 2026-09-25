@@ -17,14 +17,18 @@ export function mealId(date: ISODate, slot: MealSlot) {
   return `${date}|${slot}`;
 }
 
+export function productToItem(p: Product, qty: number): MealItem {
+  return { name: p.name, kcal: p.kcal, protein: p.protein, fat: p.fat, carbs: p.carbs, qty, productId: p.id };
+}
+
 /** 提案の品目を、今の商品データの数値で MealItem にする */
 export function resolveSuggestion(s: Suggestion, products: Map<string, Product>): MealItem[] {
   return s.items.flatMap((it): MealItem[] => {
     if ('productId' in it) {
       const p = products.get(it.productId);
-      return p ? [{ name: p.name, kcal: p.kcal, protein: p.protein, qty: it.qty, productId: p.id }] : [];
+      return p ? [productToItem(p, it.qty)] : [];
     }
-    return [{ name: it.name, kcal: it.kcal, protein: it.protein, qty: it.qty }];
+    return [{ name: it.name, kcal: it.kcal, protein: it.protein, fat: it.fat, carbs: it.carbs, qty: it.qty }];
   });
 }
 

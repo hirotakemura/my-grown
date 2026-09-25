@@ -41,10 +41,10 @@ npm run build      # dist/ に出力（base は /my-grown/）
 
 | 場所 | 中身 |
 |---|---|
-| `src/db.ts` | Dexie のテーブル定義・初期データ投入・永続化の要求 |
+| `src/db.ts` | Dexie のテーブル定義・初期データ投入・v2へのデータ移行・永続化の要求 |
 | `src/lib/plan.ts` | 達成判定、連続記録、A/B の割り当て、次にやること、提案のローテーション |
 | `src/lib/progression.ts` | 前回の記録、+5kg / +2.5kg の提案、自己ベスト、総重量 |
 | `src/lib/backup.ts` | JSON の書き出し・復元（失敗したら元のまま） |
-| `src/data/` | ローソン商品・提案メニュー（作り方）・種目・祝日 |
+| `src/data/` | 商品（ローソン・セブン・外食・自炊、PFC付き）・提案メニュー（作り方）・種目・祝日 |
 | `tests/` | ユニットテスト（fake-indexeddb で開き直しても残るか等） |
 | `e2e/` | Playwright：リロード後の保持、バックアップ往復、オフライン起動 |

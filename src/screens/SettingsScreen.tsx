@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AppData } from '../hooks';
-import type { Exercise, Product, Settings } from '../types';
+import { STORE_LABEL, type Exercise, type Product, type Settings } from '../types';
+import { fmtNut } from '../lib/format';
 import { db, newId, requestPersistence, type StorageStatus } from '../db';
 import { patchSettings } from '../lib/actions';
 import { WEEKDAY_LABEL } from '../lib/date';
@@ -195,7 +196,7 @@ export function SettingsScreen({ data }: { data: AppData }) {
       </section>
 
       <section className="card">
-        <h2 className="card-title">ローソンの商品</h2>
+        <h2 className="card-title">商品（ローソン・セブン・外食）</h2>
         <p className="muted">{data.products.length}品登録（うち目安の数値 {data.products.filter((p) => p.estimate).length}品）</p>
         <button className="btn block" onClick={() => setShowProducts(true)}>商品の追加・編集・削除</button>
       </section>
@@ -242,13 +243,13 @@ function ProductManager({ products, onClose }: { products: Product[]; onClose: (
   const [editing, setEditing] = useState<Product | 'new' | null>(null);
   return (
     <>
-      <Sheet title="ローソンの商品" onClose={onClose} footer={<button className="btn primary block" onClick={() => setEditing('new')}>＋ 商品を追加</button>}>
+      <Sheet title="商品の管理" onClose={onClose} footer={<button className="btn primary block" onClick={() => setEditing('new')}>＋ 商品を追加</button>}>
         <div className="plist">
           {sortProducts(products).map((p) => (
             <div key={p.id} className="prow">
               <button className="main" onClick={() => setEditing(p)}>
                 <span className="name"><span>{p.name}</span>{p.estimate && <span className="badge-est">目安</span>}</span>
-                <span className="nut">{p.category}・{p.kcal}kcal・たんぱく質{p.protein}g</span>
+                <span className="nut">{STORE_LABEL[p.store]}・{p.category}・{fmtNut(p)}</span>
               </button>
               <button className="icon-btn" aria-label={`${p.name}を編集`} onClick={() => setEditing(p)}>✎</button>
             </div>

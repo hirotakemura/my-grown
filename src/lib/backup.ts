@@ -1,4 +1,5 @@
-import { type AppDB, TABLE_NAMES } from '../db';
+import { type AppDB, TABLE_NAMES, fillItemPFC, normalizeProduct } from '../db';
+import type { MealRecord, Product } from '../types';
 
 export const BACKUP_APP_ID = 'my-grown';
 export const BACKUP_VERSION = 1;
@@ -46,7 +47,10 @@ export async function importBackup(db: AppDB, backup: BackupFile): Promise<void>
     for (const name of TABLE_NAMES) {
       const table = db.table(name);
       await table.clear();
-      const rows = backup.tables[name];
+      let rows: unknown[] | undefined = backup.tables[name];
+      // 古いバージョンのバックアップも今の形にそろえて入れる
+      if (name === 'products') rows = (rows as Product[] | undefined)?.map(normalizeProduct);
+      if (name === 'meals') rows = (rows as MealRecord[] | undefined)?.map((m) => ({ ...m, items: (m.items ?? []).map(fillItemPFC) }));
       if (rows?.length) await table.bulkPut(rows);
     }
   });

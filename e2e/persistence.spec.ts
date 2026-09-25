@@ -65,9 +65,9 @@ test('記録した食事・体重・セットがリロード後も残る', async
   await expect(page.getByTestId('total-volume')).toHaveText('720 kg');
 });
 
-test('ローソンの商品から複数選んで記録し、マイセット・商品の編集もリロード後に残る', async ({ page }) => {
+test('コンビニの商品から複数選んで記録し、マイセット・商品の編集もリロード後に残る', async ({ page }) => {
   await openApp(page);
-  await page.getByTestId('meal-dinner').getByRole('button', { name: 'ローソンの商品から選ぶ' }).click();
+  await page.getByTestId('meal-dinner').getByRole('button', { name: '食べたものを選ぶ' }).click();
 
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('button', { name: 'チキン・肉' }).click();
@@ -75,7 +75,7 @@ test('ローソンの商品から複数選んで記録し、マイセット・�
   await dialog.getByRole('button', { name: 'おにぎり' }).click();
   await dialog.getByRole('button', { name: /^おにぎり 鮭 目安/ }).click();
   await dialog.getByRole('button', { name: '1つ増やす' }).click(); // 鮭×2
-  await expect(dialog.getByTestId('picker-total')).toContainText('3品　485kcal・たんぱく質 34g');
+  await expect(dialog.getByTestId('picker-total')).toContainText('3品　485kcal・P34 F4.5 C76.5');
 
   await dialog.getByRole('button', { name: 'マイセット保存' }).click();
   await dialog.getByRole('button', { name: '食べた', exact: true }).click();
@@ -84,7 +84,7 @@ test('ローソンの商品から複数選んで記録し、マイセット・�
   // パッケージの数値で上書き
   await page.getByRole('button', { name: '設定' }).click();
   await page.getByRole('button', { name: '商品の追加・編集・削除' }).click();
-  await page.getByRole('button', { name: 'ゆで卵を編集' }).click();
+  await page.getByRole('button', { name: 'ゆで卵を編集', exact: true }).click();
   await page.getByLabel('たんぱく質（g）').fill('6.5');
   await page.getByRole('button', { name: '保存' }).click();
   await expect.poll(() => dbGet(page, 'products', 'boiled-egg')).toMatchObject({ protein: 6.5, estimate: false });
@@ -92,13 +92,57 @@ test('ローソンの商品から複数選んで記録し、マイセット・�
   await page.reload();
 
   await expect(page.getByTestId('meal-dinner')).toContainText('おにぎり 鮭 ×2');
-  await expect(page.getByTestId('meal-dinner')).toContainText('合計 485kcal・P34g');
+  await expect(page.getByTestId('meal-dinner')).toContainText('合計 485kcal・P34 F4.5 C76.5');
   await expect(page.getByTestId('meal-lunch').getByRole('button', { name: '⚡ 夜の定番' })).toBeVisible();
   await page.getByRole('button', { name: '設定' }).click();
   await page.getByRole('button', { name: '商品の追加・編集・削除' }).click();
-  const egg = page.getByRole('dialog').getByRole('button', { name: /ゆで卵/ }).first();
-  await expect(egg).toContainText('たんぱく質6.5g');
+  const egg = page.getByRole('dialog').getByRole('button', { name: /^ゆで卵/ }).first();
+  await expect(egg).toContainText('P6.5');
   await expect(egg).not.toContainText('目安');
+});
+
+test('セブンの商品と外食（手入力）で記録し、その日のPFCがわかる', async ({ page }) => {
+  await openApp(page);
+
+  // 昼：セブンに絞った提案をそのまま食べた
+  const lunch = page.getByTestId('meal-lunch');
+  await lunch.getByRole('button', { name: 'セブン', exact: true }).click();
+  await expect(lunch).toContainText('セブン・提案');
+  await lunch.getByRole('button', { name: 'これを食べた' }).click();
+
+  // 夜：外食を手入力
+  const dinner = page.getByTestId('meal-dinner');
+  await dinner.getByRole('button', { name: '外食', exact: true }).click();
+  await expect(dinner).toContainText('外食・提案');
+  await dinner.getByRole('button', { name: '食べたものを選ぶ' }).click();
+  const dialog = page.getByRole('dialog').first();
+  await expect(dialog.getByRole('group', { name: 'お店' }).getByRole('button', { name: '外食・自炊' })).toHaveAttribute('aria-pressed', 'true');
+  await dialog.getByRole('button', { name: /手入力で追加/ }).click();
+  const form = page.getByRole('dialog', { name: '手入力で追加（外食など）' });
+  await form.getByLabel('食べたもの').fill('定食屋 唐揚げ定食');
+  await form.getByLabel('エネルギー（kcal）').fill('900');
+  await form.getByLabel('たんぱく質（g）').fill('40');
+  await form.getByLabel('脂質（g）').fill('35');
+  await form.getByLabel('炭水化物（g）').fill('100');
+  await form.getByRole('button', { name: '選択に追加' }).click();
+  await expect(page.getByTestId('picker-total')).toContainText('1品　900kcal・P40 F35 C100');
+  await page.getByRole('button', { name: '食べた', exact: true }).click();
+  await expect(dinner).toContainText('定食屋 唐揚げ定食');
+
+  await page.reload();
+
+  // その日の合計（昼のセブン提案＋夜の外食）
+  const progress = page.getByTestId('progress');
+  await expect(progress.getByRole('progressbar', { name: 'F 脂質' })).toBeVisible();
+  const lunchText = await page.getByTestId('meal-lunch').innerText();
+  expect(lunchText).toContain('セブン');
+  await expect(page.getByTestId('pfc-ratio')).toContainText('PFCバランス　P');
+  await page.getByRole('button', { name: '記録' }).click();
+  const row = page.getByTestId('daily-pfc').getByRole('row', { name: /9\/28\(月\)/ });
+  await expect(row).toBeVisible();
+  const cells = await row.getByRole('cell').allInnerTexts();
+  expect(Number(cells[1])).toBeGreaterThan(900);
+  expect(Number(cells[3])).toBeGreaterThan(35);
 });
 
 test('バックアップを書き出して、別の端末に復元できる', async ({ page, browser }) => {

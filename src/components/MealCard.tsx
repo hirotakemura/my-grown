@@ -1,6 +1,8 @@
-import { SLOT_LABEL, type DayKind, type DayRecord, type MealItem, type MealRecord, type MealSlot, type MySet, type Product } from '../types';
-import { itemsTotal, suggestionFor } from '../lib/plan';
-import { clearMeal, patchDay, recordMeal, resolveSuggestion, skipMeal } from '../lib/actions';
+import { PLACE_LABEL, SLOT_LABEL, type DayKind, type DayRecord, type MealItem, type MealRecord, type MealSlot, type MySet, type Place, type Product } from '../types';
+import { itemsTotal, placesFor, suggestionFor } from '../lib/plan';
+import { clearMeal, patchDay, productToItem, recordMeal, resolveSuggestion, skipMeal } from '../lib/actions';
+import { fmtNut, g1 } from '../lib/format';
+import type { StoreFilter } from './ProductPicker';
 import { useToast } from './Toast';
 
 export interface MealCardProps {
@@ -12,32 +14,43 @@ export interface MealCardProps {
   meal?: MealRecord;
   products: Map<string, Product>;
   mySets: MySet[];
-  onPick: (slot: MealSlot, initial: MealItem[]) => void;
+  onPick: (slot: MealSlot, initial: MealItem[], store?: StoreFilter) => void;
 }
 
-const fmt = (t: { kcal: number; protein: number }) => `${Math.round(t.kcal)}kcal・P${Math.round(t.protein * 10) / 10}g`;
+const fmt = fmtNut;
 
+/** 提案の場所 → 「食べたものを選ぶ」を開いたときのお店タブ */
+export function storeForPlace(place?: Place): StoreFilter {
+  if (place === 'lawson' || place === 'seven') return place;
+  if (place === 'eatout' || place === 'home') return 'other';
+  return 'all';
+}
+
+const SHORT_PLACE: Record<Place, string> = { lawson: 'ローソン', seven: 'セブン', eatout: '外食', home: '家', belc: 'ベルク' };
 export function ItemList({ items }: { items: MealItem[] }) {
   return (
     <ul className="items">
       {items.map((i, n) => (
         <li key={n}>
           <span>{i.name}{i.qty > 1 ? ` ×${i.qty}` : ''}</span>
-          <span>{Math.round(i.kcal * i.qty)}kcal・P{Math.round(i.protein * i.qty * 10) / 10}g</span>
+          <span>{Math.round(i.kcal * i.qty)}kcal・P{g1(i.protein * i.qty)}</span>
         </li>
       ))}
     </ul>
   );
 }
 
-export function pickLabel(kind: DayKind) {
-  return kind === 'work' ? 'ローソンの商品から選ぶ' : '商品から選ぶ';
+export function pickLabel() {
+  return '食べたものを選ぶ';
 }
 
 /** まだ記録していない食事：提案とボタン */
 export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick }: MealCardProps) {
   const toast = useToast();
   const sug = suggestionFor(date, slot, kind, day);
+  const places = placesFor(slot, kind);
+  const place = day?.place?.[slot];
+  const setPlace = (p?: Place) => patchDay(date, { place: { ...day?.place, [slot]: p } });
   const items = resolveSuggestion(sug, products);
   const total = itemsTotal(items);
 
@@ -50,8 +63,18 @@ export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick
 
   return (
     <div className="stack">
+      {places.length > 1 && (
+        <div className="myset-chips" role="group" aria-label="どこで食べる">
+          <button className={`btn small ${place ? 'ghost' : 'primary'}`} aria-pressed={!place} onClick={() => setPlace(undefined)}>おまかせ</button>
+          {places.map((p) => (
+            <button key={p} className={`btn small ${place === p ? 'primary' : 'ghost'}`} aria-pressed={place === p} onClick={() => setPlace(p)}>
+              {SHORT_PLACE[p]}
+            </button>
+          ))}
+        </div>
+      )}
       <div>
-        <div className="muted">{kind === 'work' ? 'ローソンで買う' : 'ベルクで買って作る'}・提案</div>
+        <div className="muted">{PLACE_LABEL[sug.place]}・提案</div>
         <div className="card-title" data-testid={`suggestion-${slot}`}>{sug.title}</div>
       </div>
       <ItemList items={items} />
@@ -75,7 +98,7 @@ export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick
               onClick={() =>
                 eat(s.items.flatMap((it) => {
                   const p = products.get(it.productId);
-                  return p ? [{ name: p.name, kcal: p.kcal, protein: p.protein, qty: it.qty, productId: p.id }] : [];
+                  return p ? [productToItem(p, it.qty)] : [];
                 }))
               }
             >
@@ -86,7 +109,7 @@ export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick
       )}
       <div className="btn-grid">
         <button className="btn primary span2" onClick={() => eat(items)}>これを食べた</button>
-        <button className="btn span2" onClick={() => onPick(slot, [])}>{pickLabel(kind)}</button>
+        <button className="btn span2" onClick={() => onPick(slot, [], storeForPlace(place))}>{pickLabel()}</button>
         <button className="btn" onClick={nextIdea}>別の案</button>
         <button className="btn" onClick={() => skipMeal(date, slot)}>食べない</button>
       </div>
@@ -95,7 +118,7 @@ export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick
 }
 
 export function MealCard(props: MealCardProps) {
-  const { date, slot, time, meal, kind, onPick } = props;
+  const { date, slot, time, meal, onPick } = props;
   return (
     <section className="card" data-testid={`meal-${slot}`}>
       <div className="card-head">
@@ -109,7 +132,7 @@ export function MealCard(props: MealCardProps) {
           <ItemList items={meal.items} />
           <div className="total num">合計 {fmt(itemsTotal(meal.items))}</div>
           <div className="btn-grid">
-            <button className="btn" onClick={() => onPick(slot, meal.items)}>{kind === 'work' ? '商品を変更' : '内容を変更'}</button>
+            <button className="btn" onClick={() => onPick(slot, meal.items)}>内容を変更</button>
             <button className="btn ghost" onClick={() => clearMeal(date, slot)}>取り消す</button>
           </div>
         </>

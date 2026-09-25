@@ -14,7 +14,7 @@ import { ProgressCard } from '../components/ProgressCard';
 import { MealCard, pickLabel, type MealCardProps } from '../components/MealCard';
 import { WorkoutSection } from '../components/Workout';
 import { ShoppingList } from '../components/ShoppingList';
-import { ProductPicker } from '../components/ProductPicker';
+import { ProductPicker, type StoreFilter } from '../components/ProductPicker';
 
 interface Props {
   data: AppData;
@@ -25,7 +25,7 @@ interface Props {
 export function Today({ data, date, setDate }: Props) {
   const now = useNow();
   const today = todayISO(now);
-  const [picker, setPicker] = useState<{ slot: MealSlot; initial: MealItem[] } | null>(null);
+  const [picker, setPicker] = useState<{ slot: MealSlot; initial: MealItem[]; store?: StoreFilter } | null>(null);
 
   const { settings } = data;
   const day = data.days.get(date);
@@ -59,7 +59,7 @@ export function Today({ data, date, setDate }: Props) {
     meal: meals.find((m) => m.slot === slot),
     products: productMap,
     mySets: data.mySets,
-    onPick: (s, initial) => setPicker({ slot: s, initial }),
+    onPick: (s, initial, store) => setPicker({ slot: s, initial, store }),
   });
 
   const lastWeight = [...data.days.values()]
@@ -87,7 +87,7 @@ export function Today({ data, date, setDate }: Props) {
               aria-pressed={status.kind === k}
               onClick={() => patchDay(date, { kind: k === auto ? undefined : k })}
             >
-              {k === 'work' ? '🏢 出社日（ローソン）' : '🏠 休日（自炊）'}
+              {k === 'work' ? '🏢 出社日（コンビニ）' : '🏠 休日（自炊）'}
             </button>
           ))}
         </div>
@@ -127,8 +127,9 @@ export function Today({ data, date, setDate }: Props) {
         <ProductPicker
           date={date}
           slot={picker.slot}
-          title={`${SLOT_LABEL[picker.slot]}：${pickLabel(status.kind)}`}
+          title={`${SLOT_LABEL[picker.slot]}：${pickLabel()}`}
           initial={picker.initial}
+          initialStore={picker.store}
           products={data.products}
           mySets={data.mySets}
           onClose={() => setPicker(null)}

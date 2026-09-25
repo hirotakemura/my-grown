@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie';
-import type { DayRecord, Exercise, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
-import { SEED_PRODUCTS } from './data/products';
+import type { DayRecord, Exercise, MealItem, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
+import { SEED_BY_ID, SEED_PRODUCTS } from './data/products';
 import { DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
 
@@ -45,6 +45,16 @@ export class AppDB extends Dexie {
       exercises: 'id',
       workoutSets: 'id, date, exerciseId',
     });
+    // v2: セブン・外食の商品と PFC（脂質・炭水化物）を追加
+    this.version(2)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        await products.toCollection().modify((p) => { Object.assign(p, normalizeProduct(p)); });
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => !have.has(p.id)));
+        await tx.table<MealRecord, string>('meals').toCollection().modify((m) => { m.items = m.items.map(fillItemPFC); });
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());
@@ -52,6 +62,31 @@ export class AppDB extends Dexie {
       await tx.table('exercises').bulkAdd(SEED_EXERCISES);
     });
   }
+}
+
+/** 古いデータ（PFC・購入場所なし）を今の形にそろえる。初期データの商品なら目安値で埋める */
+export function normalizeProduct(p: Partial<Product> & { id: string }): Product {
+  const seed = SEED_BY_ID.get(p.id);
+  return {
+    name: seed?.name ?? '',
+    category: seed?.category ?? 'その他',
+    kcal: 0,
+    protein: 0,
+    estimate: true,
+    favorite: false,
+    useCount: 0,
+    ...p,
+    store: p.store ?? seed?.store ?? 'lawson',
+    // 脂質・炭水化物がない古い商品は、初期データの目安値で埋める（自作の商品は 0。編集で入れ直せる）
+    fat: p.fat ?? (seed ? seed.fat : 0),
+    carbs: p.carbs ?? (seed ? seed.carbs : 0),
+  } as Product;
+}
+
+export function fillItemPFC(i: MealItem): MealItem {
+  if (i.fat != null && i.carbs != null) return i;
+  const seed = i.productId ? SEED_BY_ID.get(i.productId) : undefined;
+  return { ...i, fat: i.fat ?? seed?.fat, carbs: i.carbs ?? seed?.carbs };
 }
 
 export const db = new AppDB();

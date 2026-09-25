@@ -5,6 +5,7 @@ import { addDays, dateRange, formatMD } from '../lib/date';
 import { dayStatus } from '../lib/plan';
 import { bestOf, sessionsOf, totalVolume } from '../lib/progression';
 import { LineChart } from '../components/LineChart';
+import { g1 } from '../lib/format';
 
 export function Records({ data }: { data: AppData }) {
   const today = useToday();
@@ -13,11 +14,17 @@ export function Records({ data }: { data: AppData }) {
     const dates = dateRange(addDays(today, -6), today);
     const st = dates.map((d) => dayStatus(d, data));
     const withMeals = st.filter((s) => data.meals.some((m) => m.date === s.date && m.status === 'eaten'));
+    const avg = (k: 'kcal' | 'protein' | 'fat' | 'carbs') =>
+      withMeals.length ? withMeals.reduce((t, s) => t + s.eaten[k], 0) / withMeals.length : null;
     return {
       achieved: st.filter((s) => s.achieved).length,
       workouts: st.filter((s) => s.doneSets > 0).length,
-      avgProtein: withMeals.length ? withMeals.reduce((t, s) => t + s.eaten.protein, 0) / withMeals.length : null,
+      avgProtein: avg('protein'),
+      avgKcal: avg('kcal'),
+      avgFat: avg('fat'),
+      avgCarbs: avg('carbs'),
       mealDays: withMeals.length,
+      days: [...st].reverse(),
     };
   }, [data, today]);
 
@@ -47,7 +54,30 @@ export function Records({ data }: { data: AppData }) {
             <b>{week.avgProtein == null ? '—' : Math.round(week.avgProtein)}</b>g<span>平均たんぱく質</span>
           </div>
         </div>
-        {week.mealDays > 0 && week.mealDays < 7 && <p className="muted">平均たんぱく質は、食事を記録した{week.mealDays}日分の平均です。</p>}
+        {week.avgKcal != null && (
+          <p className="sub num">1日平均 {Math.round(week.avgKcal)}kcal・P{g1(week.avgProtein!)} F{g1(week.avgFat!)} C{g1(week.avgCarbs!)}g</p>
+        )}
+        {week.mealDays > 0 && week.mealDays < 7 && <p className="muted">平均は、食事を記録した{week.mealDays}日分の平均です。</p>}
+      </section>
+
+      <section className="card">
+        <h2 className="card-title">日ごとのPFC</h2>
+        <table className="table" data-testid="daily-pfc">
+          <thead><tr><th>日付</th><th>kcal</th><th>P</th><th>F</th><th>C</th><th /></tr></thead>
+          <tbody>
+            {week.days.map((s) => (
+              <tr key={s.date}>
+                <td>{formatMD(s.date)}</td>
+                <td>{s.eaten.kcal ? Math.round(s.eaten.kcal) : '—'}</td>
+                <td>{s.eaten.kcal ? g1(s.eaten.protein) : '—'}</td>
+                <td>{s.eaten.kcal ? g1(s.eaten.fat) : '—'}</td>
+                <td>{s.eaten.kcal ? g1(s.eaten.carbs) : '—'}</td>
+                <td>{s.achieved ? <span className="chip ok">達成</span> : null}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="muted">P＝たんぱく質・F＝脂質・C＝炭水化物（g）。今日の画面で日付を切り替えると、その日の食事の中身が見られます。</p>
       </section>
 
       <section className="card">

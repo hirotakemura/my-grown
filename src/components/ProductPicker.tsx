@@ -1,19 +1,36 @@
 import { useMemo, useState } from 'react';
-import { CATEGORIES, SLOT_LABEL, type Category, type MealItem, type MealSlot, type MySet, type Product } from '../types';
+import { CATEGORIES, SLOT_LABEL, STORE_LABEL, type Category, type MealItem, type MealSlot, type MySet, type Product, type Store } from '../types';
 import { itemsTotal } from '../lib/plan';
-import { recordMeal, saveMySet, deleteMySet, saveProduct } from '../lib/actions';
+import { recordMeal, saveMySet, deleteMySet, saveProduct, productToItem } from '../lib/actions';
+import { fmtNut } from '../lib/format';
 import { formatMD } from '../lib/date';
 import { Sheet } from './Sheet';
 import { ProductEditor } from './ProductEditor';
 import { useToast } from './Toast';
 
 type Tab = 'all' | 'mysets' | Category;
+export type StoreFilter = 'all' | 'lawson' | 'seven' | 'other';
+
+const STORE_TABS: { id: StoreFilter; label: string }[] = [
+  { id: 'all', label: 'すべて' },
+  { id: 'lawson', label: 'ローソン' },
+  { id: 'seven', label: 'セブン' },
+  { id: 'other', label: '外食・自炊' },
+];
+
+/** ローソン／セブンを選んだときは「コンビニ共通」の商品も出す */
+export function matchStore(store: Store, filter: StoreFilter): boolean {
+  if (filter === 'all') return true;
+  if (filter === 'other') return store === 'other';
+  return store === filter || store === 'common';
+}
 
 interface Props {
   date: string;
   slot: MealSlot;
   title: string;
   initial: MealItem[];
+  initialStore?: StoreFilter;
   products: Product[];
   mySets: MySet[];
   onClose: () => void;
@@ -28,9 +45,11 @@ export function sortProducts(list: Product[]): Product[] {
 
 const keyOf = (i: MealItem) => i.productId ?? `custom:${i.name}`;
 
-export function ProductPicker({ date, slot, title, initial, products, mySets, onClose }: Props) {
+export function ProductPicker({ date, slot, title, initial, initialStore = 'all', products, mySets, onClose }: Props) {
   const toast = useToast();
+  const [store, setStore] = useState<StoreFilter>(initialStore);
   const [tab, setTab] = useState<Tab>('all');
+  const [manual, setManual] = useState(false);
   const [query, setQuery] = useState('');
   const [sel, setSel] = useState<MealItem[]>(initial);
   const [editing, setEditing] = useState<Product | 'new' | null>(null);
@@ -41,16 +60,24 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return sortProducts(
-      products.filter((p) => (tab === 'all' || tab === 'mysets' || p.category === tab) && (!q || p.name.toLowerCase().includes(q))),
+      products.filter(
+        (p) =>
+          matchStore(p.store, store) &&
+          (tab === 'all' || tab === 'mysets' || p.category === tab) &&
+          (!q || p.name.toLowerCase().includes(q)),
+      ),
     );
-  }, [products, tab, query]);
+  }, [products, store, tab, query]);
+
+  // 選んでいる場所に商品があるカテゴリだけ出す
+  const cats = CATEGORIES.filter((c) => products.some((p) => p.category === c && matchStore(p.store, store)));
 
   const setQty = (p: Product, qty: number) => {
     setSel((cur) => {
       const rest = cur.filter((i) => i.productId !== p.id);
       if (qty <= 0) return rest;
       const existing = cur.find((i) => i.productId === p.id);
-      const item: MealItem = { name: p.name, kcal: p.kcal, protein: p.protein, qty, productId: p.id };
+      const item = productToItem(p, qty);
       return existing ? cur.map((i) => (i.productId === p.id ? item : i)) : [...cur, item];
     });
   };
@@ -64,7 +91,7 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
         const ex = next.find((i) => i.productId === p.id);
         next = ex
           ? next.map((i) => (i.productId === p.id ? { ...i, qty: i.qty + it.qty } : i))
-          : [...next, { name: p.name, kcal: p.kcal, protein: p.protein, qty: it.qty, productId: p.id }];
+          : [...next, productToItem(p, it.qty)];
       }
       return next;
     });
@@ -76,7 +103,7 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
     if (items.length === 0) return;
     await recordMeal(date, slot, items);
     const t = itemsTotal(items);
-    toast(`${SLOT_LABEL[slot]}を記録しました（${Math.round(t.kcal)}kcal・P${Math.round(t.protein)}g）`);
+    toast(`${SLOT_LABEL[slot]}を記録しました（${fmtNut(t)}）`);
     onClose();
   };
 
@@ -92,7 +119,7 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
   const tabs: { id: Tab; label: string }[] = [
     { id: 'all', label: 'すべて' },
     { id: 'mysets', label: `マイセット${mySets.length ? `（${mySets.length}）` : ''}` },
-    ...CATEGORIES.map((c) => ({ id: c as Tab, label: c })),
+    ...cats.map((c) => ({ id: c as Tab, label: c })),
   ];
 
   const customSel = sel.filter((i) => !i.productId);
@@ -114,6 +141,13 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
                 aria-label="商品名で検索"
               />
             </div>
+            <div className="seg" role="group" aria-label="お店" style={{ margin: '0 12px 8px' }}>
+              {STORE_TABS.map((t) => (
+                <button key={t.id} aria-pressed={store === t.id} onClick={() => { setStore(t.id); if (tab !== 'all' && tab !== 'mysets') setTab('all'); }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
             <div className="cat-tabs" role="toolbar" aria-label="カテゴリ">
               {tabs.map((t) => (
                 <button key={t.id} aria-pressed={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
@@ -126,7 +160,7 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
             <div className="row">
               <div className="grow">
                 <div className="total num" data-testid="picker-total">
-                  {sel.reduce((n, i) => n + i.qty, 0)}品　{Math.round(total.kcal)}kcal・たんぱく質 {Math.round(total.protein * 10) / 10}g
+                  {sel.reduce((n, i) => n + i.qty, 0)}品　{fmtNut(total)}
                 </div>
                 <div className="muted">{formatMD(date)} {SLOT_LABEL[slot]}</div>
               </div>
@@ -146,7 +180,7 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
             {mySets.map((s) => {
               const items = s.items.flatMap((it) => {
                 const p = byId.get(it.productId);
-                return p ? [{ name: p.name, kcal: p.kcal, protein: p.protein, qty: it.qty, productId: p.id }] : [];
+                return p ? [productToItem(p, it.qty)] : [];
               });
               const t = itemsTotal(items);
               return (
@@ -160,7 +194,7 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
                     >🗑</button>
                   </div>
                   <div className="sub">{items.map((i) => `${i.name}${i.qty > 1 ? `×${i.qty}` : ''}`).join('、')}</div>
-                  <div className="total num">{Math.round(t.kcal)}kcal・P{Math.round(t.protein)}g</div>
+                  <div className="total num">{fmtNut(t)}</div>
                   <div className="btn-grid">
                     <button className="btn" onClick={() => addSet(s)}>選択に追加</button>
                     <button className="btn primary" onClick={() => submit(items)}>これで記録</button>
@@ -171,14 +205,15 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
           </div>
         ) : (
           <>
-            <p className="muted">「目安」の数値は一般的な商品の参考値です。✎ からパッケージの表示に書き換えられます。</p>
+            <button className="btn block" onClick={() => setManual(true)}>✎ 手入力で追加（外食・コンビニ以外）</button>
+            <p className="muted">「目安」の数値は一般的な商品の参考値です。✎ からパッケージの表示に書き換えられます。P＝たんぱく質・F＝脂質・C＝炭水化物（g）</p>
             {customSel.length > 0 && (
               <div className="plist">
                 {customSel.map((i) => (
                   <div key={keyOf(i)} className="prow sel">
                     <div className="main">
                       <div className="name"><span>{i.name}</span></div>
-                      <div className="nut">{i.kcal}kcal・P{i.protein}g ×{i.qty}</div>
+                      <div className="nut">{fmtNut(i)} ×{i.qty}</div>
                     </div>
                     <button className="btn small ghost" onClick={() => setSel((c) => c.filter((x) => keyOf(x) !== keyOf(i)))}>外す</button>
                   </div>
@@ -195,7 +230,7 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
                         <span>{p.name}</span>
                         {p.estimate && <span className="badge-est">目安</span>}
                       </span>
-                      <span className="nut">{p.kcal}kcal・たんぱく質{p.protein}g</span>
+                      <span className="nut">{store === 'all' && p.store !== 'common' ? `${STORE_LABEL[p.store]}・` : ''}{fmtNut(p)}</span>
                     </button>
                     {q > 0 ? (
                       <div className="qty">
@@ -227,7 +262,14 @@ export function ProductPicker({ date, slot, title, initial, products, mySets, on
         <ProductEditor
           product={editing === 'new' ? undefined : editing}
           defaultCategory={tab !== 'all' && tab !== 'mysets' ? tab : undefined}
+          defaultStore={store === 'all' ? undefined : store}
           onClose={() => setEditing(null)}
+        />
+      )}
+      {manual && (
+        <ProductEditor
+          onAddToMeal={(item) => setSel((cur) => [...cur, item])}
+          onClose={() => setManual(false)}
         />
       )}
     </>

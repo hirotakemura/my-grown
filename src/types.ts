@@ -9,6 +9,8 @@ export type Category =
   | '汁物・サラダ'
   | 'ホットスナック'
   | 'パン'
+  | '外食・定食'
+  | '自炊'
   | 'その他';
 
 export const CATEGORIES: Category[] = [
@@ -20,15 +22,39 @@ export const CATEGORIES: Category[] = [
   '汁物・サラダ',
   'ホットスナック',
   'パン',
+  '外食・定食',
+  '自炊',
   'その他',
 ];
+
+/** 商品の買える場所。common はローソンでもセブンでも買えるもの */
+export type Store = 'lawson' | 'seven' | 'common' | 'other';
+export const STORE_LABEL: Record<Store, string> = {
+  lawson: 'ローソン',
+  seven: 'セブン',
+  common: 'コンビニ共通',
+  other: '外食・自炊',
+};
+
+/** 食事をどこで調達するか（提案の絞り込みに使う） */
+export type Place = 'lawson' | 'seven' | 'eatout' | 'home' | 'belc';
+export const PLACE_LABEL: Record<Place, string> = {
+  lawson: 'ローソン',
+  seven: 'セブン',
+  eatout: '外食',
+  home: '家（作り置き）',
+  belc: 'ベルクで買って自炊',
+};
 
 export interface Product {
   id: string;
   name: string;
   category: Category;
+  store: Store;
   kcal: number;
   protein: number;
+  fat: number;
+  carbs: number;
   /** true = 初期データの目安値。パッケージの表示で上書きすると false になる */
   estimate: boolean;
   favorite: boolean;
@@ -47,7 +73,9 @@ export const SLOT_LABEL: Record<MealSlot, string> = { lunch: '昼', dinner: '夜
 export interface MealItem {
   name: string;
   kcal: number; // 1個あたり
-  protein: number; // 1個あたり
+  protein: number; // 1個あたり（g）
+  fat?: number; // 1個あたり（g）。PFC対応前の記録にはない
+  carbs?: number; // 1個あたり（g）
   qty: number;
   productId?: string;
 }
@@ -72,6 +100,7 @@ export interface DayRecord {
   gymStatus?: 'started' | 'done';
   weight?: number;
   rotation?: Partial<Record<MealSlot, number>>; // 「別の案」で進めた数
+  place?: Partial<Record<MealSlot, Place>>; // 提案をこの場所に絞る
   swaps?: Record<string, string>; // 元の種目id -> 代替種目id
   shoppingChecked?: string[];
 }

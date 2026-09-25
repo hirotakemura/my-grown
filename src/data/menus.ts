@@ -1,9 +1,9 @@
-import type { MealSlot } from '../types';
+import type { MealSlot, Place } from '../types';
 
 /** 商品を参照する品目（数値は商品データから取る）か、独自の品目 */
 export type SuggestionItem =
   | { productId: string; qty: number }
-  | { name: string; kcal: number; protein: number; qty: number };
+  | { name: string; kcal: number; protein: number; fat: number; carbs: number; qty: number };
 
 export interface Ingredient {
   name: string;
@@ -13,6 +13,7 @@ export interface Ingredient {
 
 export interface Suggestion {
   id: string;
+  place: Place;
   title: string;
   items: SuggestionItem[];
   recipe?: {
@@ -24,10 +25,13 @@ export interface Suggestion {
 }
 
 const p = (productId: string, qty = 1): SuggestionItem => ({ productId, qty });
-const c = (name: string, kcal: number, protein: number, qty = 1): SuggestionItem => ({ name, kcal, protein, qty });
+const c = (name: string, kcal: number, protein: number, fat: number, carbs: number, qty = 1): SuggestionItem => ({
+  name, kcal, protein, fat, carbs, qty,
+});
 
 const POST_WORKOUT: Suggestion[] = [
-  { id: 'post-1', title: 'ミルクプロテイン＋おにぎり', items: [p('savas-milk'), p('onigiri-sake')] },
+  { id: 'post-1', place: 'lawson', title: 'ミルクプロテイン＋おにぎり', items: [p('savas-milk'), p('onigiri-sake')] },
+  { id: 'post-2', place: 'seven', title: 'ミルクプロテイン＋おにぎり（セブン）', items: [p('savas-milk'), p('7-onigiri-sake')] },
 ];
 
 /** 平日（ローソン） */
@@ -35,39 +39,77 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
   lunch: [
     {
       id: 'wl-1',
+      place: 'lawson',
       title: 'サラダチキン＋おにぎり2個＋味噌汁＋ゆで卵',
       items: [p('salad-chicken'), p('onigiri-sake'), p('onigiri-ume'), p('miso-soup'), p('boiled-egg')],
     },
     {
       id: 'wl-2',
+      place: 'lawson',
       title: 'ざるそば＋サラダチキン＋ゆで卵＋おにぎり',
       items: [p('zaru-soba'), p('salad-chicken'), p('boiled-egg'), p('onigiri-sake')],
     },
     {
       id: 'wl-3',
+      place: 'lawson',
       title: '焼き鳥4本＋おにぎり2個＋サラダ',
       items: [p('yakitori-shio', 2), p('onigiri-sake'), p('onigiri-konbu'), p('salad-nonoil')],
+    },
+    {
+      id: 'sl-1',
+      place: 'seven',
+      title: 'サラダチキン＋おにぎり2個＋具だくさん味噌汁＋煮たまご',
+      items: [p('7-salad-chicken'), p('7-onigiri-sake'), p('7-onigiri-konbu'), p('7-miso-soup'), p('7-nitamago')],
+    },
+    {
+      id: 'sl-2',
+      place: 'seven',
+      title: 'さばの塩焼き＋おにぎり2個＋サラダ＋煮たまご',
+      items: [p('7-saba'), p('7-onigiri-sake'), p('7-onigiri-konbu'), p('7-salad'), p('7-nitamago')],
     },
   ],
   dinner: [
     {
       id: 'wd-1',
+      place: 'lawson',
       title: 'サラダチキン＋焼き鳥＋おにぎり＋味噌汁',
       items: [p('salad-chicken'), p('yakitori-shio'), p('onigiri-sake'), p('miso-soup')],
     },
     {
       id: 'wd-2',
+      place: 'home',
       title: '作り置きの鶏むね＋パックご飯＋冷凍ブロッコリー',
-      items: [
-        c('鶏むねソテー（作り置き1枚分）', 300, 58),
-        c('パックご飯 150g', 220, 3),
-        c('冷凍ブロッコリー 100g', 30, 4),
-      ],
+      items: [p('home-chicken'), p('home-rice-150'), p('home-broccoli')],
     },
     {
       id: 'wd-3',
+      place: 'lawson',
       title: 'サラダチキン＋豚汁＋おにぎり2個＋ゆで卵',
       items: [p('salad-chicken'), p('tonjiru'), p('onigiri-sake'), p('onigiri-konbu'), p('boiled-egg')],
+    },
+    {
+      id: 'sd-1',
+      place: 'seven',
+      title: 'サラダチキン＋豚汁＋おにぎり＋煮たまご',
+      items: [p('7-salad-chicken'), p('7-tonjiru'), p('7-onigiri-sake'), p('7-nitamago')],
+    },
+    {
+      id: 'ed-1',
+      place: 'eatout',
+      title: '定食屋：焼き魚定食（ご飯少なめ）',
+      items: [p('eo-grilled-fish')],
+    },
+    {
+      id: 'ed-2',
+      place: 'eatout',
+      title: '定食屋：刺身定食',
+      items: [p('eo-sashimi')],
+    },
+    {
+      id: 'ed-3',
+      place: 'eatout',
+      title: '鶏むね・ささみ系の定食＋サラダ',
+      items: [p('eo-chicken-teishoku'), p('eo-salad')],
     },
   ],
   post: POST_WORKOUT,
@@ -78,12 +120,13 @@ export const HOLIDAY_MENUS: Record<MealSlot, Suggestion[]> = {
   lunch: [
     {
       id: 'hl-1',
+      place: 'belc',
       title: '豚こまと冷凍野菜の炒め物＋ご飯',
       items: [
-        c('豚こま切れ肉 150g', 330, 27),
-        c('冷凍ミックス野菜 150g', 50, 3),
-        c('焼肉のたれ・油', 60, 0),
-        c('パックご飯 200g', 300, 5),
+        c('豚こま切れ肉 150g', 330, 27, 24, 0.3),
+        c('冷凍ミックス野菜 150g', 50, 3, 0.5, 10),
+        c('焼肉のたれ・油', 60, 0, 4, 6),
+        c('パックご飯 200g', 300, 5, 0.7, 68),
       ],
       recipe: {
         ingredients: [
@@ -101,12 +144,13 @@ export const HOLIDAY_MENUS: Record<MealSlot, Suggestion[]> = {
     },
     {
       id: 'hl-2',
+      place: 'belc',
       title: '鶏むね親子丼',
       items: [
-        c('鶏むね肉（皮なし）150g', 160, 35),
-        c('卵', 75, 6, 2),
-        c('玉ねぎ 1/2個・めんつゆ', 65, 2),
-        c('パックご飯 200g', 300, 5),
+        c('鶏むね肉（皮なし）150g', 160, 35, 2.5, 0),
+        c('卵', 75, 6, 5, 0.3, 2),
+        c('玉ねぎ 1/2個・めんつゆ', 65, 2, 0, 14),
+        c('パックご飯 200g', 300, 5, 0.7, 68),
       ],
       recipe: {
         ingredients: [
@@ -125,12 +169,13 @@ export const HOLIDAY_MENUS: Record<MealSlot, Suggestion[]> = {
     },
     {
       id: 'hl-3',
+      place: 'belc',
       title: '鮭のフライパン焼き定食',
       items: [
-        c('生鮭 1切れ', 130, 22),
-        c('納豆', 90, 8),
-        c('インスタント味噌汁', 35, 2),
-        c('パックご飯 200g', 300, 5),
+        c('生鮭 1切れ', 130, 22, 4, 0.1),
+        c('納豆', 90, 8, 4.5, 6),
+        c('インスタント味噌汁', 35, 2, 1, 4.5),
+        c('パックご飯 200g', 300, 5, 0.7, 68),
       ],
       recipe: {
         ingredients: [
@@ -151,12 +196,13 @@ export const HOLIDAY_MENUS: Record<MealSlot, Suggestion[]> = {
   dinner: [
     {
       id: 'hd-1',
+      place: 'belc',
       title: '鶏むねのしっとりソテー',
       items: [
-        c('鶏むね肉（皮なし）250g', 265, 58),
-        c('片栗粉・油', 67, 0),
-        c('冷凍ブロッコリー 100g', 30, 4),
-        c('パックご飯 150g', 220, 3),
+        c('鶏むね肉（皮なし）250g', 265, 58, 4, 0),
+        c('片栗粉・油', 67, 0, 4, 8),
+        c('冷凍ブロッコリー 100g', 30, 4, 0.5, 4),
+        c('パックご飯 150g', 220, 3, 0.5, 51),
       ],
       recipe: {
         ingredients: [
@@ -176,12 +222,13 @@ export const HOLIDAY_MENUS: Record<MealSlot, Suggestion[]> = {
     },
     {
       id: 'hd-2',
+      place: 'belc',
       title: '豚の生姜焼き',
       items: [
-        c('豚もも薄切り肉 150g', 200, 31),
-        c('玉ねぎ 1/2個・たれ・油', 130, 2),
-        c('千切りキャベツ', 20, 1),
-        c('パックご飯 150g', 220, 3),
+        c('豚もも薄切り肉 150g', 200, 31, 7, 0.3),
+        c('玉ねぎ 1/2個・たれ・油', 130, 2, 4, 20),
+        c('千切りキャベツ', 20, 1, 0.1, 4.5),
+        c('パックご飯 150g', 220, 3, 0.5, 51),
       ],
       recipe: {
         ingredients: [
@@ -200,12 +247,13 @@ export const HOLIDAY_MENUS: Record<MealSlot, Suggestion[]> = {
     },
     {
       id: 'hd-3',
+      place: 'belc',
       title: '鮭と豆腐の蒸し焼き',
       items: [
-        c('生鮭 1切れ', 130, 22),
-        c('豆腐 150g', 110, 10),
-        c('しめじ・ポン酢', 25, 1),
-        c('パックご飯 150g', 220, 3),
+        c('生鮭 1切れ', 130, 22, 4, 0.1),
+        c('豆腐 150g', 110, 10, 6.5, 3),
+        c('しめじ・ポン酢', 25, 1, 0.3, 5),
+        c('パックご飯 150g', 220, 3, 0.5, 51),
       ],
       recipe: {
         ingredients: [

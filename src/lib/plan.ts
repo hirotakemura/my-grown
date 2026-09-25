@@ -1,5 +1,5 @@
 import type {
-  DayKind, DayRecord, Exercise, ISODate, MealItem, MealRecord, MealSlot, Settings, WorkoutMenu, WorkoutSet,
+  DayKind, DayRecord, Exercise, ISODate, MealItem, MealRecord, MealSlot, Place, Settings, WorkoutMenu, WorkoutSet,
 } from '../types';
 import { HOLIDAYS } from '../data/holidays';
 import { HOLIDAY_MENUS, WEEKDAY_MENUS, type Suggestion } from '../data/menus';
@@ -65,11 +65,43 @@ export function plannedSetCount(settings: Settings, menu: WorkoutMenu, exercises
   return menuExerciseIds(settings, menu).reduce((n, id) => n + (exercises.get(id)?.sets ?? 3), 0);
 }
 
-export function itemsTotal(items: MealItem[]) {
+export interface Nutrition {
+  kcal: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+}
+
+export function itemsTotal(items: MealItem[]): Nutrition {
   return items.reduce(
-    (t, i) => ({ kcal: t.kcal + i.kcal * i.qty, protein: t.protein + i.protein * i.qty }),
-    { kcal: 0, protein: 0 },
+    (t, i) => ({
+      kcal: t.kcal + i.kcal * i.qty,
+      protein: t.protein + i.protein * i.qty,
+      fat: t.fat + (i.fat ?? 0) * i.qty,
+      carbs: t.carbs + (i.carbs ?? 0) * i.qty,
+    }),
+    { kcal: 0, protein: 0, fat: 0, carbs: 0 },
   );
+}
+
+export const FAT_ENERGY_RATIO = 0.25;
+
+/** PFCの目安：たんぱく質は設定値、脂質はカロリーの25%、残りを炭水化物 */
+export function pfcTargets(target: { kcal: number; protein: number }): Nutrition {
+  const fat = (target.kcal * FAT_ENERGY_RATIO) / 9;
+  const carbs = Math.max(0, (target.kcal - target.protein * 4 - fat * 9) / 4);
+  return { kcal: target.kcal, protein: target.protein, fat, carbs };
+}
+
+/** エネルギーに占める P・F・C の割合（%） */
+export function pfcRatio(n: Nutrition) {
+  const total = n.protein * 4 + n.fat * 9 + n.carbs * 4;
+  if (total <= 0) return null;
+  return {
+    protein: Math.round((n.protein * 4 * 100) / total),
+    fat: Math.round((n.fat * 9 * 100) / total),
+    carbs: Math.round((n.carbs * 4 * 100) / total),
+  };
 }
 
 export interface DayStatus {
@@ -77,7 +109,7 @@ export interface DayStatus {
   kind: DayKind;
   menu: WorkoutMenu;
   target: { kcal: number; protein: number };
-  eaten: { kcal: number; protein: number };
+  eaten: Nutrition;
   plannedSets: number;
   doneSets: number;
   proteinOk: boolean;
@@ -154,8 +186,23 @@ export function slotsFor(menu: WorkoutMenu): MealSlot[] {
   return menu === 'rest' ? ['lunch', 'dinner'] : ['lunch', 'post', 'dinner'];
 }
 
+export function suggestionList(slot: MealSlot, kind: DayKind): Suggestion[] {
+  return (kind === 'work' ? WEEKDAY_MENUS : HOLIDAY_MENUS)[slot];
+}
+
+/** その食事の提案に出てくる場所（ローソン・セブン・外食…） */
+const PLACE_ORDER: Place[] = ['lawson', 'seven', 'eatout', 'home', 'belc'];
+
+export function placesFor(slot: MealSlot, kind: DayKind): Place[] {
+  const used = new Set(suggestionList(slot, kind).map((s) => s.place));
+  return PLACE_ORDER.filter((p) => used.has(p));
+}
+
+/** 日付でローテーション。場所を選んでいればその場所の案だけから選ぶ */
 export function suggestionFor(date: ISODate, slot: MealSlot, kind: DayKind, day?: DayRecord): Suggestion {
-  const list = (kind === 'work' ? WEEKDAY_MENUS : HOLIDAY_MENUS)[slot];
+  const all = suggestionList(slot, kind);
+  const place = day?.place?.[slot];
+  const list = place && all.some((s) => s.place === place) ? all.filter((s) => s.place === place) : all;
   const i = (dayNumber(date) + (day?.rotation?.[slot] ?? 0)) % list.length;
   return list[i];
 }
