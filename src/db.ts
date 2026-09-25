@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie';
 import type { DayRecord, Exercise, MealItem, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
-import { SEED_BY_ID, SEED_PRODUCTS } from './data/products';
+import { ADDED_IN_V3, SEED_BY_ID, SEED_PRODUCTS } from './data/products';
 import { DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
 
@@ -54,6 +54,14 @@ export class AppDB extends Dexie {
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => !have.has(p.id)));
         await tx.table<MealRecord, string>('meals').toCollection().modify((m) => { m.items = m.items.map(fillItemPFC); });
+      });
+    // v3: セブンの商品を追加（ブロッコリーチキンエッグ、炭火焼さばおむすび）
+    this.version(3)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN_V3.includes(p.id) && !have.has(p.id)));
       });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {

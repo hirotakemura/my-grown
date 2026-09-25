@@ -105,3 +105,27 @@ describe('以前のデータの引き継ぎ', () => {
     db.close();
   });
 });
+
+describe('v3：セブンの商品追加', () => {
+  it('既存のDBに新しい2品だけが足され、消した商品は復活しない', async () => {
+    const name = 'migrate-v2';
+    names.push(name);
+    // v2 の時点のDBを作る（新しい2品はまだなく、ななチキは自分で消した状態）
+    const v2 = new Dexie(name);
+    v2.version(2).stores({
+      settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId',
+    });
+    await v2.table('products').bulkAdd(
+      SEED_PRODUCTS.filter((p) => !['7-broccoli-chicken-egg', '7-onigiri-saba', '7-nanachiki'].includes(p.id))
+        .map((p) => (p.id === '7-salad-chicken' ? { ...p, protein: 23.5, estimate: false } : p)),
+    );
+    v2.close();
+
+    const db = new AppDB(name);
+    expect(await db.products.get('7-broccoli-chicken-egg')).toMatchObject({ store: 'seven', category: 'チキン・肉', estimate: true });
+    expect(await db.products.get('7-onigiri-saba')).toMatchObject({ store: 'seven', category: 'おにぎり' });
+    expect(await db.products.get('7-nanachiki')).toBeUndefined();
+    expect(await db.products.get('7-salad-chicken')).toMatchObject({ protein: 23.5, estimate: false });
+    db.close();
+  });
+});
