@@ -9,6 +9,7 @@ import { backupFileName, exportBackup, importBackup, parseBackup } from '../lib/
 import { sortProducts } from '../components/ProductPicker';
 import { ProductEditor } from '../components/ProductEditor';
 import { Sheet } from '../components/Sheet';
+import { PeriodEditor } from '../components/PeriodEditor';
 import { useToast } from '../components/Toast';
 
 function NumField({ label, value, unit, onSave, step = 1 }: { label: string; value: number; unit: string; onSave: (n: number) => void; step?: number }) {
@@ -150,15 +151,8 @@ export function SettingsScreen({ data }: { data: AppData }) {
       <h1 className="page-title">設定</h1>
 
       <section className="card">
-        <h2 className="card-title">期間</h2>
-        <div className="grid2">
-          <label className="field"><span>開始日</span>
-            <input className="input" type="date" value={settings.startDate} onChange={(e) => e.target.value && set({ startDate: e.target.value })} />
-          </label>
-          <label className="field"><span>ゴール日</span>
-            <input className="input" type="date" value={settings.goalDate} onChange={(e) => e.target.value && set({ goalDate: e.target.value })} />
-          </label>
-        </div>
+        <h2 className="card-title">期間（いつからいつまで）</h2>
+        <PeriodEditor key={`${settings.startDate}|${settings.goalDate}`} settings={settings} />
       </section>
 
       <section className="card">

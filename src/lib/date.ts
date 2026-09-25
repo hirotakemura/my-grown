@@ -58,3 +58,14 @@ export function minutesToTime(min: number): string {
 export function dayNumber(date: ISODate): number {
   return diffDays('2000-01-01', date);
 }
+
+export const MAX_PERIOD_DAYS = 366;
+
+/** 期間（開始日〜ゴール日）が正しければ null、だめなら理由 */
+export function validatePeriod(start: ISODate, goal: ISODate): string | null {
+  const re = /^\d{4}-\d{2}-\d{2}$/;
+  if (!re.test(start) || !re.test(goal)) return '開始日とゴール日を入れてください';
+  if (goal <= start) return 'ゴール日は開始日より後にしてください';
+  if (diffDays(start, goal) + 1 > MAX_PERIOD_DAYS) return `期間は${MAX_PERIOD_DAYS}日以内にしてください`;
+  return null;
+}

@@ -86,7 +86,7 @@ test('コンビニの商品から複数選んで記録し、マイセット・�
   await page.getByRole('button', { name: '商品の追加・編集・削除' }).click();
   await page.getByRole('button', { name: 'ゆで卵を編集', exact: true }).click();
   await page.getByLabel('たんぱく質（g）').fill('6.5');
-  await page.getByRole('button', { name: '保存' }).click();
+  await page.getByRole('button', { name: '保存', exact: true }).click();
   await expect.poll(() => dbGet(page, 'products', 'boiled-egg')).toMatchObject({ protein: 6.5, estimate: false });
 
   await page.reload();
@@ -145,6 +145,32 @@ test('セブンの商品と外食（手入力）で記録し、その日のPFC�
   expect(Number(cells[3])).toBeGreaterThan(35);
 });
 
+test('期間（いつからいつまで）を今日の画面から変更でき、リロード後も残る', async ({ page }) => {
+  await openApp(page);
+  const goal = page.getByTestId('goal');
+  await goal.getByRole('button', { name: '期間を変更' }).click();
+  const editor = page.getByTestId('period-editor');
+
+  // ゴール日を開始日より前にすると保存できない
+  await editor.getByLabel('開始日').fill('2026-10-01');
+  await editor.getByLabel('ゴール日（期限）').fill('2026-09-30');
+  await expect(editor.getByRole('alert')).toContainText('ゴール日は開始日より後');
+  await expect(editor.getByRole('button', { name: 'この期間で保存' })).toBeDisabled();
+
+  // 「今日から始める」＋「12週間」
+  await editor.getByRole('button', { name: '今日から始める' }).click();
+  await editor.getByRole('button', { name: '12週間' }).click();
+  await expect(editor).toContainText('全84日間');
+  await editor.getByRole('button', { name: 'この期間で保存' }).click();
+  await expect(goal.getByTestId('period')).toHaveText('9/28(月)〜12/20(日)（84日間）');
+  await expect(goal.getByTestId('days-left')).toHaveText('83');
+
+  await page.reload();
+  await expect(page.getByTestId('period')).toHaveText('9/28(月)〜12/20(日)（84日間）');
+  await page.getByRole('button', { name: '設定' }).click();
+  await expect(page.getByTestId('period-editor').getByLabel('ゴール日（期限）')).toHaveValue('2026-12-20');
+});
+
 test('バックアップを書き出して、別の端末に復元できる', async ({ page, browser }) => {
   await openApp(page);
   await enterWeight(page, '70.9');
@@ -166,7 +192,7 @@ test('バックアップを書き出して、別の端末に復元できる', as
   await expect(p2.locator('#weight')).toHaveValue('');
   await p2.getByRole('button', { name: '設定' }).click();
   await p2.getByTestId('restore-input').setInputFiles(path);
-  await p2.getByRole('button', { name: '今日' }).click();
+  await p2.getByRole('button', { name: '今日', exact: true }).click();
   await expect(p2.locator('#weight')).toHaveValue('70.9');
   await p2.reload();
   await expect(p2.locator('#weight')).toHaveValue('70.9');
