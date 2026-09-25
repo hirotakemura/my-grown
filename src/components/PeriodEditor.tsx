@@ -24,7 +24,7 @@ export function PeriodEditor({ settings, onSaved }: { settings: Settings; onSave
 
   return (
     <div className="stack" data-testid="period-editor">
-      <div className="grid2">
+      <div className="stack">
         <label className="field"><span>開始日</span>
           <input className="input" type="date" value={start} onChange={(e) => setStart(e.target.value)} />
         </label>
@@ -32,7 +32,7 @@ export function PeriodEditor({ settings, onSaved }: { settings: Settings; onSave
           <input className="input" type="date" value={goal} min={start ? addDays(start, 1) : undefined} onChange={(e) => setGoal(e.target.value)} />
         </label>
       </div>
-      <div className="myset-chips" role="group" aria-label="期間をまとめて決める">
+      <div className="row wrap" role="group" aria-label="期間をまとめて決める">
         <button className="btn small" onClick={() => setStart(today)}>今日から始める</button>
         {PRESET_WEEKS.map((w) => (
           <button key={w} className="btn small" onClick={() => setGoal(addDays(start || today, w * 7 - 1))}>{w}週間</button>

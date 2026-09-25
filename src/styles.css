@@ -292,3 +292,20 @@ details ol { margin: 0; padding-left: 20px; font-size: 14px; display: flex; flex
 .weekday-picker button[aria-pressed='true'] { background: var(--accent); color: #fff; border-color: var(--accent); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* iOS Safari の日付・時刻入力は中身の幅より縮まず枠からはみ出すので、幅を親に合わせる */
+.grid2 > *, .field { min-width: 0; }
+input[type='date'].input,
+input[type='time'].input {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+input[type='date'].input::-webkit-date-and-time-value,
+input[type='time'].input::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
