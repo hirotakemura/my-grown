@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from './db';
+import { db, withSettingDefaults } from './db';
 import type { MySet, Product } from './types';
 import type { Snapshot } from './lib/plan';
 import { todayISO } from './lib/date';
@@ -21,7 +21,8 @@ export function useAppData(): AppData | undefined {
     ]);
     if (!settings) return undefined;
     return {
-      settings,
+      // あとから増えた設定項目（朝ごはんの時刻など）は既定値で補う
+      settings: withSettingDefaults(settings),
       days: new Map(days.map((d) => [d.date, d])),
       meals,
       sets,

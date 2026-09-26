@@ -183,7 +183,7 @@ export function goalProgress(snap: Snapshot, today: ISODate): Progress {
 // ---- 食事の提案 ----
 
 export function slotsFor(menu: WorkoutMenu): MealSlot[] {
-  return menu === 'rest' ? ['lunch', 'dinner'] : ['lunch', 'post', 'dinner'];
+  return menu === 'rest' ? ['breakfast', 'lunch', 'dinner'] : ['breakfast', 'lunch', 'post', 'dinner'];
 }
 
 export function suggestionList(slot: MealSlot, kind: DayKind): Suggestion[] {
@@ -235,6 +235,7 @@ export function nextAction({ menu, settings, day, meals, nowMinutes }: NextActio
 
   type Ev = { action: NextAction; at: number; done: boolean };
   const events: Ev[] = [
+    { action: { type: 'meal', slot: 'breakfast', time: settings.breakfastTime }, at: timeToMinutes(settings.breakfastTime), done: resolved('breakfast') },
     { action: { type: 'meal', slot: 'lunch', time: settings.lunchTime }, at: timeToMinutes(settings.lunchTime), done: resolved('lunch') },
     { action: { type: 'meal', slot: 'dinner', time: settings.dinnerTime }, at: timeToMinutes(settings.dinnerTime), done: resolved('dinner') },
   ];

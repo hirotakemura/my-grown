@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { currentStreak, dayStatus, goalProgress, nextAction, resolveMenu, suggestionFor } from '../src/lib/plan';
+import { currentStreak, dayStatus, goalProgress, nextAction, resolveMenu, slotsFor, suggestionFor } from '../src/lib/plan';
 import { doneSets, meal, snap } from './helpers';
 
 describe('メニューの割り当て', () => {
@@ -64,25 +64,31 @@ describe('連続記録', () => {
 });
 
 describe('次にやること', () => {
-  const s = snap().settings; // 昼12:00 ジム19:00 夜21:00
+  const s = snap().settings; // 朝7:30 昼12:00 ジム19:00 夜21:00
   const at = (h: number, mm = 0) => h * 60 + mm;
+  const bf = meal('d', 20, 'breakfast');
 
-  it('時刻に応じて食事かジムを1つだけ出す', () => {
-    expect(nextAction({ menu: 'A', settings: s, meals: [], nowMinutes: at(9) })).toMatchObject({ type: 'meal', slot: 'lunch' });
-    expect(nextAction({ menu: 'A', settings: s, meals: [meal('d', 40)], nowMinutes: at(15) })).toMatchObject({ type: 'gym' });
+  it('朝は朝ごはん。済んだら昼、昼が済んだらジム', () => {
+    expect(nextAction({ menu: 'A', settings: s, meals: [], nowMinutes: at(7) })).toMatchObject({ type: 'meal', slot: 'breakfast' });
+    expect(nextAction({ menu: 'A', settings: s, meals: [bf], nowMinutes: at(9) })).toMatchObject({ type: 'meal', slot: 'lunch' });
+    expect(nextAction({ menu: 'A', settings: s, meals: [bf, meal('d', 40)], nowMinutes: at(15) })).toMatchObject({ type: 'gym' });
+  });
+
+  it('朝ごはんを食べ忘れたまま昼を過ぎたら、昼を出す', () => {
+    expect(nextAction({ menu: 'rest', settings: s, meals: [], nowMinutes: at(12, 30) })).toMatchObject({ type: 'meal', slot: 'lunch' });
   });
 
   it('ジムを終えるとトレ後の食事、その後に夜', () => {
     const day = { date: 'd', gymStatus: 'done' as const };
-    expect(nextAction({ menu: 'A', settings: s, day, meals: [meal('d', 40)], nowMinutes: at(20) })).toMatchObject({ type: 'meal', slot: 'post' });
-    const meals = [meal('d', 40), meal('d', 20, 'post')];
+    expect(nextAction({ menu: 'A', settings: s, day, meals: [bf, meal('d', 40)], nowMinutes: at(20) })).toMatchObject({ type: 'meal', slot: 'post' });
+    const meals = [bf, meal('d', 40), meal('d', 20, 'post')];
     expect(nextAction({ menu: 'A', settings: s, day, meals, nowMinutes: at(21, 30) })).toMatchObject({ type: 'meal', slot: 'dinner' });
   });
 
   it('トレ中は他より優先して表示し、休養日はジムが出ない', () => {
     expect(nextAction({ menu: 'B', settings: s, day: { date: 'd', gymStatus: 'started' }, meals: [], nowMinutes: at(12) }))
       .toMatchObject({ type: 'gym', started: true });
-    expect(nextAction({ menu: 'rest', settings: s, meals: [meal('d', 40)], nowMinutes: at(19) })).toMatchObject({ type: 'meal', slot: 'dinner' });
+    expect(nextAction({ menu: 'rest', settings: s, meals: [bf, meal('d', 40)], nowMinutes: at(19) })).toMatchObject({ type: 'meal', slot: 'dinner' });
   });
 
   it('その日のジムの時間を変えると順番も変わる', () => {
@@ -90,8 +96,9 @@ describe('次にやること', () => {
     expect(nextAction({ menu: 'A', settings: s, day, meals: [], nowMinutes: at(7, 10) })).toMatchObject({ type: 'gym', time: '07:00' });
   });
 
-  it('すべて済んだら完了', () => {
-    const meals = [meal('d', 40), meal('d', 40, 'dinner')];
+  it('すべて済んだら完了（食べないを選んだ食事も済み扱い）', () => {
+    const skipped = { ...meal('d', 0, 'breakfast'), status: 'skipped' as const, items: [] };
+    const meals = [skipped, meal('d', 40), meal('d', 40, 'dinner')];
     expect(nextAction({ menu: 'rest', settings: s, meals, nowMinutes: at(22) })).toEqual({ type: 'done' });
   });
 });
@@ -103,5 +110,8 @@ describe('提案メニュー', () => {
     expect(a.id).not.toBe(b.id);
     expect(suggestionFor('2026-09-28', 'lunch', 'work', { date: '2026-09-28', rotation: { lunch: 1 } }).id).toBe(b.id);
     expect(suggestionFor('2026-10-03', 'dinner', 'off').recipe?.steps.length).toBeGreaterThan(0);
+    expect(suggestionFor('2026-10-03', 'breakfast', 'off').recipe?.steps.length).toBeGreaterThan(0);
+    expect(slotsFor('rest')).toEqual(['breakfast', 'lunch', 'dinner']);
+    expect(slotsFor('A')).toEqual(['breakfast', 'lunch', 'post', 'dinner']);
   });
 });

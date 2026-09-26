@@ -37,3 +37,10 @@ describe('IndexedDB への保存', () => {
     b.close();
   });
 });
+
+it('朝ごはんの時刻がない古い設定でも、既定値で補い、ほかの値は残す', async () => {
+  const { defaultSettings, withSettingDefaults } = await import('../src/db');
+  const { breakfastTime: _omit, ...old } = { ...defaultSettings('2026-09-25'), trainKcal: 2100, lunchTime: '12:30' };
+  const s = withSettingDefaults(old);
+  expect(s).toMatchObject({ breakfastTime: '07:30', trainKcal: 2100, lunchTime: '12:30', startDate: '2026-09-25' });
+});

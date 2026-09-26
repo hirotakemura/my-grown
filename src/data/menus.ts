@@ -34,8 +34,34 @@ const POST_WORKOUT: Suggestion[] = [
   { id: 'post-2', place: 'seven', title: 'ミルクプロテイン＋おにぎり（セブン）', items: [p('savas-milk'), p('7-onigiri-sake')] },
 ];
 
-/** 平日（ローソン） */
+/** 平日（出社前：家 or コンビニ） */
 export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
+  breakfast: [
+    {
+      id: 'wb-1',
+      place: 'home',
+      title: 'ソイプロテイン＋バナナ＋ゆで卵',
+      items: [p('home-savas-soy-cocoa'), p('banana'), p('home-boiled-egg')],
+    },
+    {
+      id: 'wb-2',
+      place: 'home',
+      title: 'ソイプロテイン（ALPRON）＋ゆで卵2個',
+      items: [p('home-alpron-soy-cookie'), p('home-boiled-egg', 2)],
+    },
+    {
+      id: 'wb-3',
+      place: 'lawson',
+      title: 'ギリシャヨーグルト＋ブランパン',
+      items: [p('greek-yogurt'), p('bran-bread')],
+    },
+    {
+      id: 'wb-4',
+      place: 'seven',
+      title: 'ギリシャヨーグルト＋煮たまご＋おにぎり',
+      items: [p('7-greek-yogurt'), p('7-nitamago'), p('7-onigiri-konbu')],
+    },
+  ],
   lunch: [
     {
       id: 'wl-1',
@@ -117,6 +143,58 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
 
 /** 休日（ベルク＋フライパン・電子レンジ） */
 export const HOLIDAY_MENUS: Record<MealSlot, Suggestion[]> = {
+  breakfast: [
+    {
+      id: 'hb-1',
+      place: 'belc',
+      title: '納豆卵ごはん',
+      items: [c('パックご飯 150g', 220, 3, 0.5, 51), c('納豆', 90, 8, 4.5, 6), c('卵', 75, 6, 5, 0.3)],
+      recipe: {
+        ingredients: [
+          { name: 'パックご飯 150g', qty: 1, unit: '個' },
+          { name: '納豆', qty: 1, unit: 'パック' },
+          { name: '卵', qty: 1, unit: '個' },
+        ],
+        seasonings: ['醤油（納豆のたれでも可）'],
+        steps: ['ご飯を電子レンジで温める。', '納豆をたれと混ぜ、卵と一緒にご飯にのせる。'],
+      },
+    },
+    {
+      id: 'hb-2',
+      place: 'belc',
+      title: 'オートミール＋ミルクプロテイン＋バナナ',
+      items: [c('オートミール 30g', 110, 4, 1.7, 20), p('savas-milk'), p('banana')],
+      recipe: {
+        ingredients: [
+          { name: 'オートミール', qty: 30, unit: 'g' },
+          { name: 'ザバス ミルクプロテイン', qty: 1, unit: '本' },
+          { name: 'バナナ', qty: 1, unit: '本' },
+        ],
+        seasonings: [],
+        steps: [
+          '耐熱の器にオートミールとミルクプロテインを半分（100ml）入れ、ラップなしで600W 1分温める。',
+          '残りのミルクプロテインを注ぎ、輪切りのバナナをのせる。',
+        ],
+      },
+    },
+    {
+      id: 'hb-3',
+      place: 'belc',
+      title: 'ギリシャヨーグルト＋ゆで卵2個',
+      items: [p('greek-yogurt'), p('home-boiled-egg', 2)],
+      recipe: {
+        ingredients: [
+          { name: 'ギリシャヨーグルト', qty: 1, unit: '個' },
+          { name: '卵', qty: 2, unit: '個' },
+        ],
+        seasonings: [],
+        steps: [
+          'フライパンに卵と水を1cmほど入れ、蓋をして中火にかける。沸騰したら弱めの中火で7〜8分蒸しゆでにする。',
+          '冷水で冷やして殻をむく。数日分まとめて作って冷蔵庫へ（電子レンジでそのまま温めると破裂するので注意）。',
+        ],
+      },
+    },
+  ],
   lunch: [
     {
       id: 'hl-1',

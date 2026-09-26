@@ -36,6 +36,7 @@ export function Today({ data, date, setDate }: Props) {
   const slots = slotsFor(status.menu);
   const gymTime = gymTimeOf(settings, day);
   const slotTime: Record<MealSlot, string> = {
+    breakfast: settings.breakfastTime,
     lunch: settings.lunchTime,
     dinner: settings.dinnerTime,
     post: minutesToTime(timeToMinutes(gymTime) + POST_WORKOUT_OFFSET_MIN),

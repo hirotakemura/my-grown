@@ -17,12 +17,18 @@ export function defaultSettings(startDate = todayISO()): Settings {
     restProtein: 120,
     trainWeekdays: [1, 3, 5, 6, 0], // 月・水・金・土・日
     restSeconds: 90,
+    breakfastTime: '07:30',
     lunchTime: '12:00',
     dinnerTime: '21:00',
     gymTime: '19:00',
     menuA: DEFAULT_MENU_A,
     menuB: DEFAULT_MENU_B,
   };
+}
+
+/** あとから増えた設定項目（朝ごはんの時刻など）を既定値で補う。古いデータ・古いバックアップ用 */
+export function withSettingDefaults(s: Partial<Settings> & Pick<Settings, 'startDate'>): Settings {
+  return { ...defaultSettings(s.startDate), ...s };
 }
 
 export class AppDB extends Dexie {

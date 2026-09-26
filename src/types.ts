@@ -42,7 +42,7 @@ export const PLACE_LABEL: Record<Place, string> = {
   lawson: 'ローソン',
   seven: 'セブン',
   eatout: '外食',
-  home: '家（作り置き）',
+  home: '家で食べる',
   belc: 'ベルクで買って自炊',
 };
 
@@ -67,8 +67,8 @@ export interface MySet {
   items: { productId: string; qty: number }[];
 }
 
-export type MealSlot = 'lunch' | 'dinner' | 'post';
-export const SLOT_LABEL: Record<MealSlot, string> = { lunch: '昼', dinner: '夜', post: 'トレ後' };
+export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'post';
+export const SLOT_LABEL: Record<MealSlot, string> = { breakfast: '朝', lunch: '昼', dinner: '夜', post: 'トレ後' };
 
 export interface MealItem {
   name: string;
@@ -137,6 +137,7 @@ export interface Settings {
   restProtein: number;
   trainWeekdays: number[]; // 0=日 … 6=土
   restSeconds: number;
+  breakfastTime: string;
   lunchTime: string;
   dinnerTime: string;
   gymTime: string;

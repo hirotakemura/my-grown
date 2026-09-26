@@ -1,10 +1,10 @@
 import type { DayRecord, ISODate } from '../types';
-import { HOLIDAY_MENUS, WEEKDAY_STOCK, type Ingredient } from '../data/menus';
+import { WEEKDAY_STOCK, type Ingredient } from '../data/menus';
 import { addDays, formatMD } from '../lib/date';
 import { dayKind, suggestionFor } from '../lib/plan';
 import { patchDay } from '../lib/actions';
 
-/** その日から続く休日（最大4日）の昼・夜の提案に必要な材料をまとめる */
+/** その日から続く休日（最大4日）の朝・昼・夜の提案に必要な材料をまとめる */
 export function shoppingFor(date: ISODate, days: Map<ISODate, DayRecord>) {
   const block: ISODate[] = [];
   for (let d = date; block.length < 4 && dayKind(d, days.get(d)) === 'off'; d = addDays(d, 1)) block.push(d);
@@ -16,7 +16,7 @@ export function shoppingFor(date: ISODate, days: Map<ISODate, DayRecord>) {
     sum.set(key, cur ? { ...cur, qty: cur.qty + i.qty } : { ...i });
   };
   for (const d of block) {
-    for (const slot of ['lunch', 'dinner'] as const) {
+    for (const slot of ['breakfast', 'lunch', 'dinner'] as const) {
       const s = suggestionFor(d, slot, 'off', days.get(d));
       s.recipe?.ingredients.forEach(add);
       s.recipe?.seasonings.forEach((x) => seasonings.add(x));
@@ -41,15 +41,13 @@ export function ShoppingList({ date, days }: { date: ISODate; days: Map<ISODate,
     else next.add(name);
     void patchDay(date, { shoppingChecked: [...next] });
   };
-  // 提案の「別の案」を変えるとリストも変わる
-  const menuCount = HOLIDAY_MENUS.lunch.length;
   return (
     <section className="card" data-testid="shopping">
       <div className="card-head">
         <h2 className="card-title">ベルクの買い物リスト</h2>
         <span className="muted">{formatMD(block[0])}〜{formatMD(block[block.length - 1])}</span>
       </div>
-      <p className="muted">休日の昼・夜の提案（全{menuCount}案から日替わり）と、平日の作り置き用です。</p>
+      <p className="muted">休日の朝・昼・夜の提案（日替わり）と、平日の作り置き用です。</p>
       <div>
         {items.map((i) => (
           <label key={i.label} className="list-row" style={{ cursor: 'pointer' }}>

@@ -176,6 +176,7 @@ export function SettingsScreen({ data }: { data: AppData }) {
         <div className="grid2">
           <TimeField label="ジム（いつもの時間）" value={settings.gymTime} onSave={(v) => set({ gymTime: v })} />
           <NumField label="休憩タイマー" value={settings.restSeconds} unit="秒" step={5} onSave={(n) => set({ restSeconds: Math.round(n) })} />
+          <TimeField label="朝ごはん" value={settings.breakfastTime} onSave={(v) => set({ breakfastTime: v })} />
           <TimeField label="昼ごはん" value={settings.lunchTime} onSave={(v) => set({ lunchTime: v })} />
           <TimeField label="夜ごはん" value={settings.dinnerTime} onSave={(v) => set({ dinnerTime: v })} />
         </div>
