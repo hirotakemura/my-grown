@@ -64,7 +64,8 @@ export class AppDB extends Dexie {
     // v3: セブンの商品（ブロッコリーチキンエッグ、炭火焼さばおむすび）
     // v4: 自炊の商品（SAVASソイ、ゆで卵、ベルクの豚バラ・キャベツ・サラダチキン・ソーセージ）
     // v5: ALPRON ソイプロテイン クッキー&クリーム味
-    for (const version of [3, 4, 5]) {
+    // v6: もやし、えのき
+    for (const version of [3, 4, 5, 6]) {
       this.version(version)
         .stores({})
         .upgrade(async (tx) => {

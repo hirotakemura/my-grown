@@ -149,17 +149,19 @@ describe('v4：自炊の商品追加', () => {
   });
 });
 
-it('v5：v4 のDBに ALPRON ソイプロテインが足される', async () => {
-  const name = 'migrate-v4';
+it.each([4, 5])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
+  const name = `migrate-v${from}`;
   names.push(name);
   const v4 = new Dexie(name);
-  v4.version(4).stores({
+  v4.version(from).stores({
     settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId',
   });
-  await v4.table('products').bulkAdd(SEED_PRODUCTS.filter((p) => !ADDED_IN[5].includes(p.id)));
+  const later = Object.entries(ADDED_IN).filter(([v]) => Number(v) > from).flatMap(([, ids]) => ids);
+  await v4.table('products').bulkAdd(SEED_PRODUCTS.filter((p) => !later.includes(p.id)));
   v4.close();
   const db = new AppDB(name);
-  expect(await db.products.get('home-alpron-soy-cookie')).toMatchObject({ category: '自炊', store: 'other', protein: 20, estimate: true });
+  expect(await db.products.get('home-enoki')).toMatchObject({ category: '自炊', store: 'other', estimate: true });
+  expect(await db.products.get('home-moyashi')).toMatchObject({ kcal: 30, protein: 3.4 });
   expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
   db.close();
 });
