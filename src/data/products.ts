@@ -51,6 +51,7 @@ export const ADDED_IN: Record<number, string[]> = {
   ],
   5: ['home-alpron-soy-cookie'],
   6: ['home-moyashi', 'home-enoki'],
+  7: ['home-tkg', 'home-natto-gohan'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -82,6 +83,9 @@ const other: Row[] = [
   ['home-alpron-soy-cookie', 'ALPRON ソイプロテイン クッキー&クリーム味（1杯30g）', '自炊', 115, 20, 2, 4.5],
   ['home-moyashi', 'もやし（1袋200g）', '自炊', 30, 3.4, 0.2, 5.2],
   ['home-enoki', 'えのき（1袋100g）', '自炊', 34, 2.7, 0.2, 7.6],
+  // ご飯はパックご飯150gで計算
+  ['home-tkg', '卵かけご飯（ご飯150g＋卵1個）', '自炊', 300, 9.4, 5.5, 52],
+  ['home-natto-gohan', '納豆かけご飯（ご飯150g＋納豆1パック）', '自炊', 320, 11, 5, 59],
 ];
 
 const build = (rows: Row[], store: Store): Product[] =>
