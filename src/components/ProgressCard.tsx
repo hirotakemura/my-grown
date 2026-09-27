@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
 import { pfcRatio, pfcTargets, type DayStatus } from '../lib/plan';
-import { patchDay } from '../lib/actions';
 import { g1 } from '../lib/format';
 
 function Meter({ label, value, target, unit, note }: { label: string; value: number; target: number; unit: string; note?: string }) {
@@ -18,16 +16,7 @@ function Meter({ label, value, target, unit, note }: { label: string; value: num
   );
 }
 
-export function ProgressCard({ status, weight, lastWeight }: { status: DayStatus; weight?: number; lastWeight?: number }) {
-  const [w, setW] = useState(weight != null ? String(weight) : '');
-  useEffect(() => setW(weight != null ? String(weight) : ''), [weight, status.date]);
-
-  const save = () => {
-    const n = Number(w);
-    if (w === '') void patchDay(status.date, { weight: undefined });
-    else if (n > 20 && n < 300) void patchDay(status.date, { weight: Math.round(n * 10) / 10 });
-  };
-
+export function ProgressCard({ status }: { status: DayStatus }) {
   const t = pfcTargets(status.target);
   const e = status.eaten;
   const ratio = pfcRatio(e);
@@ -49,24 +38,6 @@ export function ProgressCard({ status, weight, lastWeight }: { status: DayStatus
       {left > 0 && e.kcal > 0 && (
         <p className="muted">たんぱく質はあと{Math.ceil(left)}g（9割ラインまで {Math.max(0, Math.ceil(status.target.protein * 0.9 - e.protein))}g）</p>
       )}
-      <div className="row">
-        <label htmlFor="weight" className="grow" style={{ fontWeight: 600 }}>体重</label>
-        <div className="unit-input" style={{ width: 140 }}>
-          <input
-            id="weight"
-            className="input"
-            type="number"
-            inputMode="decimal"
-            step="0.1"
-            placeholder={lastWeight != null ? String(lastWeight) : '72.0'}
-            value={w}
-            onChange={(ev) => setW(ev.target.value)}
-            onBlur={save}
-            onKeyDown={(ev) => ev.key === 'Enter' && (ev.target as HTMLInputElement).blur()}
-          />
-          <em>kg</em>
-        </div>
-      </div>
     </section>
   );
 }

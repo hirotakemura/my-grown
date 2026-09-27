@@ -11,6 +11,7 @@ import { patchDay } from '../lib/actions';
 import { GoalCard } from '../components/GoalCard';
 import { NextActionCard } from '../components/NextActionCard';
 import { ProgressCard } from '../components/ProgressCard';
+import { WeightCard } from '../components/WeightCard';
 import { MealCard, pickLabel, type MealCardProps } from '../components/MealCard';
 import { WorkoutSection } from '../components/Workout';
 import { ShoppingList } from '../components/ShoppingList';
@@ -63,10 +64,6 @@ export function Today({ data, date, setDate }: Props) {
     onPick: (s, initial, store) => setPicker({ slot: s, initial, store }),
   });
 
-  const lastWeight = [...data.days.values()]
-    .filter((d) => d.date < date && d.weight != null)
-    .sort((a, b) => (a.date < b.date ? 1 : -1))[0]?.weight;
-
   const holiday = holidayName(date);
   const auto = autoDayKind(date);
 
@@ -96,6 +93,8 @@ export function Today({ data, date, setDate }: Props) {
 
       <GoalCard progress={progress} settings={settings} today={today} />
 
+      <WeightCard date={date} days={data.days} />
+
       <NextActionCard
         action={action}
         date={date}
@@ -107,7 +106,7 @@ export function Today({ data, date, setDate }: Props) {
         onStartGym={() => document.getElementById('workout')?.scrollIntoView({ behavior: 'smooth' })}
       />
 
-      <ProgressCard status={status} weight={day?.weight} lastWeight={lastWeight} />
+      <ProgressCard status={status} />
 
       <h2 className="card-title" style={{ marginTop: 4 }}>食事</h2>
       {ordered.map((slot) => <MealCard key={slot} {...mealProps(slot)} />)}

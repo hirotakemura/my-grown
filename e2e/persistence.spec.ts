@@ -29,7 +29,7 @@ function dbGet(page: Page, store: string, key: string) {
 
 async function enterWeight(page: Page, value: string) {
   await page.locator('#weight').fill(value);
-  await page.locator('#weight').press('Enter');
+  await page.getByTestId('weight-card').getByRole('button', { name: '記録' }).click();
   await expect.poll(() => dbGet(page, 'days', '2026-09-28')).toMatchObject({ weight: Number(value) });
 }
 
@@ -61,7 +61,7 @@ test('記録した食事・体重・セットがリロード後も残る', async
   await expect(lp2.getByRole('button', { name: '1セット目を完了' })).toHaveAttribute('aria-pressed', 'true');
 
   // 記録タブにも反映される
-  await page.getByRole('button', { name: '記録' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: '記録' }).click();
   await expect(page.getByTestId('total-volume')).toHaveText('720 kg');
 });
 
@@ -137,7 +137,7 @@ test('セブンの商品と外食（手入力）で記録し、その日のPFC�
   const lunchText = await page.getByTestId('meal-lunch').innerText();
   expect(lunchText).toContain('セブン');
   await expect(page.getByTestId('pfc-ratio')).toContainText('PFCバランス　P');
-  await page.getByRole('button', { name: '記録' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: '記録' }).click();
   const row = page.getByTestId('daily-pfc').getByRole('row', { name: /9\/28\(月\)/ });
   await expect(row).toBeVisible();
   const cells = await row.getByRole('cell').allInnerTexts();
