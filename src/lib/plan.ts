@@ -117,6 +117,16 @@ export interface DayStatus {
   achieved: boolean;
 }
 
+/** マスの色分け：両方（＝達成）／たんぱく質だけ／筋トレだけ／どちらもなし。休養日はたんぱく質だけで達成 */
+export type DayMark = 'both' | 'protein' | 'training' | 'none';
+
+export function dayMark(s: Pick<DayStatus, 'achieved' | 'proteinOk' | 'trainingOk' | 'menu'>): DayMark {
+  if (s.achieved) return 'both';
+  if (s.proteinOk) return 'protein';
+  if (s.menu !== 'rest' && s.trainingOk) return 'training';
+  return 'none';
+}
+
 export function dayStatus(date: ISODate, snap: Snapshot): DayStatus {
   const menu = resolveMenu(date, snap);
   const target = targetsFor(snap.settings, menu);

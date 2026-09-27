@@ -12,6 +12,9 @@
   --warn: #b25e00;
   --danger: #c62828;
   --chart-line: #1f9d55;
+  --mark-both: #1f9d55;
+  --mark-protein: #2f6fd1;
+  --mark-training: #c2458f;
   --grid: #e7ebe6;
   --cell-empty: #e4e8e3;
   --cell-miss: #c9cfc8;
@@ -37,6 +40,9 @@
     --warn: #f0a646;
     --danger: #ef6b6b;
     --chart-line: #2aa45f;
+    --mark-both: #2aa45f;
+    --mark-protein: #4a86e8;
+    --mark-training: #d05aa0;
     --grid: #2a302b;
     --cell-empty: #2a302b;
     --cell-miss: #444c45;
@@ -150,7 +156,11 @@ h1, h2, h3, p { margin: 0; }
 .stat span { display: block; font-size: 12px; color: var(--text-2); }
 .cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(14px, 1fr)); gap: 3px; }
 .cell { aspect-ratio: 1; border-radius: 3px; background: var(--cell-empty); }
-.cell.hit { background: var(--accent); }
+.cell.hit, .cell.both { background: var(--mark-both); }
+.cell.protein { background: var(--mark-protein); }
+.cell.training { background: var(--mark-training); }
+.cell.sel { outline: 2px solid var(--muted); outline-offset: 1px; }
+button.cell { border: none; padding: 0; cursor: pointer; }
 .cell.miss { background: var(--cell-miss); }
 .cell.future { background: transparent; border: 1px solid var(--border); }
 .cell.today { outline: 2px solid var(--text); outline-offset: 1px; }

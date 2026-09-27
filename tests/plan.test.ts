@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { currentStreak, dayStatus, goalProgress, nextAction, resolveMenu, slotsFor, suggestionFor } from '../src/lib/plan';
+import { currentStreak, dayMark, dayStatus, goalProgress, nextAction, resolveMenu, slotsFor, suggestionFor } from '../src/lib/plan';
 import { doneSets, meal, snap } from './helpers';
 
 describe('メニューの割り当て', () => {
@@ -113,5 +113,22 @@ describe('提案メニュー', () => {
     expect(suggestionFor('2026-10-03', 'breakfast', 'off').recipe?.steps.length).toBeGreaterThan(0);
     expect(slotsFor('rest')).toEqual(['breakfast', 'lunch', 'dinner']);
     expect(slotsFor('A')).toEqual(['breakfast', 'lunch', 'post', 'dinner']);
+  });
+});
+
+describe('マスの色分け', () => {
+  it('両方・たんぱく質だけ・筋トレだけ・未達成を見分ける', () => {
+    const date = '2026-09-28'; // 月曜＝トレ日
+    const trained = { days: [{ date, menu: 'A' as const, gymStatus: 'done' as const }], sets: doneSets(date, 18) };
+    expect(dayMark(dayStatus(date, snap({ ...trained, meals: [meal(date, 130)] })))).toBe('both');
+    expect(dayMark(dayStatus(date, snap({ ...trained, meals: [meal(date, 50)] })))).toBe('training');
+    expect(dayMark(dayStatus(date, snap({ days: trained.days, meals: [meal(date, 130)] })))).toBe('protein');
+    expect(dayMark(dayStatus(date, snap({ days: trained.days })))).toBe('none');
+  });
+
+  it('休養日はたんぱく質だけで「両方」、足りなければ未達成（筋トレだけ扱いにはしない）', () => {
+    const date = '2026-09-29'; // 火曜＝休養日
+    expect(dayMark(dayStatus(date, snap({ meals: [meal(date, 110)] })))).toBe('both');
+    expect(dayMark(dayStatus(date, snap({ meals: [meal(date, 50)] })))).toBe('none');
   });
 });
