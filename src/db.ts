@@ -66,7 +66,8 @@ export class AppDB extends Dexie {
     // v5: ALPRON ソイプロテイン クッキー&クリーム味
     // v6: もやし、えのき
     // v7: 卵かけご飯、納豆かけご飯
-    for (const version of [3, 4, 5, 6, 7]) {
+    // v8: ザバス MILK PROTEIN ココア味 430ml
+    for (const version of [3, 4, 5, 6, 7, 8]) {
       this.version(version)
         .stores({})
         .upgrade(async (tx) => {

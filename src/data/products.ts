@@ -52,11 +52,13 @@ export const ADDED_IN: Record<number, string[]> = {
   5: ['home-alpron-soy-cookie'],
   6: ['home-moyashi', 'home-enoki'],
   7: ['home-tkg', 'home-natto-gohan'],
+  8: ['savas-milk-cocoa-430'],
 };
 
 // どちらのコンビニでも買えるもの
 const common: Row[] = [
   ['savas-milk', 'ザバス ミルクプロテイン 脂肪0 200ml', 'プロテイン', 102, 15, 0, 10.5],
+  ['savas-milk-cocoa-430', 'ザバス MILK PROTEIN 脂肪0 ココア味 430ml', 'プロテイン', 160, 20, 0, 20],
   ['natto', '納豆', '卵・乳製品', 90, 8, 4.5, 6],
   ['tofu', '豆腐', '卵・乳製品', 80, 7, 4.5, 2.5],
   ['banana', 'バナナ', 'その他', 90, 1, 0.2, 22],
