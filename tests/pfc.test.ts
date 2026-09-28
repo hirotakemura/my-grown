@@ -149,7 +149,7 @@ describe('v4：自炊の商品追加', () => {
   });
 });
 
-it.each([4, 5, 6, 7, 8])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
+it.each([4, 5, 6, 7, 8, 10])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
   const name = `migrate-v${from}`;
   names.push(name);
   const v4 = new Dexie(name);
@@ -166,6 +166,7 @@ it.each([4, 5, 6, 7, 8])('v%i のDBに、それ以降に追加した商品が足
   expect(await db.products.get('7-mushidori-egg-salad')).toMatchObject({ store: 'seven', kcal: 66, protein: 8.7, estimate: false });
   expect(await db.products.get('7-dressing-koku-onion')).toMatchObject({ store: 'seven', kcal: 105, fat: 10.5, estimate: false });
   expect(await db.products.get('home-natto-gohan')).toMatchObject({ category: '自炊', kcal: 320 });
+  expect(await db.products.get('home-pork-broccoli-steam')).toMatchObject({ category: '自炊', store: 'other', protein: 31.5, estimate: true });
   expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
   db.close();
 });

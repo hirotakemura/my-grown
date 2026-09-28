@@ -61,6 +61,7 @@ export const ADDED_IN: Record<number, string[]> = {
   7: ['home-tkg', 'home-natto-gohan'],
   8: ['savas-milk-cocoa-430'],
   9: ['7-mushidori-egg-salad', '7-dressing-koku-onion'],
+  11: ['home-pork-broccoli-steam'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -96,6 +97,8 @@ const other: Row[] = [
   // ご飯はパックご飯150gで計算
   ['home-tkg', '卵かけご飯（ご飯150g＋卵1個）', '自炊', 300, 9.4, 5.5, 52],
   ['home-natto-gohan', '納豆かけご飯（ご飯150g＋納豆1パック）', '自炊', 320, 11, 5, 59],
+  // 豚こま150g＋ブロッコリー100g＋ポン酢で計算
+  ['home-pork-broccoli-steam', '豚こま肉とブロッコリーのレンジ蒸し（豚こま150g）', '自炊', 375, 31.5, 24.5, 7.3],
 ];
 
 const build = (rows: Row[], store: Store): Product[] =>
