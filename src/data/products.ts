@@ -1,5 +1,8 @@
 import type { Category, Product, Store } from '../types';
 
+/** 公式の栄養成分で確かめた初期データ（「目安」を付けない） */
+export const VERIFIED = new Set(['7-dressing-koku-onion', '7-mushidori-egg-salad']);
+
 // 数値は一般的な商品の目安（kcal, たんぱく質g, 脂質g, 炭水化物g）。
 // パッケージの栄養成分表示やお店の公表値で上書きできる。
 type Row = [id: string, name: string, category: Category, kcal: number, p: number, f: number, c: number];
@@ -40,10 +43,10 @@ const seven: Row[] = [
   ['7-nanachiki', 'セブン ななチキ', 'ホットスナック', 220, 12, 13, 13],
   ['7-broccoli-chicken-egg', 'セブン ブロッコリーチキンエッグ', 'チキン・肉', 180, 20, 9, 5],
   ['7-onigiri-saba', 'セブン 長野県産コシヒカリおむすび 炭火焼さば', 'おにぎり', 220, 7, 6, 35],
-  // 検索で見つかった値（173kcal・P21.5・F8.4・C3.5）。ドレッシングは含まない想定
-  ['7-mushidori-egg-salad', 'セブン 蒸し鶏と玉子のサラダ', '汁物・サラダ', 173, 21.5, 8.4, 3.5],
-  // 数値が見つからなかったため、油入り玉ねぎドレッシング25mlの一般的な値で推定
-  ['7-dressing-koku-onion', 'セブン にんにくが効いたコク旨玉ねぎドレッシング（小袋25ml）', '汁物・サラダ', 95, 0.3, 9, 3],
+  // セブン‐イレブン公式サイトの栄養成分（1食あたり、item/105215）
+  ['7-mushidori-egg-salad', 'セブン 蒸し鶏と玉子のサラダ', '汁物・サラダ', 66, 8.7, 2.3, 3.4],
+  // セブン‐イレブン公式サイトの栄養成分（1食あたり）
+  ['7-dressing-koku-onion', 'セブン 7P コク旨玉ねぎドレッシング（小袋25ml）', '汁物・サラダ', 105, 0.5, 10.5, 2],
 ];
 
 /** あとから追加した初期データ（DBのバージョン → 商品id）。既存のDBにはバージョンアップ時にこれだけ足す（消した商品は復活させない） */
@@ -97,7 +100,7 @@ const other: Row[] = [
 
 const build = (rows: Row[], store: Store): Product[] =>
   rows.map(([id, name, category, kcal, protein, fat, carbs]) => ({
-    id, name, category, store, kcal, protein, fat, carbs, estimate: true, favorite: false, useCount: 0,
+    id, name, category, store, kcal, protein, fat, carbs, estimate: !VERIFIED.has(id), favorite: false, useCount: 0,
   }));
 
 export const SEED_PRODUCTS: Product[] = [

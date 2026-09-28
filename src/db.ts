@@ -77,6 +77,18 @@ export class AppDB extends Dexie {
           await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[version].includes(p.id) && !have.has(p.id)));
         });
     }
+    // v10: セブンの蒸し鶏と玉子のサラダ・コク旨玉ねぎドレッシングを公式の栄養成分に更新（自分で数値を書き換えていたらそのまま）
+    this.version(10)
+      .stores({})
+      .upgrade(async (tx) => {
+        for (const id of ['7-mushidori-egg-salad', '7-dressing-koku-onion']) {
+          const seed = SEED_BY_ID.get(id)!;
+          await tx.table<Product, string>('products').where('id').equals(id).modify((p) => {
+            if (!p.estimate) return;
+            Object.assign(p, { name: seed.name, kcal: seed.kcal, protein: seed.protein, fat: seed.fat, carbs: seed.carbs, estimate: false });
+          });
+        }
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());

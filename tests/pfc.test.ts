@@ -163,9 +163,32 @@ it.each([4, 5, 6, 7, 8])('v%i のDBに、それ以降に追加した商品が足
   expect(await db.products.get('home-enoki')).toMatchObject({ category: '自炊', store: 'other', estimate: true });
   expect(await db.products.get('home-tkg')).toMatchObject({ category: '自炊', kcal: 300 });
   expect(await db.products.get('savas-milk-cocoa-430')).toMatchObject({ category: 'プロテイン', store: 'common', protein: 20 });
-  expect(await db.products.get('7-mushidori-egg-salad')).toMatchObject({ store: 'seven', kcal: 173, protein: 21.5 });
-  expect(await db.products.get('7-dressing-koku-onion')).toMatchObject({ store: 'seven', estimate: true });
+  expect(await db.products.get('7-mushidori-egg-salad')).toMatchObject({ store: 'seven', kcal: 66, protein: 8.7, estimate: false });
+  expect(await db.products.get('7-dressing-koku-onion')).toMatchObject({ store: 'seven', kcal: 105, fat: 10.5, estimate: false });
   expect(await db.products.get('home-natto-gohan')).toMatchObject({ category: '自炊', kcal: 320 });
   expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
   db.close();
+});
+
+describe('v10：ドレッシングを公式の値に更新', () => {
+  const schema = { settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId' };
+  it('目安のままなら公式値に置き換え、自分で書き換えた値は残す', async () => {
+    for (const [name, edited] of [['v9-untouched', false], ['v9-edited', true]] as const) {
+      names.push(name);
+      const v9 = new Dexie(name);
+      v9.version(9).stores(schema);
+      await v9.table('products').bulkAdd(SEED_PRODUCTS.map((p) => {
+        if (p.id === '7-dressing-koku-onion') return { ...p, kcal: edited ? 100 : 95, fat: 9, estimate: !edited };
+        if (p.id === '7-mushidori-egg-salad') return { ...p, kcal: 173, protein: 21.5, estimate: true };
+        return p;
+      }));
+      v9.close();
+      const db = new AppDB(name);
+      const p = await db.products.get('7-dressing-koku-onion');
+      if (edited) expect(p).toMatchObject({ kcal: 100, estimate: false });
+      else expect(p).toMatchObject({ kcal: 105, protein: 0.5, fat: 10.5, carbs: 2, estimate: false });
+      expect(await db.products.get('7-mushidori-egg-salad')).toMatchObject({ kcal: 66, protein: 8.7, fat: 2.3, carbs: 3.4, estimate: false });
+      db.close();
+    }
+  });
 });
