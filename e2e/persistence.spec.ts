@@ -62,7 +62,11 @@ test('記録した食事・体重・セットがリロード後も残る', async
 
   // 記録タブにも反映される
   await page.getByRole('navigation').getByRole('button', { name: '記録' }).click();
-  // 種目ごとの推移：トレした種目が選ばれた状態で、前回の記録が出る
+  // 種目ごとの推移：最初は折りたたまれていて、開くとトレした種目が選ばれた状態で前回の記録が出る
+  await expect(page.getByRole('group', { name: 'メニューA（押す日）' })).toBeHidden();
+  await expect(page.getByTestId('exercise-history')).toContainText('60×12');
+  await page.getByText('メニューA（押す日）').click();
+  await page.getByText('メニューB（引く日）').click();
   const chip = page.getByRole('group', { name: 'メニューA（押す日）' }).getByRole('button', { name: /レッグプレス/ });
   await expect(chip).toHaveAttribute('aria-pressed', 'true');
   await expect(chip).toContainText('前回 60kg×12');

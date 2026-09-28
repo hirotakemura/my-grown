@@ -295,6 +295,11 @@ details ol { margin: 0; padding-left: 20px; font-size: 14px; display: flex; flex
 .table td, .table th { padding: 6px 4px; border-bottom: 1px solid var(--border); text-align: left; font-variant-numeric: tabular-nums; }
 .table th { font-size: 12px; color: var(--muted); font-weight: 600; }
 
+.ex-group { border: 1px solid var(--border); border-radius: 12px; padding: 0 12px; }
+.ex-group summary { gap: 8px; color: var(--text); }
+.ex-group summary::before { content: '▸'; color: var(--muted); transition: transform 0.15s; }
+.ex-group[open] summary::before { transform: rotate(90deg); }
+.ex-group[open] { padding-bottom: 12px; }
 .ex-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .ex-chip {
   min-height: 48px; padding: 4px 12px; border-radius: 12px; border: 1px solid var(--border);

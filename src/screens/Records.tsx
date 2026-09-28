@@ -114,8 +114,11 @@ export function Records({ data }: { data: AppData }) {
         ) : (
           <>
             {exGroups.map((g) => (
-              <div key={g.label} className="stack" style={{ gap: 6 }}>
-                <div className="muted">{g.label}</div>
+              <details key={g.label} className="ex-group">
+                <summary>
+                  <span className="grow">{g.label}</span>
+                  <span className="muted num">{g.ids.filter((id) => trainedIds.has(id)).length}/{g.ids.length}種目に記録</span>
+                </summary>
                 <div className="ex-chips" role="group" aria-label={g.label}>
                   {g.ids.map((id) => {
                     const ex = data.exercises.get(id);
@@ -135,7 +138,7 @@ export function Records({ data }: { data: AppData }) {
                     );
                   })}
                 </div>
-              </div>
+              </details>
             ))}
             {current && <h3 className="card-title" style={{ fontSize: 15, marginTop: 4 }}>{current.name}</h3>}
             {current && sessions.length > 0 && <LineChart
