@@ -40,6 +40,10 @@ const seven: Row[] = [
   ['7-nanachiki', 'セブン ななチキ', 'ホットスナック', 220, 12, 13, 13],
   ['7-broccoli-chicken-egg', 'セブン ブロッコリーチキンエッグ', 'チキン・肉', 180, 20, 9, 5],
   ['7-onigiri-saba', 'セブン 長野県産コシヒカリおむすび 炭火焼さば', 'おにぎり', 220, 7, 6, 35],
+  // 検索で見つかった値（173kcal・P21.5・F8.4・C3.5）。ドレッシングは含まない想定
+  ['7-mushidori-egg-salad', 'セブン 蒸し鶏と玉子のサラダ', '汁物・サラダ', 173, 21.5, 8.4, 3.5],
+  // 数値が見つからなかったため、油入り玉ねぎドレッシング25mlの一般的な値で推定
+  ['7-dressing-koku-onion', 'セブン にんにくが効いたコク旨玉ねぎドレッシング（小袋25ml）', '汁物・サラダ', 95, 0.3, 9, 3],
 ];
 
 /** あとから追加した初期データ（DBのバージョン → 商品id）。既存のDBにはバージョンアップ時にこれだけ足す（消した商品は復活させない） */
@@ -53,6 +57,7 @@ export const ADDED_IN: Record<number, string[]> = {
   6: ['home-moyashi', 'home-enoki'],
   7: ['home-tkg', 'home-natto-gohan'],
   8: ['savas-milk-cocoa-430'],
+  9: ['7-mushidori-egg-salad', '7-dressing-koku-onion'],
 };
 
 // どちらのコンビニでも買えるもの
