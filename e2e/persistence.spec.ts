@@ -62,7 +62,12 @@ test('記録した食事・体重・セットがリロード後も残る', async
 
   // 記録タブにも反映される
   await page.getByRole('navigation').getByRole('button', { name: '記録' }).click();
-  await expect(page.getByTestId('total-volume')).toHaveText('720 kg');
+  // 種目ごとの推移：トレした種目が選ばれた状態で、前回の記録が出る
+  const chip = page.getByRole('group', { name: 'メニューA（押す日）' }).getByRole('button', { name: /レッグプレス/ });
+  await expect(chip).toHaveAttribute('aria-pressed', 'true');
+  await expect(chip).toContainText('前回 60kg×12');
+  await expect(page.getByRole('group', { name: 'メニューB（引く日）' }).getByRole('button', { name: /ラットプルダウン/ })).toBeDisabled();
+  await expect(page.getByTestId('exercise-history')).toContainText('60×12');
 });
 
 test('コンビニの商品から複数選んで記録し、マイセット・商品の編集もリロード後に残る', async ({ page }) => {

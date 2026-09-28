@@ -3,7 +3,7 @@ import type { AppData } from '../hooks';
 import { useToday } from '../hooks';
 import { addDays, dateRange, formatMD } from '../lib/date';
 import { dayStatus } from '../lib/plan';
-import { bestOf, sessionsOf, totalVolume } from '../lib/progression';
+import { bestOf, sessionsOf } from '../lib/progression';
 import { LineChart } from '../components/LineChart';
 import { WeightCard } from '../components/WeightCard';
 import { g1 } from '../lib/format';
@@ -34,13 +34,24 @@ export function Records({ data }: { data: AppData }) {
     .sort((a, b) => (a.date < b.date ? -1 : 1))
     .map((d) => ({ date: d.date, value: d.weight! }));
 
-  const trained = [...data.exercises.values()].filter((e) => data.sets.some((s) => s.exerciseId === e.id && s.done));
+  // 種目ごとの推移：メニューA／B／それ以外（代替種目など）に分けてボタンで選ぶ
+  const doneSets = data.sets.filter((s) => s.done);
+  const trainedIds = new Set(doneSets.map((s) => s.exerciseId));
+  const { menuA, menuB } = data.settings;
+  const exGroups = [
+    { label: 'メニューA（押す日）', ids: menuA },
+    { label: 'メニューB（引く日）', ids: menuB },
+    { label: '代替・その他', ids: [...trainedIds].filter((id) => !menuA.includes(id) && !menuB.includes(id)) },
+  ].filter((g) => g.ids.some((id) => data.exercises.has(id)));
+  // 最初は最後にトレした種目を選んでおく
+  const lastTrainedId = [...doneSets].sort((a, b) => (a.date === b.date ? (a.doneAt ?? 0) - (b.doneAt ?? 0) : a.date < b.date ? -1 : 1)).pop()?.exerciseId;
   const [exId, setExId] = useState<string>('');
-  const current = data.exercises.get(exId) ?? trained[0];
+  const current = data.exercises.get(exId) ?? (lastTrainedId ? data.exercises.get(lastTrainedId) : undefined);
   const sessions = current ? sessionsOf(current.id, data.sets) : [];
-
-  const volume = totalVolume(data.sets);
-  const doneSets = data.sets.filter((s) => s.done).length;
+  const latestBest = (id: string) => {
+    const s = sessionsOf(id, data.sets);
+    return s.length ? bestOf(s[s.length - 1].sets) : undefined;
+  };
 
   return (
     <div className="screen">
@@ -98,22 +109,44 @@ export function Records({ data }: { data: AppData }) {
 
       <section className="card">
         <h2 className="card-title">種目ごとの推移</h2>
-        {trained.length === 0 ? (
+        {trainedIds.size === 0 ? (
           <p className="muted">セットを完了すると、ここに重さと回数の推移が出ます。</p>
         ) : (
           <>
-            <select className="input" value={current?.id} onChange={(e) => setExId(e.target.value)} aria-label="種目">
-              {trained.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </select>
-            <LineChart
-              label={`${current!.name}の最高重量`}
+            {exGroups.map((g) => (
+              <div key={g.label} className="stack" style={{ gap: 6 }}>
+                <div className="muted">{g.label}</div>
+                <div className="ex-chips" role="group" aria-label={g.label}>
+                  {g.ids.map((id) => {
+                    const ex = data.exercises.get(id);
+                    if (!ex) return null;
+                    const best = latestBest(id);
+                    return (
+                      <button
+                        key={id}
+                        className="ex-chip"
+                        aria-pressed={current?.id === id}
+                        disabled={!trainedIds.has(id)}
+                        onClick={() => setExId(id)}
+                      >
+                        {ex.name}
+                        <small>{best ? `前回 ${best.weight}kg×${best.reps}` : '記録なし'}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            {current && <h3 className="card-title" style={{ fontSize: 15, marginTop: 4 }}>{current.name}</h3>}
+            {current && sessions.length > 0 && <LineChart
+              label={`${current.name}の最高重量`}
               unit="kg"
               points={sessions.map((s) => {
                 const b = bestOf(s.sets)!;
                 return { date: s.date, value: b.weight, note: `最高 ${b.weight}kg×${b.reps}回` };
               })}
-            />
-            <table className="table">
+            />}
+            <table className="table" data-testid="exercise-history">
               <thead><tr><th>日付</th><th>セット（kg×回）</th></tr></thead>
               <tbody>
                 {[...sessions].reverse().slice(0, 10).map((s) => (
@@ -126,12 +159,6 @@ export function Records({ data }: { data: AppData }) {
             </table>
           </>
         )}
-      </section>
-
-      <section className="card">
-        <h2 className="card-title">これまでに持ち上げた総重量</h2>
-        <div className="big" data-testid="total-volume">{Math.round(volume).toLocaleString('ja-JP')} kg</div>
-        <p className="muted">完了した{doneSets}セットの「重さ×回数」の合計{volume >= 1000 ? `（約${(volume / 1000).toFixed(1)}トン）` : ''}</p>
       </section>
     </div>
   );
