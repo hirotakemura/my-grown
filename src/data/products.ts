@@ -1,7 +1,12 @@
 import type { Category, Product, Store } from '../types';
 
 /** 公式の栄養成分で確かめた初期データ（「目安」を付けない） */
-export const VERIFIED = new Set(['7-dressing-koku-onion', '7-mushidori-egg-salad']);
+export const VERIFIED = new Set([
+  '7-dressing-koku-onion', '7-mushidori-egg-salad',
+  '7-yakitori', '7-zaru-soba', '7-tonjiru', '7-nanachiki',
+  '7-tofu-hamburg', '7-nikuyasai', '7-salmon-saikyo', '7-pork-egg-itame', '7-agedori', '7-niku-soba',
+  '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
+]);
 
 // 数値は一般的な商品の目安（kcal, たんぱく質g, 脂質g, 炭水化物g）。
 // パッケージの栄養成分表示やお店の公表値で上書きできる。
@@ -24,30 +29,51 @@ const lawson: Row[] = [
   ['tonjiru', '豚汁', '汁物・サラダ', 160, 8, 8, 13],
   ['salad-nonoil', 'サラダ（ノンオイル）', '汁物・サラダ', 50, 2, 0.5, 9],
   ['karaage-kun', 'からあげクン', 'ホットスナック', 220, 14, 14, 9],
+  // ローソン公式サイトはこの環境から開けないため、一般的な値の目安
+  ['l-lchiki', 'Lチキ（レギュラー）', 'ホットスナック', 230, 13, 15, 11],
+  ['l-saba-shioyaki', 'さばの塩焼き', 'チキン・肉', 260, 18, 20, 1],
+  ['l-oden-egg', 'おでん たまご', '卵・乳製品', 80, 6.5, 5.5, 1],
+  ['l-oden-atsuage', 'おでん 厚揚げ', '卵・乳製品', 80, 6, 5.5, 1.5],
+  ['l-oden-daikon', 'おでん 大根', '汁物・サラダ', 10, 0.4, 0.1, 2.2],
 ];
 
 const seven: Row[] = [
   ['7-salad-chicken', 'セブン サラダチキン プレーン', 'チキン・肉', 115, 24, 1.5, 1],
   ['7-chicken-bar', 'セブン サラダチキンバー', 'チキン・肉', 70, 11, 2, 1.5],
   ['7-nitamago', 'セブン 味付け半熟ゆで卵', '卵・乳製品', 80, 6.5, 5.5, 1],
-  ['7-yakitori', 'セブン 焼き鳥 もも塩（2本）', 'チキン・肉', 160, 15, 10, 2],
+  ['7-yakitori', 'セブン 炭火焼き鳥（塩）1本', 'チキン・肉', 66, 9.6, 3, 0.3],
   ['7-saba', 'セブン さばの塩焼き', 'チキン・肉', 260, 18, 20, 1],
   ['7-onigiri-sake', 'セブン おにぎり 紅しゃけ', 'おにぎり', 180, 5, 1.5, 37],
   ['7-onigiri-konbu', 'セブン おにぎり 昆布', 'おにぎり', 170, 3, 0.5, 38],
   ['7-onigiri-tunamayo', 'セブン おにぎり ツナマヨネーズ', 'おにぎり', 235, 5, 10, 31],
   ['7-greek-yogurt', 'セブン ギリシャヨーグルト', '卵・乳製品', 90, 10, 0.3, 12],
-  ['7-zaru-soba', 'セブン ざるそば', '麺', 350, 13, 2, 68],
+  ['7-zaru-soba', 'セブン 北海道産そば粉のざるそば', '麺', 330, 15, 2.5, 63.4],
   ['7-miso-soup', 'セブン 具だくさん味噌汁', '汁物・サラダ', 60, 3, 2, 7],
-  ['7-tonjiru', 'セブン 豚汁', '汁物・サラダ', 180, 9, 9, 15],
+  ['7-tonjiru', 'セブン コクと旨味の豚汁', '汁物・サラダ', 148, 12.1, 7.6, 9.3],
   ['7-salad', 'セブン サラダ（ノンオイル）', '汁物・サラダ', 50, 2, 0.5, 9],
-  ['7-nanachiki', 'セブン ななチキ', 'ホットスナック', 220, 12, 13, 13],
+  ['7-nanachiki', 'セブン ななチキ', 'ホットスナック', 174, 13.4, 9, 10],
   ['7-broccoli-chicken-egg', 'セブン ブロッコリーチキンエッグ', 'チキン・肉', 180, 20, 9, 5],
   ['7-onigiri-saba', 'セブン 長野県産コシヒカリおむすび 炭火焼さば', 'おにぎり', 220, 7, 6, 35],
   // セブン‐イレブン公式サイトの栄養成分（1食あたり、item/105215）
   ['7-mushidori-egg-salad', 'セブン 蒸し鶏と玉子のサラダ', '汁物・サラダ', 66, 8.7, 2.3, 3.4],
   // セブン‐イレブン公式サイトの栄養成分（1食あたり）
   ['7-dressing-koku-onion', 'セブン 7P コク旨玉ねぎドレッシング（小袋25ml）', '汁物・サラダ', 105, 0.5, 10.5, 2],
+  // ここから下もセブン‐イレブン公式サイトの栄養成分（1食あたり）
+  ['7-tofu-hamburg', 'セブン 豆腐ハンバーグ 和風粗おろしソース', 'チキン・肉', 347, 26.1, 13.1, 33.3],
+  ['7-nikuyasai', 'セブン 肉野菜炒め', 'チキン・肉', 197, 8, 10.9, 19.4],
+  ['7-salmon-saikyo', 'セブン 7P サーモンハラミの西京焼', 'チキン・肉', 171, 10.5, 13.8, 1.2],
+  ['7-pork-egg-itame', 'セブン 豚肉ときくらげのふんわり中華玉子炒め', 'チキン・肉', 306, 15.2, 21.3, 15.2],
+  ['7-agedori', 'セブン 揚げ鶏', 'ホットスナック', 175, 13.4, 10.1, 7.8],
+  ['7-niku-soba', 'セブン 若鶏の冷たい肉そば', '麺', 542, 24.2, 13.4, 83.5],
+  ['7-tonshabu-pasta', 'セブン 豚しゃぶパスタサラダ', '麺', 362, 15.5, 15, 42.7],
+  ['7-mushi-mame', 'セブン 7P 蒸しサラダ豆', '汁物・サラダ', 120, 9.2, 3, 17.8],
+  ['7-oden-egg', 'セブン おでん 味しみたまご', '卵・乳製品', 77, 6.7, 4.9, 1.4],
+  ['7-oden-atsuage', 'セブン おでん 味しみ木綿厚揚げ', '卵・乳製品', 72, 6, 4.7, 1.6],
+  ['7-oden-daikon', 'セブン おでん 味しみ大根', '汁物・サラダ', 8, 0.3, 0.1, 2],
 ];
+
+/** 公式値に置き換えた既存の商品（v12で、目安のままの端末だけ更新する） */
+export const UPDATED_TO_OFFICIAL_V12 = ['7-yakitori', '7-zaru-soba', '7-tonjiru', '7-nanachiki'];
 
 /** あとから追加した初期データ（DBのバージョン → 商品id）。既存のDBにはバージョンアップ時にこれだけ足す（消した商品は復活させない） */
 export const ADDED_IN: Record<number, string[]> = {
@@ -62,6 +88,11 @@ export const ADDED_IN: Record<number, string[]> = {
   8: ['savas-milk-cocoa-430'],
   9: ['7-mushidori-egg-salad', '7-dressing-koku-onion'],
   11: ['home-pork-broccoli-steam'],
+  12: [
+    'l-lchiki', 'l-saba-shioyaki', 'l-oden-egg', 'l-oden-atsuage', 'l-oden-daikon',
+    '7-tofu-hamburg', '7-nikuyasai', '7-salmon-saikyo', '7-pork-egg-itame', '7-agedori', '7-niku-soba',
+    '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
+  ],
 };
 
 // どちらのコンビニでも買えるもの

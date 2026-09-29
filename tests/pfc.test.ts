@@ -149,7 +149,7 @@ describe('v4：自炊の商品追加', () => {
   });
 });
 
-it.each([4, 5, 6, 7, 8, 10])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
+it.each([4, 5, 6, 7, 8, 10, 11])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
   const name = `migrate-v${from}`;
   names.push(name);
   const v4 = new Dexie(name);
@@ -167,6 +167,26 @@ it.each([4, 5, 6, 7, 8, 10])('v%i のDBに、それ以降に追加した商品�
   expect(await db.products.get('7-dressing-koku-onion')).toMatchObject({ store: 'seven', kcal: 105, fat: 10.5, estimate: false });
   expect(await db.products.get('home-natto-gohan')).toMatchObject({ category: '自炊', kcal: 320 });
   expect(await db.products.get('home-pork-broccoli-steam')).toMatchObject({ category: '自炊', store: 'other', protein: 31.5, estimate: true });
+  expect(await db.products.get('7-tofu-hamburg')).toMatchObject({ store: 'seven', kcal: 347, protein: 26.1, estimate: false });
+  expect(await db.products.get('l-oden-egg')).toMatchObject({ store: 'lawson', estimate: true });
+  expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
+  db.close();
+});
+
+it('v12：焼き鳥・ざるそば・豚汁・ななチキを公式値に更新（自分で書き換えた値は残す）', async () => {
+  const name = 'v11-official';
+  names.push(name);
+  const v11 = new Dexie(name);
+  v11.version(11).stores({ settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId' });
+  await v11.table('products').bulkAdd(SEED_PRODUCTS.filter((p) => !ADDED_IN[12].includes(p.id)).map((p) => {
+    if (p.id === '7-yakitori') return { ...p, name: 'セブン 焼き鳥 もも塩（2本）', kcal: 160, protein: 15, estimate: true };
+    if (p.id === '7-tonjiru') return { ...p, kcal: 170, estimate: false }; // 自分で書き換えた
+    return p;
+  }));
+  v11.close();
+  const db = new AppDB(name);
+  expect(await db.products.get('7-yakitori')).toMatchObject({ name: 'セブン 炭火焼き鳥（塩）1本', kcal: 66, protein: 9.6, estimate: false });
+  expect(await db.products.get('7-tonjiru')).toMatchObject({ kcal: 170, estimate: false });
   expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
   db.close();
 });

@@ -32,6 +32,8 @@ const c = (name: string, kcal: number, protein: number, fat: number, carbs: numb
 const POST_WORKOUT: Suggestion[] = [
   { id: 'post-1', place: 'lawson', title: 'ミルクプロテイン＋おにぎり', items: [p('savas-milk'), p('onigiri-sake')] },
   { id: 'post-2', place: 'seven', title: 'ミルクプロテイン＋おにぎり（セブン）', items: [p('savas-milk'), p('7-onigiri-sake')] },
+  { id: 'post-3', place: 'lawson', title: 'サラダチキンバー＋おにぎり＋バナナ', items: [p('chicken-bar'), p('onigiri-konbu'), p('banana')] },
+  { id: 'post-4', place: 'seven', title: '炭火焼き鳥（塩）2本＋おにぎり', items: [p('7-yakitori', 2), p('7-onigiri-konbu')] },
 ];
 
 /** 平日（出社前：家 or コンビニ） */
@@ -60,6 +62,18 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       place: 'seven',
       title: 'ギリシャヨーグルト＋煮たまご＋おにぎり',
       items: [p('7-greek-yogurt'), p('7-nitamago'), p('7-onigiri-konbu')],
+    },
+    {
+      id: 'wb-5',
+      place: 'lawson',
+      title: 'ゆで卵2個＋ブランパン＋ミルクプロテイン',
+      items: [p('boiled-egg', 2), p('bran-bread'), p('savas-milk')],
+    },
+    {
+      id: 'wb-6',
+      place: 'seven',
+      title: '蒸しサラダ豆＋煮たまご＋ミルクプロテイン',
+      items: [p('7-mushi-mame'), p('7-nitamago'), p('savas-milk')],
     },
   ],
   lunch: [
@@ -93,6 +107,48 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       title: 'さばの塩焼き＋おにぎり2個＋サラダ＋煮たまご',
       items: [p('7-saba'), p('7-onigiri-sake'), p('7-onigiri-konbu'), p('7-salad'), p('7-nitamago')],
     },
+    {
+      id: 'wl-4',
+      place: 'lawson',
+      title: 'サラダチキン＋ブランパン＋ギリシャヨーグルト',
+      items: [p('salad-chicken'), p('bran-bread'), p('greek-yogurt')],
+    },
+    {
+      id: 'wl-5',
+      place: 'lawson',
+      title: 'さばの塩焼き＋おにぎり＋サラダ＋ゆで卵',
+      items: [p('l-saba-shioyaki'), p('onigiri-sake'), p('salad-nonoil'), p('boiled-egg')],
+    },
+    {
+      id: 'wl-6',
+      place: 'lawson',
+      title: 'からあげクン＋おにぎり＋サラダ＋ゆで卵＋味噌汁',
+      items: [p('karaage-kun'), p('onigiri-konbu'), p('salad-nonoil'), p('boiled-egg'), p('miso-soup')],
+    },
+    {
+      id: 'sl-3',
+      place: 'seven',
+      title: '若鶏の冷たい肉そば＋煮たまご',
+      items: [p('7-niku-soba'), p('7-nitamago')],
+    },
+    {
+      id: 'sl-4',
+      place: 'seven',
+      title: '豆腐ハンバーグ＋おにぎり＋サラダ',
+      items: [p('7-tofu-hamburg'), p('7-onigiri-konbu'), p('7-salad')],
+    },
+    {
+      id: 'sl-5',
+      place: 'seven',
+      title: 'ざるそば＋サラダチキン',
+      items: [p('7-zaru-soba'), p('7-salad-chicken')],
+    },
+    {
+      id: 'sl-6',
+      place: 'seven',
+      title: '豚しゃぶパスタサラダ＋煮たまご＋サラダチキンバー',
+      items: [p('7-tonshabu-pasta'), p('7-nitamago'), p('7-chicken-bar')],
+    },
   ],
   dinner: [
     {
@@ -118,6 +174,54 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       place: 'seven',
       title: 'サラダチキン＋豚汁＋おにぎり＋煮たまご',
       items: [p('7-salad-chicken'), p('7-tonjiru'), p('7-onigiri-sake'), p('7-nitamago')],
+    },
+    {
+      id: 'wd-4',
+      place: 'lawson',
+      title: 'さばの塩焼き＋おにぎり＋味噌汁＋サラダ',
+      items: [p('l-saba-shioyaki'), p('onigiri-konbu'), p('miso-soup'), p('salad-nonoil')],
+    },
+    {
+      id: 'wd-5',
+      place: 'lawson',
+      title: 'おでん（たまご・厚揚げ・大根）＋サラダチキンバー＋おにぎり',
+      items: [p('l-oden-egg'), p('l-oden-atsuage'), p('l-oden-daikon'), p('chicken-bar'), p('onigiri-sake')],
+    },
+    {
+      id: 'wd-6',
+      place: 'lawson',
+      title: 'Lチキ＋サラダチキン＋サラダ＋おにぎり',
+      items: [p('l-lchiki'), p('salad-chicken'), p('salad-nonoil'), p('onigiri-konbu')],
+    },
+    {
+      id: 'sd-2',
+      place: 'seven',
+      title: 'サーモンハラミの西京焼＋豚汁＋おにぎり',
+      items: [p('7-salmon-saikyo'), p('7-tonjiru'), p('7-onigiri-sake')],
+    },
+    {
+      id: 'sd-3',
+      place: 'seven',
+      title: '豚肉ときくらげの中華玉子炒め＋おにぎり＋サラダチキンバー',
+      items: [p('7-pork-egg-itame'), p('7-onigiri-konbu'), p('7-chicken-bar')],
+    },
+    {
+      id: 'sd-4',
+      place: 'seven',
+      title: 'おでん（たまご2・厚揚げ・大根）＋炭火焼き鳥2本＋おにぎり',
+      items: [p('7-oden-egg', 2), p('7-oden-atsuage'), p('7-oden-daikon'), p('7-yakitori', 2), p('7-onigiri-sake')],
+    },
+    {
+      id: 'sd-5',
+      place: 'seven',
+      title: '揚げ鶏＋豚汁＋蒸し鶏と玉子のサラダ＋おにぎり',
+      items: [p('7-agedori'), p('7-tonjiru'), p('7-mushidori-egg-salad'), p('7-onigiri-konbu')],
+    },
+    {
+      id: 'sd-6',
+      place: 'seven',
+      title: '肉野菜炒め＋サラダチキン＋おにぎり',
+      items: [p('7-nikuyasai'), p('7-salad-chicken'), p('7-onigiri-sake')],
     },
     {
       id: 'ed-1',
