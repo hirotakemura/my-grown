@@ -6,6 +6,7 @@ export const VERIFIED = new Set([
   '7-yakitori', '7-zaru-soba', '7-tonjiru', '7-nanachiki',
   '7-tofu-hamburg', '7-nikuyasai', '7-salmon-saikyo', '7-pork-egg-itame', '7-agedori', '7-niku-soba',
   '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
+  '7-smoked-nitamago',
 ]);
 
 // 数値は一般的な商品の目安（kcal, たんぱく質g, 脂質g, 炭水化物g）。
@@ -70,6 +71,8 @@ const seven: Row[] = [
   ['7-oden-egg', 'セブン おでん 味しみたまご', '卵・乳製品', 77, 6.7, 4.9, 1.4],
   ['7-oden-atsuage', 'セブン おでん 味しみ木綿厚揚げ', '卵・乳製品', 72, 6, 4.7, 1.6],
   ['7-oden-daikon', 'セブン おでん 味しみ大根', '汁物・サラダ', 8, 0.3, 0.1, 2],
+  // 公式の値（item/104613）。表示に「何個当たり」がないが、卵1個分の値なので1個として登録
+  ['7-smoked-nitamago', 'セブン 7P 燻製風 半熟煮たまご（1個）', '卵・乳製品', 73, 6.3, 4.6, 1.3],
 ];
 
 /** 公式値に置き換えた既存の商品（v12で、目安のままの端末だけ更新する） */
@@ -93,6 +96,7 @@ export const ADDED_IN: Record<number, string[]> = {
     '7-tofu-hamburg', '7-nikuyasai', '7-salmon-saikyo', '7-pork-egg-itame', '7-agedori', '7-niku-soba',
     '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   ],
+  13: ['7-smoked-nitamago'],
 };
 
 // どちらのコンビニでも買えるもの
