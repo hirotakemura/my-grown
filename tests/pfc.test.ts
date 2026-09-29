@@ -3,7 +3,7 @@ import Dexie from 'dexie';
 import { AppDB } from '../src/db';
 import { ADDED_IN, SEED_PRODUCTS, SEED_BY_ID } from '../src/data/products';
 import { HOLIDAY_MENUS, WEEKDAY_MENUS } from '../src/data/menus';
-import { dayStatus, pfcRatio, pfcTargets, placesFor, suggestionFor } from '../src/lib/plan';
+import { dayStatus, pfcRatio, pfcTargets, placesFor, suggestionChoices, suggestionFor } from '../src/lib/plan';
 import { importBackup, parseBackup } from '../src/lib/backup';
 import { matchStore } from '../src/components/ProductPicker';
 import { meal, snap } from './helpers';
@@ -53,6 +53,20 @@ describe('お店と提案', () => {
     }
     const seven = suggestionFor('2026-09-28', 'lunch', 'work', { date: '2026-09-28', place: { lunch: 'seven' } });
     expect(seven.place).toBe('seven');
+  });
+
+  it('どの場所を選んでも「別の案」で2案以上から選べ、押すと案が変わる', () => {
+    for (const kind of ['work', 'off'] as const) {
+      for (const slot of ['breakfast', 'lunch', 'dinner', 'post'] as const) {
+        for (const place of placesFor(slot, kind)) {
+          const day = { date: '2026-09-28', place: { [slot]: place } };
+          expect(suggestionChoices(slot, kind, day).length, `${kind} ${slot} ${place}`).toBeGreaterThanOrEqual(2);
+          const a = suggestionFor('2026-09-28', slot, kind, day);
+          const b = suggestionFor('2026-09-28', slot, kind, { ...day, rotation: { [slot]: 1 } });
+          expect(a.id, `${kind} ${slot} ${place}`).not.toBe(b.id);
+        }
+      }
+    }
   });
 
   it('ローソン／セブンのタブには共通商品（ザバスなど）も出る', () => {

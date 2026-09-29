@@ -209,10 +209,15 @@ export function placesFor(slot: MealSlot, kind: DayKind): Place[] {
 }
 
 /** 日付でローテーション。場所を選んでいればその場所の案だけから選ぶ */
-export function suggestionFor(date: ISODate, slot: MealSlot, kind: DayKind, day?: DayRecord): Suggestion {
+/** 今選んでいる場所で出せる案の一覧（「別の案」はこの中で回る） */
+export function suggestionChoices(slot: MealSlot, kind: DayKind, day?: DayRecord): Suggestion[] {
   const all = suggestionList(slot, kind);
   const place = day?.place?.[slot];
-  const list = place && all.some((s) => s.place === place) ? all.filter((s) => s.place === place) : all;
+  return place && all.some((s) => s.place === place) ? all.filter((s) => s.place === place) : all;
+}
+
+export function suggestionFor(date: ISODate, slot: MealSlot, kind: DayKind, day?: DayRecord): Suggestion {
+  const list = suggestionChoices(slot, kind, day);
   const i = (dayNumber(date) + (day?.rotation?.[slot] ?? 0)) % list.length;
   return list[i];
 }

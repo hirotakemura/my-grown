@@ -1,5 +1,5 @@
 import { PLACE_LABEL, SLOT_LABEL, type DayKind, type DayRecord, type MealItem, type MealRecord, type MealSlot, type MySet, type Place, type Product } from '../types';
-import { itemsTotal, placesFor, suggestionFor } from '../lib/plan';
+import { itemsTotal, placesFor, suggestionChoices, suggestionFor } from '../lib/plan';
 import { clearMeal, patchDay, productToItem, recordMeal, resolveSuggestion, skipMeal } from '../lib/actions';
 import { fmtNut, g1 } from '../lib/format';
 import type { StoreFilter } from './ProductPicker';
@@ -60,6 +60,8 @@ export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick
     toast(`${SLOT_LABEL[slot]}を記録しました（${fmt(itemsTotal(list))}）`);
   };
 
+  // 選んだ場所の案が1つしかないときは「別の案」を押せないようにする
+  const choiceCount = suggestionChoices(slot, kind, day).length;
   const nextIdea = () => patchDay(date, { rotation: { ...day?.rotation, [slot]: (day?.rotation?.[slot] ?? 0) + 1 } });
 
   return (
@@ -111,7 +113,9 @@ export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick
       <div className="btn-grid">
         <button className="btn primary span2" onClick={() => eat(items)}>これを食べた</button>
         <button className="btn span2" onClick={() => onPick(slot, [], storeForPlace(place ?? (kind === 'off' ? 'belc' : undefined)))}>{pickLabel()}</button>
-        <button className="btn" onClick={nextIdea}>別の案</button>
+        <button className="btn" onClick={nextIdea} disabled={choiceCount < 2}>
+          別の案{choiceCount > 1 ? `（${choiceCount}案）` : ''}
+        </button>
         <button className="btn" onClick={() => skipMeal(date, slot)}>食べない</button>
       </div>
     </div>

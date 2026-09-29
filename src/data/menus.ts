@@ -52,6 +52,18 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       items: [p('home-alpron-soy-cookie'), p('home-boiled-egg', 2)],
     },
     {
+      id: 'hb-w1',
+      place: 'home',
+      title: '卵かけご飯＋ソイプロテイン',
+      items: [p('home-tkg'), p('home-savas-soy-cocoa')],
+    },
+    {
+      id: 'hb-w2',
+      place: 'home',
+      title: '納豆かけご飯＋ゆで卵＋ソイプロテイン',
+      items: [p('home-natto-gohan'), p('home-boiled-egg'), p('home-savas-soy-cocoa')],
+    },
+    {
       id: 'wb-3',
       place: 'lawson',
       title: 'ギリシャヨーグルト＋ブランパン',
@@ -162,6 +174,24 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       place: 'home',
       title: '作り置きの鶏むね＋パックご飯＋冷凍ブロッコリー',
       items: [p('home-chicken'), p('home-rice-150'), p('home-broccoli')],
+    },
+    {
+      id: 'hd-w1',
+      place: 'home',
+      title: '豚こま肉とブロッコリーのレンジ蒸し＋パックご飯',
+      items: [p('home-pork-broccoli-steam'), p('home-rice-150')],
+    },
+    {
+      id: 'hd-w2',
+      place: 'home',
+      title: 'サラダチキン（ハーブ）＋卵かけご飯＋千切りキャベツ',
+      items: [p('belc-salad-chicken-herb'), p('home-tkg'), p('belc-cabbage-sengiri-mini')],
+    },
+    {
+      id: 'hd-w3',
+      place: 'home',
+      title: '納豆かけご飯＋ゆで卵2個＋もやしのレンジ蒸し',
+      items: [p('home-natto-gohan'), p('home-boiled-egg', 2), p('home-moyashi')],
     },
     {
       id: 'wd-3',
