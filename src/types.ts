@@ -144,3 +144,46 @@ export interface Settings {
   menuA: string[];
   menuB: string[];
 }
+
+// ---- 支出（レシート） ----
+
+export type ExpenseCategory = 'meal' | 'snack' | 'drink' | 'daily' | 'other';
+export const EXPENSE_CATEGORIES: ExpenseCategory[] = ['meal', 'snack', 'drink', 'daily', 'other'];
+export const EXPENSE_CATEGORY_LABEL: Record<ExpenseCategory, string> = {
+  meal: '食費（食事）',
+  snack: '間食・嗜好品',
+  drink: '飲み物',
+  daily: '日用品',
+  other: 'その他',
+};
+
+export type ExpenseStore = 'lawson' | 'seven' | 'belc' | 'other';
+export const EXPENSE_STORES: ExpenseStore[] = ['lawson', 'seven', 'belc', 'other'];
+export const EXPENSE_STORE_LABEL: Record<ExpenseStore, string> = {
+  lawson: 'ローソン',
+  seven: 'セブン',
+  belc: 'ベルク',
+  other: 'その他',
+};
+
+export interface ExpenseItem {
+  name: string;
+  price: number; // 税込の金額（値引きはマイナス）
+  category: ExpenseCategory;
+}
+
+export interface Expense {
+  id: string;
+  date: ISODate;
+  store: ExpenseStore;
+  items: ExpenseItem[];
+  receiptTotal?: number; // レシートに書かれていた合計（読み取れたとき）
+  source: 'receipt' | 'manual';
+  createdAt: number;
+}
+
+/** 品名 → 費目の覚え書き。手で直した分類を次のレシートから使う */
+export interface CategoryRule {
+  name: string; // 正規化した品名
+  category: ExpenseCategory;
+}

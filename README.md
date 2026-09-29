@@ -46,5 +46,6 @@ npm run build      # dist/ に出力（base は /my-grown/）
 | `src/lib/progression.ts` | 前回の記録、+5kg / +2.5kg の提案、自己ベスト、総重量 |
 | `src/lib/backup.ts` | JSON の書き出し・復元（失敗したら元のまま） |
 | `src/data/` | 商品（ローソン・セブン・外食・自炊、PFC付き）・提案メニュー（作り方）・種目・祝日 |
+| `src/lib/receipt.ts` / `src/lib/ocr.ts` | レシートの読み取り（Tesseract.js を端末内で実行、日本語データは `scripts/copy-ocr-assets.mjs` でビルド時に同梱）と費目の自動判定 |
 | `tests/` | ユニットテスト（fake-indexeddb で開き直しても残るか等） |
 | `e2e/` | Playwright：リロード後の保持、バックアップ往復、オフライン起動 |

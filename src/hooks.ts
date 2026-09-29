@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, withSettingDefaults } from './db';
-import type { MySet, Product } from './types';
+import type { CategoryRule, Expense, MySet, Product } from './types';
 import type { Snapshot } from './lib/plan';
 import { todayISO } from './lib/date';
 
-export type AppData = Snapshot & { products: Product[]; mySets: MySet[] };
+export type AppData = Snapshot & { products: Product[]; mySets: MySet[]; expenses: Expense[]; categoryRules: CategoryRule[] };
 
 /** 全データをまとめて購読する。どこかが書き換わると自動で再描画される */
 export function useAppData(): AppData | undefined {
   return useLiveQuery(async () => {
-    const [settings, days, meals, sets, exercises, products, mySets] = await Promise.all([
+    const [settings, days, meals, sets, exercises, products, mySets, expenses, categoryRules] = await Promise.all([
       db.settings.get('main'),
       db.days.toArray(),
       db.meals.toArray(),
@@ -18,6 +18,8 @@ export function useAppData(): AppData | undefined {
       db.exercises.toArray(),
       db.products.toArray(),
       db.mySets.toArray(),
+      db.expenses.toArray(),
+      db.categoryRules.toArray(),
     ]);
     if (!settings) return undefined;
     return {
@@ -29,6 +31,8 @@ export function useAppData(): AppData | undefined {
       exercises: new Map(exercises.map((e) => [e.id, e])),
       products,
       mySets,
+      expenses,
+      categoryRules,
     };
   });
 }

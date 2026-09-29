@@ -3,10 +3,11 @@ import { useAppData, useToday } from './hooks';
 import { Today } from './screens/Today';
 import { Records } from './screens/Records';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { Money } from './screens/Money';
 import { ToastProvider } from './components/Toast';
 import { RestTimerProvider } from './components/RestTimer';
 
-type Tab = 'today' | 'records' | 'settings';
+type Tab = 'today' | 'records' | 'money' | 'settings';
 
 const icons: Record<Tab, JSX.Element> = {
   today: (
@@ -19,6 +20,11 @@ const icons: Record<Tab, JSX.Element> = {
       <path d="M3 3v18h18" /><path d="m7 15 4-4 3 3 5-6" />
     </svg>
   ),
+  money: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z" /><path d="m9 8 3 3 3-3M12 11v5M9.5 13h5" />
+    </svg>
+  ),
   settings: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <circle cx="12" cy="12" r="3" />
@@ -27,7 +33,7 @@ const icons: Record<Tab, JSX.Element> = {
   ),
 };
 
-const labels: Record<Tab, string> = { today: '今日', records: '記録', settings: '設定' };
+const labels: Record<Tab, string> = { today: '今日', records: '記録', money: '支出', settings: '設定' };
 
 export default function App() {
   const data = useAppData();
@@ -45,6 +51,8 @@ export default function App() {
             <Today data={data} date={date ?? today} setDate={(d) => setDate(d === today ? null : d)} />
           ) : tab === 'records' ? (
             <Records data={data} />
+          ) : tab === 'money' ? (
+            <Money data={data} />
           ) : (
             <SettingsScreen data={data} />
           )}

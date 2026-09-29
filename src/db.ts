@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { DayRecord, Exercise, MealItem, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
+import type { CategoryRule, DayRecord, Exercise, Expense, MealItem, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
 import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12 } from './data/products';
 import { DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
@@ -39,6 +39,8 @@ export class AppDB extends Dexie {
   meals!: Table<MealRecord, string>;
   exercises!: Table<Exercise, string>;
   workoutSets!: Table<WorkoutSet, string>;
+  expenses!: Table<Expense, string>;
+  categoryRules!: Table<CategoryRule, string>;
 
   constructor(name = DB_NAME) {
     super(name);
@@ -120,6 +122,11 @@ export class AppDB extends Dexie {
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[13].includes(p.id) && !have.has(p.id)));
       });
+    // v14: 支出（レシート）と、品名→費目の覚え書き
+    this.version(14).stores({
+      expenses: 'id, date',
+      categoryRules: 'name',
+    });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());
@@ -156,7 +163,9 @@ export function fillItemPFC(i: MealItem): MealItem {
 
 export const db = new AppDB();
 
-export const TABLE_NAMES = ['settings', 'products', 'mySets', 'days', 'meals', 'exercises', 'workoutSets'] as const;
+export const TABLE_NAMES = [
+  'settings', 'products', 'mySets', 'days', 'meals', 'exercises', 'workoutSets', 'expenses', 'categoryRules',
+] as const;
 export type TableName = (typeof TABLE_NAMES)[number];
 
 export interface StorageStatus {
