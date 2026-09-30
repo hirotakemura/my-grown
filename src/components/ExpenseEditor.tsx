@@ -80,7 +80,7 @@ export function ExpenseEditor({ expense, isNew, rules, photoUrl, rawText, onClos
     >
       {isNew && expense.source === 'receipt' && (
         <p className="note">
-          読み取り結果です。品名・金額・費目が違うところは直してから保存してください。直した費目は覚えて、次のレシートから使います。{photoUrl && ' 読み取りがうまくいかないときは「iPhoneで読んだ文字を貼り付け」の方が正確です。'}
+          読み取り結果です。品名・金額・費目が違うところは直してから保存してください。直した費目は覚えて、次のレシートから使います。{photoUrl && ' 読み取りがうまくいかないときは「レシートの文字を貼り付け」の方が正確です。'}
         </p>
       )}
       {photoUrl && (

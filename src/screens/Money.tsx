@@ -136,12 +136,13 @@ export function Money({ data }: { data: AppData }) {
       </section>
 
       <div className="btn-grid">
-        <button className="btn primary" onClick={() => fileRef.current?.click()} disabled={!!ocr}>📷 レシートを読む</button>
-        <button className="btn" onClick={() => setEditing({ expense: newExpense('manual'), isNew: true })}>✎ 手入力で追加</button>
-        <button className="btn span2" onClick={() => setPasting(true)} disabled={!!ocr}>
-          📋 iPhoneで読んだ文字を貼り付け（より正確）
+        <button className="btn primary span2" onClick={() => setPasting(true)} disabled={!!ocr}>
+          📋 レシートの文字を貼り付け
         </button>
+        <button className="btn" onClick={() => setEditing({ expense: newExpense('manual'), isNew: true })}>✎ 手入力で追加</button>
+        <button className="btn" onClick={() => fileRef.current?.click()} disabled={!!ocr}>📷 写真から読む</button>
       </div>
+      <p className="muted">iPhoneのカメラでレシートを写して「テキスト認識表示」→ すべてを選択 → コピーし、貼り付けるのがいちばん正確です。</p>
       <input
         ref={fileRef}
         type="file"

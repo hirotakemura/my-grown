@@ -61,7 +61,7 @@ test('レシートの写真を端末内で読み取り、費目を直して保�
 
 test('iPhoneの文字認識でコピーした文字を貼り付けて読み取れる（品名と金額が別の行でも）', async ({ page }) => {
   await openMoney(page);
-  await page.getByRole('button', { name: /貼り付け（より正確）/ }).click();
+  await page.getByRole('button', { name: 'レシートの文字を貼り付け' }).click();
   const paste = page.getByRole('dialog', { name: 'レシートの文字を貼り付け' });
   await paste.getByLabel('レシートの文字').fill([
     'セブン-イレブン 新宿三丁目店', '2026年9月28日(月) 12:10', '領収書',
