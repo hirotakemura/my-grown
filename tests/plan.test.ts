@@ -126,9 +126,11 @@ describe('マスの色分け', () => {
     expect(dayMark(dayStatus(date, snap({ days: trained.days })))).toBe('none');
   });
 
-  it('休養日はたんぱく質だけで「両方」、足りなければ未達成（筋トレだけ扱いにはしない）', () => {
+  it('休養日はたんぱく質が足りれば「たんぱく質だけ」（両方にはしない）、足りなければ未達成', () => {
     const date = '2026-09-29'; // 火曜＝休養日
-    expect(dayMark(dayStatus(date, snap({ meals: [meal(date, 110)] })))).toBe('both');
+    const st = dayStatus(date, snap({ meals: [meal(date, 110)] }));
+    expect(dayMark(st)).toBe('protein');
+    expect(st.achieved).toBe(true); // 連続記録・達成日数には数える
     expect(dayMark(dayStatus(date, snap({ meals: [meal(date, 50)] })))).toBe('none');
   });
 });

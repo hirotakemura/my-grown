@@ -121,9 +121,11 @@ export interface DayStatus {
 export type DayMark = 'both' | 'protein' | 'training' | 'none';
 
 export function dayMark(s: Pick<DayStatus, 'achieved' | 'proteinOk' | 'trainingOk' | 'menu'>): DayMark {
+  // 休養日は筋トレをしていないので「両方」にはしない（たんぱく質が足りていれば「たんぱく質だけ」）
+  if (s.menu === 'rest') return s.proteinOk ? 'protein' : 'none';
   if (s.achieved) return 'both';
   if (s.proteinOk) return 'protein';
-  if (s.menu !== 'rest' && s.trainingOk) return 'training';
+  if (s.trainingOk) return 'training';
   return 'none';
 }
 

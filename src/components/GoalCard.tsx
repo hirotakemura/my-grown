@@ -80,7 +80,7 @@ export function GoalCard({ progress, settings, today }: { progress: Progress; se
         <span><i style={{ background: 'var(--cell-miss)' }} />未達成</span>
       </div>
       <p className="muted">
-        マスをタップするとその日の内訳が出ます。たんぱく質は目標の9割以上、筋トレは予定セットの8割以上で達成。休養日はたんぱく質だけで「両方達成」。2日続けて未達成で連続記録リセット。
+        マスをタップするとその日の内訳が出ます。たんぱく質は目標の9割以上、筋トレは予定セットの8割以上で達成。休養日はたんぱく質を達成すれば「たんぱく質だけ」の色になり、達成日・連続記録にも数えます。2日続けて未達成で連続記録リセット。
       </p>
       {editing && (
         <Sheet title="期間を変更" onClose={() => setEditing(false)} short>
