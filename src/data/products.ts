@@ -7,6 +7,7 @@ export const VERIFIED = new Set([
   '7-tofu-hamburg', '7-nikuyasai', '7-salmon-saikyo', '7-pork-egg-itame', '7-agedori', '7-niku-soba',
   '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   '7-smoked-nitamago',
+  'l-chicken-stick-yuzu', 'l-tororo-soba',
 ]);
 
 // 数値は一般的な商品の目安（kcal, たんぱく質g, 脂質g, 炭水化物g）。
@@ -36,6 +37,9 @@ const lawson: Row[] = [
   ['l-oden-egg', 'おでん たまご', '卵・乳製品', 80, 6.5, 5.5, 1],
   ['l-oden-atsuage', 'おでん 厚揚げ', '卵・乳製品', 80, 6, 5.5, 1.5],
   ['l-oden-daikon', 'おでん 大根', '汁物・サラダ', 10, 0.4, 0.1, 2.2],
+  // ローソン公式サイトの栄養成分（炭水化物は幅のある表示の中間値）
+  ['l-chicken-stick-yuzu', 'サラダチキンスティック 柚子こしょう（65g）', 'チキン・肉', 83, 10.1, 3.3, 3.4],
+  ['l-tororo-soba', '香りとのど越し 冷しとろろそば', '麺', 323, 18.9, 2.8, 58.2],
 ];
 
 const seven: Row[] = [
@@ -97,6 +101,7 @@ export const ADDED_IN: Record<number, string[]> = {
     '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   ],
   13: ['7-smoked-nitamago'],
+  15: ['l-chicken-stick-yuzu', 'l-tororo-soba'],
 };
 
 // どちらのコンビニでも買えるもの

@@ -96,6 +96,12 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       items: [p('salad-chicken'), p('onigiri-sake'), p('onigiri-ume'), p('miso-soup'), p('boiled-egg')],
     },
     {
+      id: 'wl-tororo',
+      place: 'lawson',
+      title: '冷しとろろそば＋サラダチキンスティック＋ゆで卵',
+      items: [p('l-tororo-soba'), p('l-chicken-stick-yuzu'), p('boiled-egg')],
+    },
+    {
       id: 'wl-2',
       place: 'lawson',
       title: 'ざるそば＋サラダチキン＋ゆで卵＋おにぎり',
