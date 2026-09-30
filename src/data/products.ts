@@ -7,7 +7,7 @@ export const VERIFIED = new Set([
   '7-tofu-hamburg', '7-nikuyasai', '7-salmon-saikyo', '7-pork-egg-itame', '7-agedori', '7-niku-soba',
   '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   '7-smoked-nitamago',
-  'l-chicken-stick-yuzu', 'l-tororo-soba',
+  'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -106,6 +106,7 @@ const lawson: Row[] = [
   ['l-ham-cheese-egg-sand', 'ハムチーズたまごサンド', 'パン', 255, 11.9, 12.8, 23.7],
   ['l-chicken-katsu-sand', 'チキンカツサンド', 'パン', 455, 23, 21.4, 43.4],
   ['l-bran-shokupan', 'NL たんぱく質が摂れるブラン入り食パン（1枚）', 'パン', 104, 7.2, 2.1, 16],
+  ['l-tofu-stick-konbu', '豆腐スティック 旨み昆布（68g）', '卵・乳製品', 102, 11.8, 5.9, 0.6],
 ];
 
 const seven: Row[] = [
@@ -169,6 +170,7 @@ export const ADDED_IN: Record<number, string[]> = {
   13: ['7-smoked-nitamago'],
   15: ['l-chicken-stick-yuzu', 'l-tororo-soba'],
   16: ADDED_LAWSON_V16,
+  17: ['l-tofu-stick-konbu'],
 };
 
 // どちらのコンビニでも買えるもの

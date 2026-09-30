@@ -163,7 +163,7 @@ describe('v4：自炊の商品追加', () => {
   });
 });
 
-it.each([4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
+it.each([4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
   const name = `migrate-v${from}`;
   names.push(name);
   const v4 = new Dexie(name);
@@ -187,6 +187,7 @@ it.each([4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15])('v%i のDBに、それ以降に
   expect(await db.products.get('l-chicken-stick-yuzu')).toMatchObject({ store: 'lawson', kcal: 83, protein: 10.1, estimate: false });
   expect(await db.products.get('l-tororo-soba')).toMatchObject({ store: 'lawson', category: '麺', kcal: 323, protein: 18.9, estimate: false });
   expect(await db.products.get('l-munenikusalad')).toMatchObject({ store: 'lawson', protein: 23.2, estimate: false });
+  expect(await db.products.get('l-tofu-stick-konbu')).toMatchObject({ store: 'lawson', kcal: 102, protein: 11.8, estimate: false });
   expect(await db.products.get('l-oyakodon')).toMatchObject({ store: 'lawson', category: '外食・定食', kcal: 497, estimate: false });
   expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
   db.close();
