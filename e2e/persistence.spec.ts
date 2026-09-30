@@ -92,11 +92,11 @@ test('コンビニの商品から複数選んで記録し、マイセット・�
 
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('button', { name: 'チキン・肉' }).click();
-  await dialog.getByRole('button', { name: /^サラダチキン プレーン 目安/ }).click();
+  await dialog.getByRole('button', { name: /^サラダチキン プレーン（たんぱく質30.3g）/ }).first().click();
   await dialog.getByRole('button', { name: 'おにぎり' }).click();
-  await dialog.getByRole('button', { name: /^おにぎり 鮭 目安/ }).click();
+  await dialog.getByRole('button', { name: /^手巻おにぎり 炙り熟成紅鮭/ }).first().click();
   await dialog.getByRole('button', { name: '1つ増やす' }).click(); // 鮭×2
-  await expect(dialog.getByTestId('picker-total')).toContainText('3品　485kcal・P34 F4.5 C76.5');
+  await expect(dialog.getByTestId('picker-total')).toContainText('3品　489kcal・P39.9 F5.9 C70.4');
 
   await dialog.getByRole('button', { name: 'マイセット保存' }).click();
   await dialog.getByRole('button', { name: '食べた', exact: true }).click();
@@ -112,8 +112,8 @@ test('コンビニの商品から複数選んで記録し、マイセット・�
 
   await page.reload();
 
-  await expect(page.getByTestId('meal-dinner')).toContainText('おにぎり 鮭 ×2');
-  await expect(page.getByTestId('meal-dinner')).toContainText('合計 485kcal・P34 F4.5 C76.5');
+  await expect(page.getByTestId('meal-dinner')).toContainText('手巻おにぎり 炙り熟成紅鮭 ×2');
+  await expect(page.getByTestId('meal-dinner')).toContainText('合計 489kcal・P39.9 F5.9 C70.4');
   await expect(page.getByTestId('meal-lunch').getByRole('button', { name: '⚡ 夜の定番' })).toBeVisible();
   await page.getByRole('button', { name: '設定' }).click();
   await page.getByRole('button', { name: '商品の追加・編集・削除' }).click();

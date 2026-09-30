@@ -34,6 +34,7 @@ const POST_WORKOUT: Suggestion[] = [
   { id: 'post-2', place: 'seven', title: 'ミルクプロテイン＋おにぎり（セブン）', items: [p('savas-milk'), p('7-onigiri-sake')] },
   { id: 'post-3', place: 'lawson', title: 'サラダチキンバー＋おにぎり＋バナナ', items: [p('chicken-bar'), p('onigiri-konbu'), p('banana')] },
   { id: 'post-4', place: 'seven', title: '炭火焼き鳥（塩）2本＋おにぎり', items: [p('7-yakitori', 2), p('7-onigiri-konbu')] },
+  { id: 'post-l-mamaru', place: 'lawson', title: 'まんまる鶏＋塩にぎり', items: [p('l-mamaru-dori'), p('l-shio-nigiri')] },
 ];
 
 /** 平日（出社前：家 or コンビニ） */
@@ -80,6 +81,18 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       place: 'lawson',
       title: 'ゆで卵2個＋ブランパン＋ミルクプロテイン',
       items: [p('boiled-egg', 2), p('bran-bread'), p('savas-milk')],
+    },
+    {
+      id: 'wb-l-nitamago',
+      place: 'lawson',
+      title: '煮たまご2個＋ブラン入り食パン＋のむヨーグルト',
+      items: [p('l-nitamago', 2), p('l-bran-shokupan'), p('l-nomu-yogurt')],
+    },
+    {
+      id: 'wb-l-chicken',
+      place: 'lawson',
+      title: 'サラダチキン ハーブ＋枝豆と塩昆布おにぎり',
+      items: [p('l-salad-chicken-herb'), p('l-onigiri-edamame')],
     },
     {
       id: 'wb-6',
@@ -142,6 +155,36 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       place: 'lawson',
       title: 'からあげクン＋おにぎり＋サラダ＋ゆで卵＋味噌汁',
       items: [p('karaage-kun'), p('onigiri-konbu'), p('salad-nonoil'), p('boiled-egg'), p('miso-soup')],
+    },
+    {
+      id: 'wl-l-munesalad',
+      place: 'lawson',
+      title: '国産鶏むね肉のサラダ＋大きなおにぎり 鮭',
+      items: [p('l-munenikusalad'), p('l-onigiri-big-sake')],
+    },
+    {
+      id: 'wl-l-kakesoba',
+      place: 'lawson',
+      title: 'かけそば＋サラダチキン スモーク＋煮たまご',
+      items: [p('l-kake-soba'), p('l-salad-chicken-smoke'), p('l-nitamago')],
+    },
+    {
+      id: 'wl-l-oyakodon',
+      place: 'lawson',
+      title: '親子丼＋たまご＆ブロッコリー',
+      items: [p('l-oyakodon'), p('l-egg-broccoli')],
+    },
+    {
+      id: 'wl-l-sand',
+      place: 'lawson',
+      title: '照焼チキンたまごサンド＋サラダチキン 梅しそ＋宿六の豚汁',
+      items: [p('l-teriyaki-egg-sand'), p('l-salad-chicken-umeshiso'), p('l-tonjiru-yadoroku')],
+    },
+    {
+      id: 'wl-l-hiyashichuka',
+      place: 'lawson',
+      title: '冷し中華＋サラダチキン スティック＋蒸し鶏のサラダ',
+      items: [p('l-hiyashi-chuka'), p('l-chicken-stick-yuzu'), p('l-mushidori-salad')],
     },
     {
       id: 'sl-3',
@@ -228,6 +271,36 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       place: 'lawson',
       title: 'Lチキ＋サラダチキン＋サラダ＋おにぎり',
       items: [p('l-lchiki'), p('salad-chicken'), p('salad-nonoil'), p('onigiri-konbu')],
+    },
+    {
+      id: 'wd-l-sumibi',
+      place: 'lawson',
+      title: '鶏の炭火焼き3種盛り＋塩にぎり＋和風スープ',
+      items: [p('l-sumibi-3'), p('l-shio-nigiri'), p('l-wafu-soup')],
+    },
+    {
+      id: 'wd-l-sanma',
+      place: 'lawson',
+      title: 'さんまの塩焼＋塩にぎり＋たまご＆ブロッコリー＋宿六の豚汁',
+      items: [p('l-sanma'), p('l-shio-nigiri'), p('l-egg-broccoli'), p('l-tonjiru-yadoroku')],
+    },
+    {
+      id: 'wd-l-hokke',
+      place: 'lawson',
+      title: 'ほっけの塩焼＋砂肝の焼鳥＋おにぎり＋蒸し鶏のサラダ',
+      items: [p('l-hokke'), p('l-sunagimo'), p('onigiri-konbu'), p('l-mushidori-salad')],
+    },
+    {
+      id: 'wd-l-shogayaki',
+      place: 'lawson',
+      title: '豚生姜焼弁当＋蒸し鶏のサラダ',
+      items: [p('l-shogayaki-bento'), p('l-mushidori-salad')],
+    },
+    {
+      id: 'wd-l-pescatore',
+      place: 'lawson',
+      title: '海鮮づくしペスカトーレ＋パリパリチキン',
+      items: [p('l-pescatore'), p('l-paripari-chicken')],
     },
     {
       id: 'sd-2',

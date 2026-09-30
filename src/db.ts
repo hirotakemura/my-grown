@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie';
 import type { CategoryRule, DayRecord, Exercise, Expense, MealItem, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
-import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12 } from './data/products';
+import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12, UPDATED_TO_OFFICIAL_V16 } from './data/products';
 import { DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
 
@@ -134,6 +134,21 @@ export class AppDB extends Dexie {
         const products = tx.table<Product, string>('products');
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[15].includes(p.id) && !have.has(p.id)));
+      });
+    // v16: ローソンの商品を増やし、今ある商品もローソン公式サイトの栄養成分に見直す
+    this.version(16)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[16].includes(p.id) && !have.has(p.id)));
+        for (const id of UPDATED_TO_OFFICIAL_V16) {
+          const seed = SEED_BY_ID.get(id)!;
+          await products.where('id').equals(id).modify((p) => {
+            if (!p.estimate) return; // 自分で書き換えた値は残す
+            Object.assign(p, { name: seed.name, kcal: seed.kcal, protein: seed.protein, fat: seed.fat, carbs: seed.carbs, estimate: false });
+          });
+        }
       });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {

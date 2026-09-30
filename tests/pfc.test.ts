@@ -96,7 +96,7 @@ describe('以前のデータの引き継ぎ', () => {
     v1.close();
 
     const db = new AppDB(name);
-    expect(await db.products.get('salad-chicken')).toMatchObject({ kcal: 113, protein: 25, fat: 1.5, store: 'lawson', favorite: true, useCount: 3 });
+    expect(await db.products.get('salad-chicken')).toMatchObject({ kcal: 113, protein: 25, fat: 2.1, store: 'lawson', favorite: true, useCount: 3 });
     expect(await db.products.get('my-item')).toMatchObject({ fat: 0, carbs: 0, store: 'lawson' });
     expect(await db.products.get('7-salad-chicken')).toMatchObject({ store: 'seven' });
     expect(await db.products.get('eo-grilled-fish')).toMatchObject({ store: 'other' });
@@ -163,7 +163,7 @@ describe('v4：自炊の商品追加', () => {
   });
 });
 
-it.each([4, 5, 6, 7, 8, 10, 11, 12, 13, 14])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
+it.each([4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
   const name = `migrate-v${from}`;
   names.push(name);
   const v4 = new Dexie(name);
@@ -186,6 +186,8 @@ it.each([4, 5, 6, 7, 8, 10, 11, 12, 13, 14])('v%i のDBに、それ以降に追�
   expect(await db.products.get('7-smoked-nitamago')).toMatchObject({ store: 'seven', kcal: 73, protein: 6.3, estimate: false });
   expect(await db.products.get('l-chicken-stick-yuzu')).toMatchObject({ store: 'lawson', kcal: 83, protein: 10.1, estimate: false });
   expect(await db.products.get('l-tororo-soba')).toMatchObject({ store: 'lawson', category: '麺', kcal: 323, protein: 18.9, estimate: false });
+  expect(await db.products.get('l-munenikusalad')).toMatchObject({ store: 'lawson', protein: 23.2, estimate: false });
+  expect(await db.products.get('l-oyakodon')).toMatchObject({ store: 'lawson', category: '外食・定食', kcal: 497, estimate: false });
   expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
   db.close();
 });
@@ -204,6 +206,30 @@ it('v12：焼き鳥・ざるそば・豚汁・ななチキを公式値に更新�
   const db = new AppDB(name);
   expect(await db.products.get('7-yakitori')).toMatchObject({ name: 'セブン 炭火焼き鳥（塩）1本', kcal: 66, protein: 9.6, estimate: false });
   expect(await db.products.get('7-tonjiru')).toMatchObject({ kcal: 170, estimate: false });
+  expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
+  db.close();
+});
+
+it('v16：ローソンの商品を公式値に見直す（自分で書き換えた値は残す）', async () => {
+  const name = 'v15-lawson';
+  names.push(name);
+  const v15 = new Dexie(name);
+  v15.version(15).stores({
+    settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId',
+    expenses: 'id, date', categoryRules: 'name',
+  });
+  await v15.table('products').bulkAdd(SEED_PRODUCTS.filter((p) => !ADDED_IN[16].includes(p.id)).map((p) => {
+    if (p.id === 'salad-chicken') return { ...p, name: 'サラダチキン プレーン', kcal: 115, protein: 24, estimate: true };
+    if (p.id === 'karaage-kun') return { ...p, name: 'からあげクン', kcal: 220, protein: 14, estimate: true };
+    if (p.id === 'zaru-soba') return { ...p, kcal: 300, estimate: false }; // 自分で書き換えた
+    return p;
+  }));
+  v15.close();
+  const db = new AppDB(name);
+  expect(await db.products.get('salad-chicken')).toMatchObject({ name: 'サラダチキン プレーン（たんぱく質30.3g）', kcal: 141, protein: 30.3, estimate: false });
+  expect(await db.products.get('karaage-kun')).toMatchObject({ kcal: 226, protein: 14.4, fat: 15.4, carbs: 7.8, estimate: false });
+  expect(await db.products.get('zaru-soba')).toMatchObject({ kcal: 300, estimate: false });
+  expect(await db.products.get('l-salad-chicken-herb')).toMatchObject({ store: 'lawson', protein: 23.1 });
   expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
   db.close();
 });
