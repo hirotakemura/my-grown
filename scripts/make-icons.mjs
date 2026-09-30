@@ -59,8 +59,8 @@ async function render(size, inset = 1) {
 
 mkdirSync('public/icons', { recursive: true });
 writeFileSync('public/icons/icon-192.png', await render(192));
-writeFileSync('public/icons/icon-512.png', await render(512));
-writeFileSync('public/icons/icon-maskable-512.png', await render(512));
+writeFileSync('public/icons/icon-512.png', await render(512, 0.85));
+writeFileSync('public/icons/icon-maskable-512.png', await render(512, 0.85));
 writeFileSync('public/icons/apple-touch-icon.png', await render(180));
 writeFileSync('public/icons/favicon.png', await render(48));
 await browser.close();
