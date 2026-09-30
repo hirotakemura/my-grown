@@ -20,7 +20,7 @@ async function receiptImage(page: Page): Promise<Buffer> {
       <div>2026年9月29日(火) 12:34</div>
       <div style="display:flex;justify-content:space-between"><span>サラダチキン</span><span>¥228</span></div>
       <div style="display:flex;justify-content:space-between"><span>おにぎり 鮭</span><span>¥160</span></div>
-      <div style="display:flex;justify-content:space-between"><span>緑茶</span><span>¥151</span></div>
+      <div style="display:flex;justify-content:space-between"><span>アイスコーヒー</span><span>¥151</span></div>
       <div style="display:flex;justify-content:space-between"><span>チョコレート</span><span>¥198</span></div>
       <div style="display:flex;justify-content:space-between"><span>合計</span><span>¥737</span></div>
     </body>`);
@@ -57,6 +57,27 @@ test('レシートの写真を端末内で読み取り、費目を直して保�
   await expect(page.getByTestId('money-total')).toHaveText('¥737');
   await expect(page.getByTestId('money-by-category')).toContainText('その他');
   await expect(page.getByTestId('expense-list')).toContainText('ローソン');
+});
+
+test('iPhoneの文字認識でコピーした文字を貼り付けて読み取れる（品名と金額が別の行でも）', async ({ page }) => {
+  await openMoney(page);
+  await page.getByRole('button', { name: /貼り付け（より正確）/ }).click();
+  const paste = page.getByRole('dialog', { name: 'レシートの文字を貼り付け' });
+  await paste.getByLabel('レシートの文字').fill([
+    'セブン-イレブン 新宿三丁目店', '2026年9月28日(月) 12:10', '領収書',
+    'ななチキ', 'サラダ 蒸し鶏と玉子', 'アイスコーヒー M', '合計',
+    '¥220軽', '¥298軽', '¥120軽', '¥638',
+  ].join('\n'));
+  await paste.getByRole('button', { name: 'この文字で読み取る' }).click();
+
+  const sheet = page.getByRole('dialog', { name: 'レシートの内容を確認' });
+  await expect(sheet.getByLabel('お店')).toHaveValue('seven');
+  await expect(sheet.getByLabel('日付')).toHaveValue('2026-09-28');
+  await expect(page.getByTestId('expense-total')).toHaveText('合計 ¥638');
+  await expect(sheet.getByLabel('2行目の品名')).toHaveValue('サラダ 蒸し鶏と玉子');
+  await expect(sheet.getByLabel('3行目の費目')).toHaveValue('drink');
+  await sheet.getByRole('button', { name: 'この内容で保存' }).click();
+  await expect(page.getByTestId('money-total')).toHaveText('¥638');
 });
 
 test('手入力で支出を追加・修正・削除でき、出社日の1日平均が出る', async ({ page }) => {

@@ -8,6 +8,7 @@ import { parseReceipt, rulesMap, sumItems } from '../lib/receipt';
 import { newId } from '../db';
 import { ExpenseEditor, yen } from '../components/ExpenseEditor';
 import { useToast } from '../components/Toast';
+import { PasteReceipt } from '../components/PasteReceipt';
 
 const monthOf = (date: string) => date.slice(0, 7);
 const shiftMonth = (ym: string, n: number) => {
@@ -29,6 +30,7 @@ export function Money({ data }: { data: AppData }) {
   const [month, setMonth] = useState(monthOf(today));
   const [editing, setEditing] = useState<Editing | null>(null);
   const [ocr, setOcr] = useState<{ label: string; ratio: number } | null>(null);
+  const [pasting, setPasting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const rules = useMemo(() => rulesMap(data.categoryRules), [data.categoryRules]);
 
@@ -57,26 +59,30 @@ export function Money({ data }: { data: AppData }) {
     id: newId(), date: today, store: 'other', items: [], source, createdAt: Date.now(),
   });
 
+  /** 読み取った文字から確認画面を開く */
+  const openParsed = (text: string, photoUrl?: string) => {
+    const parsed = parseReceipt(text, rules);
+    if (parsed.items.length === 0) toast('品目を読み取れませんでした。手で入力してください');
+    setEditing({
+      expense: {
+        ...newExpense('receipt'),
+        date: parsed.date ?? today,
+        store: parsed.store,
+        items: parsed.items,
+        receiptTotal: parsed.total,
+      },
+      isNew: true,
+      photoUrl,
+      rawText: text,
+    });
+  };
+
   const onPhoto = async (file: File) => {
     const photoUrl = URL.createObjectURL(file);
     setOcr({ label: '読み取りの準備中…', ratio: 0 });
     try {
       const { readReceipt } = await import('../lib/ocr');
-      const text = await readReceipt(file, (label, ratio) => setOcr({ label, ratio }));
-      const parsed = parseReceipt(text, rules);
-      if (parsed.items.length === 0) toast('品目を読み取れませんでした。手で入力してください');
-      setEditing({
-        expense: {
-          ...newExpense('receipt'),
-          date: parsed.date ?? today,
-          store: parsed.store,
-          items: parsed.items,
-          receiptTotal: parsed.total,
-        },
-        isNew: true,
-        photoUrl,
-        rawText: text,
-      });
+      openParsed(await readReceipt(file, (label, ratio) => setOcr({ label, ratio })), photoUrl);
     } catch (e) {
       console.error(e);
       toast('レシートを読み取れませんでした。手で入力してください');
@@ -132,6 +138,9 @@ export function Money({ data }: { data: AppData }) {
       <div className="btn-grid">
         <button className="btn primary" onClick={() => fileRef.current?.click()} disabled={!!ocr}>📷 レシートを読む</button>
         <button className="btn" onClick={() => setEditing({ expense: newExpense('manual'), isNew: true })}>✎ 手入力で追加</button>
+        <button className="btn span2" onClick={() => setPasting(true)} disabled={!!ocr}>
+          📋 iPhoneで読んだ文字を貼り付け（より正確）
+        </button>
       </div>
       <input
         ref={fileRef}
@@ -172,6 +181,12 @@ export function Money({ data }: { data: AppData }) {
         </div>
       </section>
 
+      {pasting && (
+        <PasteReceipt
+          onClose={() => setPasting(false)}
+          onRead={(text) => { setPasting(false); openParsed(text); }}
+        />
+      )}
       {editing && (
         <ExpenseEditor
           key={editing.expense.id}
