@@ -7,7 +7,7 @@ export const VERIFIED = new Set([
   '7-tofu-hamburg', '7-nikuyasai', '7-salmon-saikyo', '7-pork-egg-itame', '7-agedori', '7-niku-soba',
   '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   '7-smoked-nitamago',
-  'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu',
+  'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -144,6 +144,8 @@ const seven: Row[] = [
   ['7-oden-daikon', 'セブン おでん 味しみ大根', '汁物・サラダ', 8, 0.3, 0.1, 2],
   // 公式の値（item/104613）。表示に「何個当たり」がないが、卵1個分の値なので1個として登録
   ['7-smoked-nitamago', 'セブン 7P 燻製風 半熟煮たまご（1個）', '卵・乳製品', 73, 6.3, 4.6, 1.3],
+  // 商品の表示の値（ユーザーが確認）
+  ['7-goma-mushidori-soba', 'セブン ピリ辛濃厚ごまだれ 冷し蒸し鶏そば', '麺', 630, 27.7, 33.1, 58.3],
 ];
 
 /** 公式値に置き換えた既存の商品（v12で、目安のままの端末だけ更新する） */
@@ -171,6 +173,7 @@ export const ADDED_IN: Record<number, string[]> = {
   15: ['l-chicken-stick-yuzu', 'l-tororo-soba'],
   16: ADDED_LAWSON_V16,
   17: ['l-tofu-stick-konbu'],
+  18: ['7-goma-mushidori-soba'],
 };
 
 // どちらのコンビニでも買えるもの
