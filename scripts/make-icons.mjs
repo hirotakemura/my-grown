@@ -8,7 +8,7 @@ const src = `data:image/png;base64,${readFileSync('assets/icon-source.png').toSt
 const browser = await chromium.launch();
 const page = await browser.newPage();
 
-/** size px の正方形に描く。inset < 1 は Android の丸い切り抜き用に絵を小さくし、周りをぼかした背景で埋める */
+/** size px の正方形に描く。元画像の絵が端に寄っているときは inset < 1 で Android の丸い切り抜き用に絵を小さくし、周りをぼかした背景で埋める */
 async function render(size, inset = 1) {
   const dataUrl = await page.evaluate(async ({ src, size, inset }) => {
     const img = new Image();
@@ -60,7 +60,7 @@ async function render(size, inset = 1) {
 mkdirSync('public/icons', { recursive: true });
 writeFileSync('public/icons/icon-192.png', await render(192));
 writeFileSync('public/icons/icon-512.png', await render(512));
-writeFileSync('public/icons/icon-maskable-512.png', await render(512, 0.8));
+writeFileSync('public/icons/icon-maskable-512.png', await render(512));
 writeFileSync('public/icons/apple-touch-icon.png', await render(180));
 writeFileSync('public/icons/favicon.png', await render(48));
 await browser.close();
