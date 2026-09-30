@@ -11,7 +11,6 @@ import { patchDay } from '../lib/actions';
 import { GoalCard } from '../components/GoalCard';
 import { NextActionCard } from '../components/NextActionCard';
 import { ProgressCard } from '../components/ProgressCard';
-import { WeightCard } from '../components/WeightCard';
 import { MealCard, pickLabel, type MealCardProps } from '../components/MealCard';
 import { WorkoutSection } from '../components/Workout';
 import { ShoppingList } from '../components/ShoppingList';
@@ -92,8 +91,6 @@ export function Today({ data, date, setDate }: Props) {
       </header>
 
       <GoalCard progress={progress} settings={settings} today={today} />
-
-      <WeightCard date={date} days={data.days} />
 
       <NextActionCard
         action={action}

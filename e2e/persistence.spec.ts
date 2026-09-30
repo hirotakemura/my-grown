@@ -27,10 +27,21 @@ function dbGet(page: Page, store: string, key: string) {
   );
 }
 
+const tab = (page: Page, name: string) => page.getByRole('navigation').getByRole('button', { name, exact: true }).click();
+
+/** 体重は「記録」タブで入れる（入れたら「今日」タブに戻る） */
 async function enterWeight(page: Page, value: string) {
+  await tab(page, '記録');
   await page.locator('#weight').fill(value);
   await page.getByTestId('weight-card').getByRole('button', { name: '記録' }).click();
   await expect.poll(() => dbGet(page, 'days', '2026-09-28')).toMatchObject({ weight: Number(value) });
+  await tab(page, '今日');
+}
+
+/** 記録タブの体重欄 */
+async function weightInput(page: Page) {
+  await tab(page, '記録');
+  return page.locator('#weight');
 }
 
 test('記録した食事・体重・セットがリロード後も残る', async ({ page }) => {
@@ -54,11 +65,12 @@ test('記録した食事・体重・セットがリロード後も残る', async
   await page.reload();
 
   await expect(page.getByTestId('meal-lunch').getByText('✓ 食べた')).toBeVisible();
-  await expect(page.locator('#weight')).toHaveValue('71.6');
   const lp2 = page.getByTestId('exercise-leg-press');
   await expect(lp2.getByLabel('レッグプレス 1セット目の重さ')).toHaveValue('60');
   await expect(lp2.getByLabel('レッグプレス 1セット目の回数')).toHaveValue('12');
   await expect(lp2.getByRole('button', { name: '1セット目を完了' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(await weightInput(page)).toHaveValue('71.6');
+  await tab(page, '今日');
 
   // 記録タブにも反映される
   await page.getByRole('navigation').getByRole('button', { name: '記録' }).click();
@@ -198,13 +210,12 @@ test('バックアップを書き出して、別の端末に復元できる', as
   const other = await browser.newContext({ locale: 'ja-JP', timezoneId: 'Asia/Tokyo', baseURL: 'http://localhost:4173/my-grown/' });
   const p2 = await other.newPage();
   await openApp(p2);
-  await expect(p2.locator('#weight')).toHaveValue('');
+  await expect(await weightInput(p2)).toHaveValue('');
   await p2.getByRole('button', { name: '設定' }).click();
   await p2.getByTestId('restore-input').setInputFiles(path);
-  await p2.getByRole('button', { name: '今日', exact: true }).click();
-  await expect(p2.locator('#weight')).toHaveValue('70.9');
+  await expect(await weightInput(p2)).toHaveValue('70.9');
   await p2.reload();
-  await expect(p2.locator('#weight')).toHaveValue('70.9');
+  await expect(await weightInput(p2)).toHaveValue('70.9');
   await other.close();
 });
 
@@ -219,7 +230,7 @@ test('オフラインでも起動でき、データも読める', async ({ page,
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByTestId('current-date')).toContainText('9/28(月)');
-  await expect(page.locator('#weight')).toHaveValue('71.2');
+  await expect(await weightInput(page)).toHaveValue('71.2');
   await context.setOffline(false);
 });
 

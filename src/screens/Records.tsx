@@ -92,7 +92,7 @@ export function Records({ data }: { data: AppData }) {
         <p className="muted">P＝たんぱく質・F＝脂質・C＝炭水化物（g）。今日の画面で日付を切り替えると、その日の食事の中身が見られます。</p>
       </section>
 
-      <WeightCard date={today} days={data.days} inputId="weight-records" />
+      <WeightCard date={today} days={data.days} />
 
       <section className="card">
         <div className="card-head">
