@@ -13,8 +13,8 @@ export default defineConfig(({ command, isPreview }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon.png'],
       manifest: {
-        name: '筋トレ＆食事管理',
-        short_name: 'マイグロウン',
+        name: 'Thrive 筋トレ＆食事管理',
+        short_name: 'Thrive',
         description: '11月末までに引き締めるための、筋トレと食事の記録アプリ',
         lang: 'ja',
         start_url: '.',

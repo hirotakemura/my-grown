@@ -1,4 +1,4 @@
-# 筋トレ＆食事管理（my-grown）
+# Thrive 筋トレ＆食事管理（my-grown）
 
 11月末までに体を引き締めるための、スマホ向けの筋トレ＆食事記録アプリ。
 Vite + React + TypeScript の静的サイトで、データは端末の IndexedDB（Dexie.js）に保存します。PWA なので iPhone のホーム画面に追加してオフラインでも使えます。
