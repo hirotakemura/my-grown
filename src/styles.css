@@ -197,8 +197,8 @@ textarea.input { height: auto; min-height: 44px; resize: vertical; font-size: 16
 .ex-card:first-of-type { border-top: none; padding-top: 0; }
 .ex-name { font-weight: 700; font-size: 16px; }
 .suggest { font-size: 13px; font-weight: 700; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
-/* 画面の中の小さなアイコン（白い角丸のタイル） */
-.ui-icon { width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0; box-shadow: 0 0 0 1px var(--border); vertical-align: middle; }
+/* 画面の中の小さなアイコン（背景は透明） */
+.ui-icon { width: 28px; height: 28px; flex-shrink: 0; vertical-align: middle; }
 .suggest.up { color: var(--accent); }
 .set-row { display: grid; grid-template-columns: 28px 1fr 1fr 52px; gap: 6px; align-items: center; }
 .set-row .idx { color: var(--muted); font-size: 14px; text-align: center; }
