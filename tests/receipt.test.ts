@@ -121,6 +121,14 @@ describe('レシートの読み取り', () => {
     expect(r.total).toBe(539);
   });
 
+  it('品名がまとめて並び、そのあと¥なしの金額が並んでも対応させる（品名の末尾の数字やバーコードに惑わされない）', () => {
+    expect(parseReceipt('商品１\n商品２\n商品３\n500\n200\n100').items.map((i) => [i.name, i.price]))
+      .toEqual([['商品1', 500], ['商品2', 200], ['商品3', 100]]);
+    const withJan = parseReceipt('サラダチキン\n4901234567890\nおにぎり 鮭\n4909876543210\nお茶\n¥500\n¥200\n¥100\n合計\n¥800');
+    expect(withJan.items.map((i) => [i.name, i.price])).toEqual([['サラダチキン', 500], ['おにぎり 鮭', 200], ['お茶', 100]]);
+    expect(withJan.total).toBe(800);
+  });
+
   it('住所・電話番号・品名の中の数字（525ml）を金額と間違えない', () => {
     const r = parseReceipt('東京都新宿区新宿3-2-1\n電話:03-1234-5678\nお~いお茶 525ml\n合計 ¥151');
     expect(r.items).toEqual([]);

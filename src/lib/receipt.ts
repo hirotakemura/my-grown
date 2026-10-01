@@ -176,16 +176,16 @@ export function parseReceipt(text: string, rules?: Map<string, ExpenseCategory>)
     if (INFO_LINE.test(line) || detectDate(line)) continue;
     const hit = splitPrice(line);
     if (hit && !hit.name) {
-      // 金額だけの行
+      // 金額だけの行。8桁以上（バーコード・JANコードなど）は金額ではない
+      if ((line.match(/\d/g) ?? []).length >= 8) continue;
       if (hit.yen || Math.abs(hit.price) >= 10) prices.push(hit.price);
       continue;
     }
     flush();
-    if (hit && /\p{L}/u.test(hit.name)) {
-      // ¥が無い小さな数（「M 2」など）は金額とみなさない
-      if (!hit.yen && Math.abs(hit.price) < 10) continue;
+    if (hit && /\p{L}/u.test(hit.name) && (hit.yen || Math.abs(hit.price) >= 10)) {
       add(hit.name, hit.price);
-    } else if (/\p{L}/u.test(line) && !hit) {
+    } else if (/\p{L}/u.test(line)) {
+      // 金額のない行、または¥の無い小さな数で終わる行（「商品1」「M 2」など）は品名として扱う
       names.push(line);
     }
   }
