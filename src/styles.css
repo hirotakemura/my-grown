@@ -125,7 +125,10 @@ h1, h2, h3, p { margin: 0; }
 .seg button {
   flex: 1; min-height: 40px; border: none; border-radius: 8px; background: transparent;
   font-weight: 600; font-size: 14px; cursor: pointer; color: var(--text-2);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
+.seg button .ui-icon { opacity: 0.55; }
+.seg button[aria-pressed='true'] .ui-icon { opacity: 1; }
 .seg button[aria-pressed='true'] { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
 .seg.tall button { min-height: 44px; }
 
@@ -193,7 +196,9 @@ textarea.input { height: auto; min-height: 44px; resize: vertical; font-size: 16
 .ex-card { border-top: 1px solid var(--border); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
 .ex-card:first-of-type { border-top: none; padding-top: 0; }
 .ex-name { font-weight: 700; font-size: 16px; }
-.suggest { font-size: 13px; font-weight: 700; color: var(--text-2); }
+.suggest { font-size: 13px; font-weight: 700; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+/* 画面の中の小さなアイコン（白い角丸のタイル） */
+.ui-icon { width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0; box-shadow: 0 0 0 1px var(--border); vertical-align: middle; }
 .suggest.up { color: var(--accent); }
 .set-row { display: grid; grid-template-columns: 28px 1fr 1fr 52px; gap: 6px; align-items: center; }
 .set-row .idx { color: var(--muted); font-size: 14px; text-align: center; }

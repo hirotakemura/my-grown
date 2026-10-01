@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import dayWorkIcon from '../assets/ui/day-work.png';
+import dayOffIcon from '../assets/ui/day-off.png';
 import type { AppData } from '../hooks';
 import { useNow } from '../hooks';
 import type { MealItem, MealSlot } from '../types';
@@ -84,7 +86,8 @@ export function Today({ data, date, setDate }: Props) {
               aria-pressed={status.kind === k}
               onClick={() => patchDay(date, { kind: k === auto ? undefined : k })}
             >
-              {k === 'work' ? '🏢 出社日（コンビニ）' : '🏠 休日（自炊）'}
+              <img className="ui-icon" src={k === 'work' ? dayWorkIcon : dayOffIcon} alt="" />
+              {k === 'work' ? '出社日（コンビニ）' : '休日（自炊）'}
             </button>
           ))}
         </div>

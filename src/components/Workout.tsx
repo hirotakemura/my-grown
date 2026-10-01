@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import weightUpIcon from '../assets/ui/weight-up.png';
 import type { DayRecord, Exercise, Settings, WorkoutMenu, WorkoutSet } from '../types';
 import { gymTimeOf, menuExerciseIds } from '../lib/plan';
 import { lastSession, isPersonalBest, suggestWeight } from '../lib/progression';
@@ -133,7 +134,10 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
           前回 {formatMD(last.date)}：{last.sets.map((s) => `${s.weight}kg×${s.reps}`).join(' / ')}
         </div>
       ) : null}
-      <div className={`suggest ${sug.increase ? 'up' : ''}`}>{sug.increase ? '⬆ ' : ''}{sug.text}</div>
+      <div className={`suggest ${sug.increase ? 'up' : ''}`}>
+        {sug.increase && <img className="ui-icon" src={weightUpIcon} alt="" />}
+        {sug.text}
+      </div>
       <details>
         <summary>やり方</summary>
         <p className="sub">{ex.howTo}</p>
