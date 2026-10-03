@@ -264,7 +264,7 @@ function ExerciseEditor({ exercise, all, onClose, onCreated }: { exercise?: Exer
   const [increment, setIncrement] = useState(String(exercise?.increment ?? 5));
   const [howTo, setHowTo] = useState(exercise?.howTo ?? '');
   const [altId, setAltId] = useState(exercise?.altId ?? '');
-  const valid = name.trim() !== '' && Number(repMin) > 0 && Number(repMax) >= Number(repMin) && Number(sets) > 0;
+  const valid = name.trim() !== '' && Number(repMin) > 0 && Number(repMax) >= Number(repMin) && Number(sets) > 0 && Number(increment) > 0;
 
   const save = async () => {
     if (!valid) return;
@@ -295,12 +295,11 @@ function ExerciseEditor({ exercise, all, onClose, onCreated }: { exercise?: Exer
         <label className="field"><span>回数（下限）</span><input className="input" type="number" inputMode="numeric" value={repMin} onChange={(e) => setRepMin(e.target.value)} /></label>
         <label className="field"><span>回数（上限）</span><input className="input" type="number" inputMode="numeric" value={repMax} onChange={(e) => setRepMax(e.target.value)} /></label>
         <label className="field"><span>セット数</span><input className="input" type="number" inputMode="numeric" value={sets} onChange={(e) => setSets(e.target.value)} /></label>
-        <label className="field"><span>増やす重さ</span>
-          <select className="input" value={increment} onChange={(e) => setIncrement(e.target.value)}>
-            <option value="2.5">+2.5kg（小さい種目）</option>
-            <option value="5">+5kg</option>
-            <option value="1">+1kg</option>
-          </select>
+        <label className="field"><span>マシンの1段階（kg）</span>
+          <div className="unit-input">
+            <input className="input" type="number" inputMode="decimal" step="any" value={increment} onChange={(e) => setIncrement(e.target.value)} />
+            <em>kg</em>
+          </div>
         </label>
       </div>
       <label className="field"><span>やり方（シートの合わせ方と動かし方）</span>

@@ -347,3 +347,7 @@ input[type='time'].input::-webkit-date-and-time-value {
   text-align: left;
   margin: 0;
 }
+
+/* マシンの1段階の重さ */
+.step-btn { align-self: flex-start; color: var(--muted); font-weight: 600; padding: 0 4px; min-height: 36px; }
+.step-edit { display: flex; flex-direction: column; gap: 8px; background: var(--card-2); border-radius: 10px; padding: 10px; }

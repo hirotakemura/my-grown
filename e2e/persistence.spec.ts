@@ -241,3 +241,15 @@ test('manifest がホーム画面追加に必要な内容を持っている', as
   expect(m).toMatchObject({ display: 'standalone', lang: 'ja' });
   expect(m.icons.map((i: { sizes: string }) => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
 });
+
+test('筋トレ画面でマシンの1段階の重さを変えると、次の提案に使われ、リロード後も残る', async ({ page }) => {
+  await openApp(page);
+  const card = page.getByTestId('exercise-leg-press');
+  await card.getByRole('button', { name: /マシンの1段階：5kg/ }).click();
+  await card.getByRole('button', { name: '4kg', exact: true }).click();
+  await card.getByRole('button', { name: '保存', exact: true }).click();
+  await expect(card.getByRole('button', { name: /マシンの1段階：4kg/ })).toBeVisible();
+  await expect.poll(() => dbGet(page, 'exercises', 'leg-press')).toMatchObject({ increment: 4 });
+  await page.reload();
+  await expect(page.getByTestId('exercise-leg-press').getByRole('button', { name: /マシンの1段階：4kg/ })).toBeVisible();
+});

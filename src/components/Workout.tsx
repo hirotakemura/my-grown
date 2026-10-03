@@ -7,6 +7,7 @@ import { patchDay, saveSet, setId } from '../lib/actions';
 import { formatMD } from '../lib/date';
 import { useRestTimer } from './RestTimer';
 import { useToast } from './Toast';
+import { db } from '../db';
 
 interface Props {
   date: string;
@@ -95,6 +96,55 @@ interface CardProps {
   plannedSets: number;
 }
 
+/** マシンごとに違う「1段階の重さ」（例：レッグエクステンションは32kgの次が36kg）をその場で変える */
+function StepEditor({ ex }: { ex: Exercise }) {
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(String(ex.increment));
+  const valid = Number(value) > 0;
+
+  const save = async () => {
+    if (!valid) return;
+    await db.exercises.update(ex.id, { increment: Number(value) });
+    toast(`${ex.name}：1段階 ${Number(value)}kg にしました`);
+    setOpen(false);
+  };
+
+  if (!open) {
+    return (
+      <button className="btn small ghost step-btn" onClick={() => { setValue(String(ex.increment)); setOpen(true); }}>
+        マシンの1段階：{ex.increment}kg ✎
+      </button>
+    );
+  }
+  return (
+    <div className="step-edit">
+      <div className="sub">このマシンで1段階重くすると何kg増えるか</div>
+      <div className="ex-chips">
+        {[1, 2, 2.5, 4, 5].map((n) => (
+          <button key={n} className="ex-chip" aria-pressed={Number(value) === n} onClick={() => setValue(String(n))}>{n}kg</button>
+        ))}
+      </div>
+      <div className="row">
+        <div className="unit-input grow">
+          <input
+            className="input"
+            type="number"
+            inputMode="decimal"
+            step="any"
+            value={value}
+            aria-label={`${ex.name}の1段階の重さ`}
+            onChange={(e) => setValue(e.target.value)}
+          />
+          <em>kg</em>
+        </div>
+        <button className="btn small" onClick={() => setOpen(false)}>やめる</button>
+        <button className="btn small primary" disabled={!valid} onClick={save}>保存</button>
+      </div>
+    </div>
+  );
+}
+
 function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedSets }: CardProps) {
   const toast = useToast();
   const timer = useRestTimer();
@@ -138,6 +188,7 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
         {sug.increase && <img className="ui-icon" src={weightUpIcon} alt="" />}
         {sug.text}
       </div>
+      <StepEditor ex={ex} />
       <details>
         <summary>やり方</summary>
         <p className="sub">{ex.howTo}</p>

@@ -182,6 +182,14 @@ export class AppDB extends Dexie {
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[20].includes(p.id) && !have.has(p.id)));
       });
+    // v21: レッグエクステンションのマシンは1段階4kg（32kgの次が36kg）。自分で変えていなければ合わせる
+    this.version(21)
+      .stores({})
+      .upgrade(async (tx) => {
+        await tx.table<Exercise, string>('exercises').where('id').equals('leg-extension').modify((e) => {
+          if (e.increment === 5) e.increment = 4;
+        });
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());
