@@ -13,7 +13,17 @@ const done = (weight: number, reps: number, index: number): WorkoutSet => ({
   id: `d|leg-extension|${index}`, date: '2026-10-01', exerciseId: 'leg-extension', index, weight, reps, done: true,
 });
 
-describe('マシンの1段階の重さ', () => {
+describe('マシンの次の重さ', () => {
+  it('重さごとに覚えた「次の重さ」を使う（41→45、45→50。幅が一定でなくてよい）', () => {
+    const base = SEED_EXERCISES.find((e) => e.id === 'leg-extension')!;
+    const ex = { ...base, increment: 4, nextWeights: { '41': 45, '45': 50 } };
+    const at = (w: number) => ({ date: '2026-10-01', sets: [done(w, 15, 0), done(w, 15, 1), done(w, 15, 2)] });
+    expect(suggestWeight(ex, at(41))).toMatchObject({ weight: 45, increase: true, text: '今日は+4kg（45kg）', from: 41, known: true });
+    expect(suggestWeight(ex, at(45))).toMatchObject({ weight: 50, text: '今日は+5kg（50kg）', known: true });
+    // 覚えていない重さは目安の幅で
+    expect(suggestWeight(ex, at(50))).toMatchObject({ weight: 54, text: '今日は+4kg（54kg）', known: false });
+  });
+
   it('上限回数に届いたら、そのマシンの1段階分だけ重くする（32kg → 36kg）', () => {
     const ex = { ...SEED_EXERCISES.find((e) => e.id === 'leg-extension')!, increment: 4 };
     const sug = suggestWeight(ex, { date: '2026-10-01', sets: [done(32, 15, 0), done(32, 15, 1), done(32, 15, 2)] });

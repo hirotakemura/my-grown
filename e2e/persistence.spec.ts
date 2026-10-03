@@ -242,14 +242,42 @@ test('manifest がホーム画面追加に必要な内容を持っている', as
   expect(m.icons.map((i: { sizes: string }) => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
 });
 
-test('筋トレ画面でマシンの1段階の重さを変えると、次の提案に使われ、リロード後も残る', async ({ page }) => {
+/** IndexedDB に直接書く（前回の記録を用意するため） */
+function dbPut(page: Page, store: string, rows: unknown[]) {
+  return page.evaluate(
+    ([store, rows]) =>
+      new Promise<void>((resolve, reject) => {
+        const req = indexedDB.open('my-grown');
+        req.onerror = () => reject(req.error);
+        req.onsuccess = () => {
+          const tx = req.result.transaction(store as string, 'readwrite');
+          for (const r of rows as unknown[]) tx.objectStore(store as string).put(r);
+          tx.oncomplete = () => { req.result.close(); resolve(); };
+        };
+      }),
+    [store, rows] as const,
+  );
+}
+
+test('筋トレ：マシンの「次の重さ」を重さごとに覚えて提案し、今日のセットの重さも変わる', async ({ page }) => {
   await openApp(page);
-  const card = page.getByTestId('exercise-leg-press');
-  await card.getByRole('button', { name: /マシンの1段階：5kg/ }).click();
-  await card.getByRole('button', { name: '4kg', exact: true }).click();
-  await card.getByRole('button', { name: '保存', exact: true }).click();
-  await expect(card.getByRole('button', { name: /マシンの1段階：4kg/ })).toBeVisible();
-  await expect.poll(() => dbGet(page, 'exercises', 'leg-press')).toMatchObject({ increment: 4 });
+  // 前回（9/25）レッグプレス 41kg で全セット上限回数
+  await dbPut(page, 'workoutSets', [0, 1, 2].map((i) => ({
+    id: `2026-09-25|leg-press|${i}`, date: '2026-09-25', exerciseId: 'leg-press', index: i, weight: 41, reps: 12, done: true,
+  })));
   await page.reload();
-  await expect(page.getByTestId('exercise-leg-press').getByRole('button', { name: /マシンの1段階：4kg/ })).toBeVisible();
+  const card = page.getByTestId('exercise-leg-press');
+  await expect(card).toContainText('今日は+5kg（46kg）'); // まだ覚えていないので目安の幅
+  await expect(card.getByLabel('レッグプレス 1セット目の重さ')).toHaveValue('46');
+
+  await card.getByRole('button', { name: /マシンの次の重さが違うときは/ }).click();
+  await card.getByRole('button', { name: '45kg', exact: true }).click();
+  await card.getByRole('button', { name: '保存', exact: true }).click();
+  await expect(card).toContainText('今日は+4kg（45kg）');
+  await expect(card.getByRole('button', { name: '41kgの次は45kg ✎' })).toBeVisible();
+  await expect(card.getByLabel('レッグプレス 1セット目の重さ')).toHaveValue('45');
+  await expect.poll(() => dbGet(page, 'exercises', 'leg-press')).toMatchObject({ nextWeights: { '41': 45 } });
+
+  await page.reload();
+  await expect(page.getByTestId('exercise-leg-press')).toContainText('今日は+4kg（45kg）');
 });

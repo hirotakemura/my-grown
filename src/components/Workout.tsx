@@ -96,32 +96,36 @@ interface CardProps {
   plannedSets: number;
 }
 
-/** マシンごとに違う「1段階の重さ」（例：レッグエクステンションは32kgの次が36kg）をその場で変える */
-function StepEditor({ ex }: { ex: Exercise }) {
+/**
+ * マシンの「この重さの次」の重さを覚える。1段階の幅はマシンによって違い、同じマシンでも一定ではない
+ * （例：41kgの次は45kg、45kgの次は50kg）ので、重さごとにその場で直せるようにする。
+ */
+function NextWeightEditor({ ex, from, weight, known }: { ex: Exercise; from: number; weight: number; known: boolean }) {
   const toast = useToast();
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(String(ex.increment));
-  const valid = Number(value) > 0;
+  const [value, setValue] = useState(String(weight));
+  const valid = Number(value) > from;
+  const quick = [...new Set([2, 2.5, 4, 5].map((d) => Math.round((from + d) * 100) / 100))];
 
   const save = async () => {
     if (!valid) return;
-    await db.exercises.update(ex.id, { increment: Number(value) });
-    toast(`${ex.name}：1段階 ${Number(value)}kg にしました`);
+    await db.exercises.update(ex.id, { nextWeights: { ...ex.nextWeights, [String(from)]: Number(value) } });
+    toast(`${ex.name}：${from}kgの次は${Number(value)}kg と覚えました`);
     setOpen(false);
   };
 
   if (!open) {
     return (
-      <button className="btn small ghost step-btn" onClick={() => { setValue(String(ex.increment)); setOpen(true); }}>
-        マシンの1段階：{ex.increment}kg ✎
+      <button className="btn small ghost step-btn" onClick={() => { setValue(String(weight)); setOpen(true); }}>
+        {known ? `${from}kgの次は${weight}kg ✎` : `マシンの次の重さが違うときは ✎（${from}kgの次）`}
       </button>
     );
   }
   return (
     <div className="step-edit">
-      <div className="sub">このマシンで1段階重くすると何kg増えるか</div>
+      <div className="sub">このマシンで {from}kg の次の重さ</div>
       <div className="ex-chips">
-        {[1, 2, 2.5, 4, 5].map((n) => (
+        {quick.map((n) => (
           <button key={n} className="ex-chip" aria-pressed={Number(value) === n} onClick={() => setValue(String(n))}>{n}kg</button>
         ))}
       </div>
@@ -133,7 +137,7 @@ function StepEditor({ ex }: { ex: Exercise }) {
             inputMode="decimal"
             step="any"
             value={value}
-            aria-label={`${ex.name}の1段階の重さ`}
+            aria-label={`${ex.name}の${from}kgの次の重さ`}
             onChange={(e) => setValue(e.target.value)}
           />
           <em>kg</em>
@@ -188,7 +192,9 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
         {sug.increase && <img className="ui-icon" src={weightUpIcon} alt="" />}
         {sug.text}
       </div>
-      <StepEditor ex={ex} />
+      {sug.increase && sug.from != null && sug.weight != null && (
+        <NextWeightEditor key={`${ex.id}-${sug.from}`} ex={ex} from={sug.from} weight={sug.weight} known={!!sug.known} />
+      )}
       <details>
         <summary>やり方</summary>
         <p className="sub">{ex.howTo}</p>
@@ -233,6 +239,15 @@ function SetRow({ date, exercise, index, stored, defaultWeight, onDone }: RowPro
   const [weight, setWeight] = useState(stored?.weight != null ? String(stored.weight) : defaultWeight != null ? String(defaultWeight) : '');
   const [reps, setReps] = useState(stored?.reps != null ? String(stored.reps) : '');
   const repsRef = useRef<HTMLInputElement>(null);
+  // まだ記録していないセットは、提案の重さが変わったら（「次の重さ」を直したとき）入れ直す
+  const prevDefault = useRef(defaultWeight);
+  useEffect(() => {
+    if (prevDefault.current === defaultWeight) return;
+    if (!stored && weight === (prevDefault.current != null ? String(prevDefault.current) : '')) {
+      setWeight(defaultWeight != null ? String(defaultWeight) : '');
+    }
+    prevDefault.current = defaultWeight;
+  }, [defaultWeight, stored, weight]);
   const done = stored?.done ?? false;
 
   // 前のセットの重さが決まったら、まだ触っていない行に引き継ぐ

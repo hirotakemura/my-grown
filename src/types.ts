@@ -110,7 +110,9 @@ export interface Exercise {
   name: string;
   repMin: number;
   repMax: number;
-  increment: number; // 前回上限回数に届いたら増やす重さ（kg）
+  increment: number; // 次の重さがわからないときに増やす重さ（kg・目安）
+  /** マシンの「この重さの次」の重さ。マシンによって1段階の幅が違う（41→45→50）ので重さごとに覚える */
+  nextWeights?: Record<string, number>;
   howTo: string;
   altId?: string;
   sets: number;

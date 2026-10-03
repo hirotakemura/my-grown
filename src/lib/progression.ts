@@ -27,6 +27,16 @@ export interface WeightSuggestion {
   weight: number | null;
   increase: boolean;
   text: string;
+  /** 重くするとき：前回の重さと、次の重さがマシンに合わせて覚えた値かどうか */
+  from?: number;
+  known?: boolean;
+}
+
+/** マシンで「この重さの次」の重さ。覚えていなければ目安の幅だけ足す */
+export function nextWeightOf(ex: Exercise, top: number): { weight: number; known: boolean } {
+  const known = ex.nextWeights?.[String(top)];
+  if (known != null && known > top) return { weight: known, known: true };
+  return { weight: round(top + ex.increment), known: false };
 }
 
 export function suggestWeight(ex: Exercise, last: Session | undefined): WeightSuggestion {
@@ -36,8 +46,8 @@ export function suggestWeight(ex: Exercise, last: Session | undefined): WeightSu
   const top = Math.max(...last.sets.map((s) => s.weight ?? 0));
   const allHit = last.sets.length >= ex.sets && last.sets.every((s) => (s.reps ?? 0) >= ex.repMax);
   if (allHit) {
-    const w = round(top + ex.increment);
-    return { weight: w, increase: true, text: `今日は+${ex.increment}kg（${w}kg）` };
+    const { weight: w, known } = nextWeightOf(ex, top);
+    return { weight: w, increase: true, text: `今日は+${round(w - top)}kg（${w}kg）`, from: top, known };
   }
   return { weight: top, increase: false, text: `前回と同じ${top}kgで、全セット${ex.repMax}回を目指す` };
 }
