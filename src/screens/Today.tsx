@@ -87,7 +87,7 @@ export function Today({ data, date, setDate }: Props) {
               onClick={() => patchDay(date, { kind: k === auto ? undefined : k })}
             >
               <img className="ui-icon" src={k === 'work' ? dayWorkIcon : dayOffIcon} alt="" />
-              {k === 'work' ? '出社日（コンビニ）' : '休日（自炊）'}
+              {k === 'work' ? '出社日' : '休日'}
             </button>
           ))}
         </div>
