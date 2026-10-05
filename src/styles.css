@@ -348,6 +348,27 @@ input[type='time'].input::-webkit-date-and-time-value {
   margin: 0;
 }
 
-/* マシンの1段階の重さ */
-.step-btn { align-self: flex-start; color: var(--muted); font-weight: 600; padding: 0 4px; min-height: 36px; }
-.step-edit { display: flex; flex-direction: column; gap: 8px; background: var(--card-2); border-radius: 10px; padding: 10px; }
+/* 重くする日の提案（前回 → 今日の重さをその場で直す） */
+.next-weight {
+  display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 4px 10px;
+  background: var(--accent-soft); border-radius: 14px; padding: 10px 12px;
+}
+.nw-label { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.nw-title { font-size: 14px; font-weight: 800; color: var(--accent); white-space: nowrap; }
+.nw-from { font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nw-stepper { display: flex; align-items: center; gap: 4px; background: var(--card); border-radius: 999px; padding: 3px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); }
+.nw-stepper button {
+  width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--card-2);
+  font-size: 20px; font-weight: 700; line-height: 1; color: var(--text); cursor: pointer;
+}
+.nw-stepper button:disabled { opacity: 0.35; }
+.nw-value { display: flex; align-items: baseline; gap: 1px; }
+.nw-value input {
+  width: 2.8em; border: none; background: transparent; text-align: right; color: var(--text);
+  font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; padding: 0; appearance: none; -moz-appearance: textfield;
+}
+.nw-value input::-webkit-inner-spin-button, .nw-value input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.nw-value input:focus { outline: none; }
+.nw-value em { font-style: normal; font-size: 12px; color: var(--muted); padding-right: 4px; }
+.nw-hint { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+.nw-hint.known { color: var(--accent); }

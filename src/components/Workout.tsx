@@ -97,53 +97,48 @@ interface CardProps {
 }
 
 /**
- * マシンの「この重さの次」の重さを覚える。1段階の幅はマシンによって違い、同じマシンでも一定ではない
- * （例：41kgの次は45kg、45kgの次は50kg）ので、重さごとにその場で直せるようにする。
+ * 重くする日の提案。「前回 41kg → 今日 [− 45kg ＋]」をその場で直すと、
+ * マシンの「この重さの次」の重さとして覚える（1段階の幅はマシンごと・重さごとに違う：41→45→50）。
  */
-function NextWeightEditor({ ex, from, weight, known }: { ex: Exercise; from: number; weight: number; known: boolean }) {
-  const toast = useToast();
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(String(weight));
-  const valid = Number(value) > from;
-  const quick = [...new Set([2, 2.5, 4, 5].map((d) => Math.round((from + d) * 100) / 100))];
+function NextWeight({ ex, from, weight, known }: { ex: Exercise; from: number; weight: number; known: boolean }) {
+  const [text, setText] = useState(String(weight));
+  useEffect(() => setText(String(weight)), [weight]);
 
-  const save = async () => {
-    if (!valid) return;
-    await db.exercises.update(ex.id, { nextWeights: { ...ex.nextWeights, [String(from)]: Number(value) } });
-    toast(`${ex.name}：${from}kgの次は${Number(value)}kg と覚えました`);
-    setOpen(false);
+  const save = async (n: number) => {
+    const w = Math.round(n * 100) / 100;
+    if (!(w > from)) { setText(String(weight)); return; }
+    setText(String(w));
+    if (w === weight && known) return;
+    await db.exercises.update(ex.id, { nextWeights: { ...ex.nextWeights, [String(from)]: w } });
   };
+  const current = Number(text) || weight;
 
-  if (!open) {
-    return (
-      <button className="btn small ghost step-btn" onClick={() => { setValue(String(weight)); setOpen(true); }}>
-        {known ? `${from}kgの次は${weight}kg ✎` : `マシンの次の重さが違うときは ✎（${from}kgの次）`}
-      </button>
-    );
-  }
   return (
-    <div className="step-edit">
-      <div className="sub">このマシンで {from}kg の次の重さ</div>
-      <div className="ex-chips">
-        {quick.map((n) => (
-          <button key={n} className="ex-chip" aria-pressed={Number(value) === n} onClick={() => setValue(String(n))}>{n}kg</button>
-        ))}
+    <div className="next-weight" data-testid={`next-weight-${ex.id}`}>
+      <img className="ui-icon" src={weightUpIcon} alt="" />
+      <div className="nw-label">
+        <span className="nw-title">重さアップ</span>
+        <span className="nw-from">前回 {from}kg →</span>
       </div>
-      <div className="row">
-        <div className="unit-input grow">
+      <div className="nw-stepper">
+        <button aria-label={`${ex.name}の今日の重さを1kg下げる`} disabled={current - 1 <= from} onClick={() => void save(current - 1)}>−</button>
+        <label className="nw-value">
           <input
-            className="input"
             type="number"
             inputMode="decimal"
             step="any"
-            value={value}
+            value={text}
             aria-label={`${ex.name}の${from}kgの次の重さ`}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => setText(e.target.value)}
+            onBlur={() => void save(Number(text))}
+            onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
           />
           <em>kg</em>
-        </div>
-        <button className="btn small" onClick={() => setOpen(false)}>やめる</button>
-        <button className="btn small primary" disabled={!valid} onClick={save}>保存</button>
+        </label>
+        <button aria-label={`${ex.name}の今日の重さを1kg上げる`} onClick={() => void save(current + 1)}>＋</button>
+      </div>
+      <div className={`nw-hint ${known ? 'known' : ''}`}>
+        {known ? `✓ このマシンは ${from}kg の次が ${weight}kg` : 'マシンの次の重さに合わせて −＋ で直すと覚えます'}
       </div>
     </div>
   );
@@ -188,12 +183,10 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
           前回 {formatMD(last.date)}：{last.sets.map((s) => `${s.weight}kg×${s.reps}`).join(' / ')}
         </div>
       ) : null}
-      <div className={`suggest ${sug.increase ? 'up' : ''}`}>
-        {sug.increase && <img className="ui-icon" src={weightUpIcon} alt="" />}
-        {sug.text}
-      </div>
-      {sug.increase && sug.from != null && sug.weight != null && (
-        <NextWeightEditor key={`${ex.id}-${sug.from}`} ex={ex} from={sug.from} weight={sug.weight} known={!!sug.known} />
+      {sug.increase && sug.from != null && sug.weight != null ? (
+        <NextWeight key={`${ex.id}-${sug.from}`} ex={ex} from={sug.from} weight={sug.weight} known={!!sug.known} />
+      ) : (
+        <div className="suggest">{sug.text}</div>
       )}
       <details>
         <summary>やり方</summary>

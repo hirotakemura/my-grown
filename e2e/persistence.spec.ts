@@ -267,17 +267,23 @@ test('筋トレ：マシンの「次の重さ」を重さごとに覚えて提�
   })));
   await page.reload();
   const card = page.getByTestId('exercise-leg-press');
-  await expect(card).toContainText('今日は+5kg（46kg）'); // まだ覚えていないので目安の幅
+  const next = card.getByLabel('レッグプレスの41kgの次の重さ');
+  await expect(card).toContainText('前回 41kg →');
+  await expect(next).toHaveValue('46'); // まだ覚えていないので目安の幅
   await expect(card.getByLabel('レッグプレス 1セット目の重さ')).toHaveValue('46');
 
-  await card.getByRole('button', { name: /マシンの次の重さが違うときは/ }).click();
-  await card.getByRole('button', { name: '45kg', exact: true }).click();
-  await card.getByRole('button', { name: '保存', exact: true }).click();
-  await expect(card).toContainText('今日は+4kg（45kg）');
-  await expect(card.getByRole('button', { name: '41kgの次は45kg ✎' })).toBeVisible();
+  // −で1kg下げると、マシンの次の重さとして覚え、今日のセットの重さも変わる
+  await card.getByRole('button', { name: 'レッグプレスの今日の重さを1kg下げる' }).click();
+  await expect(next).toHaveValue('45');
+  await expect(card).toContainText('✓ このマシンは 41kg の次が 45kg');
   await expect(card.getByLabel('レッグプレス 1セット目の重さ')).toHaveValue('45');
   await expect.poll(() => dbGet(page, 'exercises', 'leg-press')).toMatchObject({ nextWeights: { '41': 45 } });
 
+  // 直接入力でも直せる
+  await next.fill('50');
+  await next.blur();
+  await expect.poll(() => dbGet(page, 'exercises', 'leg-press')).toMatchObject({ nextWeights: { '41': 50 } });
+
   await page.reload();
-  await expect(page.getByTestId('exercise-leg-press')).toContainText('今日は+4kg（45kg）');
+  await expect(page.getByTestId('exercise-leg-press').getByLabel('レッグプレスの41kgの次の重さ')).toHaveValue('50');
 });
