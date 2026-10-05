@@ -182,12 +182,27 @@ export function parseReceipt(text: string, rules?: Map<string, ExpenseCategory>)
   // 品名と金額が別々の行に分かれて読めたとき（段組みの読み取り・iPhoneの文字認識のコピー）用
   let names: string[] = [];
   let prices: number[] = [];
+  // 小計・合計・税・支払いなどの行（品目ではなく、品目の後ろに並ぶ）
+  const isSummary = (n: string) => /小\s*計|合\s*計|税|対象|支払|払|お預|預り|釣|ポイント|クレジット|電子マネー|nanaco|paypay|%/i.test(n);
+  // 店名・領収書などの見出し（品目の前に並ぶ）
+  const isHeader = (n: string) => /LAWSON|ローソン|セブン|イレブン|ベルク|BELC|店\s*$|領収|レシート|登録番号/i.test(n);
   const flush = () => {
     if (prices.length) {
-      // 金額の並びは、直前に並んだ品名の並びと対応させる（見出しなどの余計な行は前に来る）
-      const k = Math.min(prices.length, names.length);
-      const paired = names.slice(names.length - k);
-      paired.forEach((n, i) => add(n, prices[i]));
+      const first = names.findIndex(isSummary);
+      const items = (first < 0 ? names : names.slice(0, first)).filter((n) => !isHeader(n));
+      const summary = first < 0 ? [] : names.slice(first);
+      if (items.length && prices.length >= items.length) {
+        // 金額は品名の順に対応し、余った金額は小計・合計などの行に順に対応させる
+        items.forEach((n, i) => add(n, prices[i]));
+        summary.forEach((n, i) => { if (prices[items.length + i] != null) add(n, prices[items.length + i]); });
+      } else if (items.length) {
+        // 金額の数が足りないときも、品名の順に対応させる
+        prices.forEach((p, i) => add(items[i], p));
+      } else {
+        // 品名らしい行がないときは、直前に並んだ行と対応させる
+        const k = Math.min(prices.length, names.length);
+        names.slice(names.length - k).forEach((n, i) => add(n, prices[i]));
+      }
       names = [];
       prices = [];
     }
@@ -203,7 +218,8 @@ export function parseReceipt(text: string, rules?: Map<string, ExpenseCategory>)
     if (hit && !hit.name || (hit && !/\p{L}/u.test(hit.name))) {
       // 金額だけの行。8桁以上（バーコード・JANコードなど）は金額ではない
       if ((line.match(/\d/g) ?? []).length >= 8) continue;
-      if (hit.yen || Math.abs(hit.price) >= 10) prices.push(hit.price);
+      // ¥のない1桁の数は、金額だけの行が続いている途中（レジ袋 3円など）なら金額とみなす
+      if (hit.yen || Math.abs(hit.price) >= 10 || prices.length > 0) prices.push(hit.price);
       continue;
     }
     flush();
