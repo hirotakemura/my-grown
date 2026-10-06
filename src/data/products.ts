@@ -8,7 +8,7 @@ export const VERIFIED = new Set([
   '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   '7-smoked-nitamago',
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
-  'eo-matsuya-negitama-gyumeshi', 'l-tori-liver',
+  'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -114,6 +114,8 @@ const lawson: Row[] = [
 const seven: Row[] = [
   ['7-salad-chicken', 'セブン サラダチキン プレーン', 'チキン・肉', 115, 24, 1.5, 1],
   ['7-chicken-bar', 'セブン サラダチキンバー', 'チキン・肉', 70, 11, 2, 1.5],
+  // kcalは表示のPFCから計算（4×P＋9×F＋4×C）
+  ['7-chicken-bar-smoke-pepper', 'セブン 糖質0gサラダチキンバー スモークペッパー', 'チキン・肉', 63, 13.6, 0.9, 0.1],
   ['7-nitamago', 'セブン 味付け半熟ゆで卵', '卵・乳製品', 80, 6.5, 5.5, 1],
   ['7-yakitori', 'セブン 炭火焼き鳥（塩）1本', 'チキン・肉', 66, 9.6, 3, 0.3],
   ['7-saba', 'セブン さばの塩焼き', 'チキン・肉', 260, 18, 20, 1],
@@ -182,6 +184,7 @@ export const ADDED_IN: Record<number, string[]> = {
   20: ['7-tonshabu-salad'],
   22: ['eo-matsuya-negitama-gyumeshi'],
   23: ['l-tori-liver'],
+  24: ['7-chicken-bar-smoke-pepper'],
 };
 
 // どちらのコンビニでも買えるもの
