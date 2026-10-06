@@ -8,7 +8,7 @@ export const VERIFIED = new Set([
   '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   '7-smoked-nitamago',
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
-  'eo-matsuya-negitama-gyumeshi',
+  'eo-matsuya-negitama-gyumeshi', 'l-tori-liver',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -67,6 +67,7 @@ const lawson: Row[] = [
   ['l-salad-chicken-smoke', 'サラダチキン スモーク', 'チキン・肉', 120, 23.8, 1.4, 3],
   ['l-salad-chicken-umeshiso', 'サラダチキン 梅しそ', 'チキン・肉', 130, 24.9, 1.7, 3.9],
   ['l-sunagimo', '炭火香る！砂肝の焼鳥', 'チキン・肉', 70, 11.9, 1.4, 2.4],
+  ['l-tori-liver', '炭火香る！鶏レバー焼', 'チキン・肉', 99, 14.6, 3.4, 2.3],
   ['l-nankotsu-tsukune', '炭火香る！なんこつ塩つくね', 'チキン・肉', 102, 12.4, 5, 2],
   ['l-sumibi-3', '鶏の炭火焼き3種盛り', 'チキン・肉', 303, 27.2, 15.3, 15.1],
   ['l-ginzake', '銀鮭の塩焼（1切）', 'チキン・肉', 135, 12, 9.7, 0],
@@ -180,6 +181,7 @@ export const ADDED_IN: Record<number, string[]> = {
   19: ['savas-milk-fruit-430'],
   20: ['7-tonshabu-salad'],
   22: ['eo-matsuya-negitama-gyumeshi'],
+  23: ['l-tori-liver'],
 };
 
 // どちらのコンビニでも買えるもの
