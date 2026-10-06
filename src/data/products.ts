@@ -8,6 +8,7 @@ export const VERIFIED = new Set([
   '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   '7-smoked-nitamago',
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
+  'eo-matsuya-negitama-gyumeshi',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -178,6 +179,7 @@ export const ADDED_IN: Record<number, string[]> = {
   18: ['7-goma-mushidori-soba'],
   19: ['savas-milk-fruit-430'],
   20: ['7-tonshabu-salad'],
+  22: ['eo-matsuya-negitama-gyumeshi'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -198,6 +200,7 @@ const other: Row[] = [
   ['eo-gyudon', '牛丼 並', '外食・定食', 650, 20, 20, 95],
   ['eo-chicken-teishoku', '鶏むね・ささみ系の定食', '外食・定食', 650, 40, 12, 90],
   ['eo-salad', '生野菜サラダ（外食）', '外食・定食', 30, 1, 0.3, 6],
+  ['eo-matsuya-negitama-gyumeshi', '松屋 ネギたっぷり旨辛ネギたま牛めし', '外食・定食', 821, 24.7, 36.2, 94.5],
   ['home-chicken', '鶏むねソテー（作り置き1枚分）', '自炊', 300, 58, 5, 5],
   ['home-rice-150', 'パックご飯 150g', '自炊', 220, 3, 0.5, 51],
   ['home-broccoli', '冷凍ブロッコリー 100g', '自炊', 30, 4, 0.5, 4],

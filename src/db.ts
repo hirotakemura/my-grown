@@ -190,6 +190,14 @@ export class AppDB extends Dexie {
           if (e.increment === 5) e.increment = 4;
         });
       });
+    // v22: 松屋 ネギたっぷり旨辛ネギたま牛めし
+    this.version(22)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[22].includes(p.id) && !have.has(p.id)));
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());
