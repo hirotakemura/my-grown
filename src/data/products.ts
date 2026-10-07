@@ -8,7 +8,7 @@ export const VERIFIED = new Set([
   '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   '7-smoked-nitamago',
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
-  'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper',
+  'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -152,6 +152,7 @@ const seven: Row[] = [
   ['7-goma-mushidori-soba', 'セブン ピリ辛濃厚ごまだれ 冷し蒸し鶏そば', '麺', 630, 27.7, 33.1, 58.3],
   // セブン‐イレブン公式サイトの栄養成分（item/104228）
   ['7-tonshabu-salad', 'セブン たんぱく質が摂れる豚しゃぶサラダ', '汁物・サラダ', 131, 18.2, 5.3, 3.6],
+  ['7-ebi-doria', 'セブン クリーミーソースの海老ドリア', '外食・定食', 412, 13.7, 11.5, 65.1],
 ];
 
 /** 公式値に置き換えた既存の商品（v12で、目安のままの端末だけ更新する） */
@@ -185,6 +186,7 @@ export const ADDED_IN: Record<number, string[]> = {
   22: ['eo-matsuya-negitama-gyumeshi'],
   23: ['l-tori-liver'],
   24: ['7-chicken-bar-smoke-pepper'],
+  25: ['7-ebi-doria'],
 };
 
 // どちらのコンビニでも買えるもの
