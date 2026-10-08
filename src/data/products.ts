@@ -8,7 +8,7 @@ export const VERIFIED = new Set([
   '7-tonshabu-pasta', '7-mushi-mame', '7-oden-egg', '7-oden-atsuage', '7-oden-daikon',
   '7-smoked-nitamago',
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
-  'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria',
+  'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria', 'l-rosu-katsudon',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -99,6 +99,7 @@ const lawson: Row[] = [
   ['l-pescatore', '贅沢すぎ！海鮮づくしペスカトーレ', '麺', 465, 30, 10.1, 66.4],
   ['l-sakurajima-pasta', 'こだわりおだしの生パスタ 桜島どりと九条ねぎ', '麺', 447, 24.4, 6.3, 75.5],
   ['l-oyakodon', 'ヨード卵・光の親子丼', '外食・定食', 497, 24.8, 10, 77.7],
+  ['l-rosu-katsudon', 'とろーりたまごの三元豚厚切りロースカツ丼', '外食・定食', 647, 21.8, 19, 97.8],
   ['l-shogayaki-bento', '国産生姜の豚生姜焼弁当', '外食・定食', 632, 28.9, 20.9, 84.4],
   ['l-yakibuta-don', '直火で炙った焼豚丼', '外食・定食', 551, 24.9, 16.2, 78.1],
   ['l-onigiri-big-sake', '大きなおにぎり 鮭', 'おにぎり', 283, 7.7, 2.5, 58.6],
@@ -187,6 +188,7 @@ export const ADDED_IN: Record<number, string[]> = {
   23: ['l-tori-liver'],
   24: ['7-chicken-bar-smoke-pepper'],
   25: ['7-ebi-doria'],
+  26: ['l-rosu-katsudon'],
 };
 
 // どちらのコンビニでも買えるもの

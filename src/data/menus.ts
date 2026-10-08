@@ -175,6 +175,12 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       items: [p('l-oyakodon'), p('l-egg-broccoli')],
     },
     {
+      id: 'wl-l-katsudon',
+      place: 'lawson',
+      title: '厚切りロースカツ丼＋宿六の豚汁',
+      items: [p('l-rosu-katsudon'), p('l-tonjiru-yadoroku')],
+    },
+    {
       id: 'wl-l-sand',
       place: 'lawson',
       title: '照焼チキンたまごサンド＋サラダチキン 梅しそ＋宿六の豚汁',
