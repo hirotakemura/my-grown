@@ -111,3 +111,35 @@ test('手入力で支出を追加・修正・削除でき、出社日の1日平�
   await page.getByRole('dialog', { name: '支出を編集' }).getByRole('button', { name: '削除' }).click();
   await expect(page.getByTestId('money-total')).toHaveText('¥0');
 });
+
+test('支出：その月の記録が10件を超えたら、一覧のブロックの中でスクロールして見られる', async ({ page }) => {
+  await openMoney(page);
+  await page.evaluate(
+    (rows) =>
+      new Promise<void>((resolve, reject) => {
+        const req = indexedDB.open('my-grown');
+        req.onerror = () => reject(req.error);
+        req.onsuccess = () => {
+          const tx = req.result.transaction('expenses', 'readwrite');
+          for (const r of rows) tx.objectStore('expenses').put(r);
+          tx.oncomplete = () => { req.result.close(); resolve(); };
+        };
+      }),
+    Array.from({ length: 15 }, (_, i) => ({
+      id: `e${i}`, date: `2026-09-${String(i + 1).padStart(2, '0')}`, store: 'lawson', source: 'manual', createdAt: i,
+      items: [{ name: `おにぎり${i + 1}`, price: 150, category: 'meal' }],
+    })),
+  );
+  await page.reload();
+  await page.getByRole('navigation').getByRole('button', { name: '支出' }).click();
+  const list = page.getByTestId('expense-list');
+  await expect(list.getByRole('button')).toHaveCount(15);
+  await expect(page.getByText('15件')).toBeVisible();
+  const box = await list.evaluate((el) => ({ client: el.clientHeight, scroll: el.scrollHeight, overflow: getComputedStyle(el).overflowY }));
+  expect(box.overflow).toBe('auto');
+  expect(box.scroll).toBeGreaterThan(box.client);
+  // 見えている高さはちょうど10件分
+  const rowH = await list.getByRole('button').first().evaluate((el) => el.getBoundingClientRect().height);
+  expect(box.client / rowH).toBeCloseTo(10, 0);
+  await page.screenshot({ path: 'test-results/money-scroll.png' });
+});

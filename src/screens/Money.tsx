@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { AppData } from '../hooks';
 import { useToday } from '../hooks';
 import { EXPENSE_CATEGORIES, EXPENSE_CATEGORY_LABEL, EXPENSE_STORES, EXPENSE_STORE_LABEL, type Expense } from '../types';
@@ -9,6 +9,9 @@ import { newId } from '../db';
 import { ExpenseEditor, yen } from '../components/ExpenseEditor';
 import { useToast } from '../components/Toast';
 import { PasteReceipt } from '../components/PasteReceipt';
+
+/** 記録の一覧は10件までをそのまま見せ、それより多いとブロックの中でスクロールする */
+const VISIBLE_ROWS = 10;
 
 const monthOf = (date: string) => date.slice(0, 7);
 const shiftMonth = (ym: string, n: number) => {
@@ -100,6 +103,14 @@ export function Money({ data }: { data: AppData }) {
 
   const [y, m] = month.split('-').map(Number);
 
+  const listRef = useRef<HTMLDivElement>(null);
+  const [listMax, setListMax] = useState<number>();
+  useLayoutEffect(() => {
+    const el = listRef.current;
+    const next = el?.children[VISIBLE_ROWS] as HTMLElement | undefined;
+    setListMax(el && next ? next.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop : undefined);
+  }, [list.length]);
+
   return (
     <div className="screen">
       <h1 className="page-title">支出</h1>
@@ -160,9 +171,16 @@ export function Money({ data }: { data: AppData }) {
       )}
 
       <section className="card">
-        <h2 className="card-title">{m}月の記録</h2>
+        <h2 className="card-title">
+          {m}月の記録{list.length > 0 && <span className="muted list-count">{list.length}件</span>}
+        </h2>
         {list.length === 0 && <p className="muted">まだ記録がありません。レシートの写真を読むか、手入力で追加してください。</p>}
-        <div data-testid="expense-list">
+        <div
+          ref={listRef}
+          data-testid="expense-list"
+          className={listMax ? 'scroll-list' : undefined}
+          style={listMax ? { maxHeight: listMax } : undefined}
+        >
           {list.map((e) => (
             <button
               key={e.id}
