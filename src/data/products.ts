@@ -9,6 +9,7 @@ export const VERIFIED = new Set([
   '7-smoked-nitamago',
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
   'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria', 'l-rosu-katsudon',
+  'l-toridango-shirataki-soup',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -92,6 +93,7 @@ const lawson: Row[] = [
   ['l-tonshabu-pasta', '0秒パスタサラダ 豚しゃぶ', '麺', 404, 16, 20.5, 41.3],
   ['l-tonjiru-yadoroku', 'おにぎり浅草宿六監修 こだわり味噌の豚汁', '汁物・サラダ', 111, 10, 6.4, 4.8],
   ['l-wafu-soup', '食物繊維が摂れる 地鶏出汁きかせた和風スープ', '汁物・サラダ', 77, 6.7, 1.4, 11.2],
+  ['l-toridango-shirataki-soup', '鶏団子としらたき麺の和風スープ', '汁物・サラダ', 127, 11.1, 5.8, 8.9],
   ['l-kake-soba', 'つゆが主役！かけそば', '麺', 272, 20.7, 1.7, 45.7],
   ['l-nebaneba-soba', '香りとのど越し ミニネバネバそば', '麺', 238, 13.3, 4.2, 39.1],
   ['l-niku-soba', '特盛！冷し肉そば', '麺', 614, 35.2, 14, 90.7],
@@ -189,6 +191,7 @@ export const ADDED_IN: Record<number, string[]> = {
   24: ['7-chicken-bar-smoke-pepper'],
   25: ['7-ebi-doria'],
   26: ['l-rosu-katsudon'],
+  27: ['l-toridango-shirataki-soup'],
 };
 
 // どちらのコンビニでも買えるもの
