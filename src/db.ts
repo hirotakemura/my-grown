@@ -246,6 +246,14 @@ export class AppDB extends Dexie {
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[28].includes(p.id) && !have.has(p.id)));
       });
+    // v29: サッポロ一番 天下一品 京都濃厚鶏白湯 ミニ
+    this.version(29)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[29].includes(p.id) && !have.has(p.id)));
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());
