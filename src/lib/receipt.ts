@@ -98,7 +98,9 @@ function splitPrice(line: string): { name: string; price: number; yen: boolean }
 function cleanName(raw: string): string {
   return raw
     .replace(/^\d{2}(?![\d個本枚gGmlL%P入])\s*/, '')
-    .replace(/^[\s.,、。・*‡†※#{}()[\]]+/, '')
+    .replace(/^[\s.,、。・*‡†※#{}()[\]（）｛｝]+/, '')
+    // 中身が読めずに残った空の括弧（「（）麻婆豆腐の素」）
+    .replace(/[（(]\s*[)）]/g, '')
     .replace(/^\d[)）]\s*/, '')
     .replace(/[【】「」[\]]/g, '')
     // 末尾に残った閉じていない括弧（「…ひき肉（」）
@@ -196,8 +198,12 @@ export function parseReceipt(text: string, rules?: Map<string, ExpenseCategory>)
         items.forEach((n, i) => add(n, prices[i]));
         summary.forEach((n, i) => { if (prices[items.length + i] != null) add(n, prices[items.length + i]); });
       } else if (items.length) {
-        // 金額の数が足りないときも、品名の順に対応させる
+        // 金額の数が足りないときは、品名の順に対応させ、残った品名は次に続く金額へ持ち越す
+        // （段がずれて「品名, 品名, 金額, 品名, 金額…」と1行ずつ遅れて並んだとき）
         prices.forEach((p, i) => add(items[i], p));
+        names = items.slice(prices.length);
+        prices = [];
+        return;
       } else {
         // 品名らしい行がないときは、直前に並んだ行と対応させる
         const k = Math.min(prices.length, names.length);
@@ -213,6 +219,8 @@ export function parseReceipt(text: string, rules?: Map<string, ExpenseCategory>)
     if (INFO_LINE.test(line) || detectDate(line)) continue;
     // 「2枚」「3個」のような数量だけの行は品名でも金額でもない
     if (/^\d+\s*(枚|個|本|点|パック|袋|コ|切れ?|尾|玉|束|缶|食|入)$/.test(line)) continue;
+    // 「（@125x2個）」「(0125x2個)」のような単価×数量の行（@が0に化けることもある）
+    if (/^[（(]?\s*[@＠0]?\s*[\d,]+\s*[xX×]\s*\d+\s*(個|コ|点|本|枚)?\s*[)）]?$/.test(line)) continue;
     const hit = splitPrice(line);
     // 「*498」「※182」のように、金額の前に記号だけが付いた行も金額だけの行として扱う
     if (hit && !hit.name || (hit && !/\p{L}/u.test(hit.name))) {
