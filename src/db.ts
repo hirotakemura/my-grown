@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { CategoryRule, DayRecord, Exercise, Expense, MealItem, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
 import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12, UPDATED_TO_OFFICIAL_V16 } from './data/products';
-import { DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_EXERCISES } from './data/exercises';
+import { ASSIST_EXERCISES, DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
 
 export const DB_NAME = 'my-grown';
@@ -253,6 +253,12 @@ export class AppDB extends Dexie {
         const products = tx.table<Product, string>('products');
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[29].includes(p.id) && !have.has(p.id)));
+      });
+    // v30: アシスト懸垂マシンは数値が大きいほど楽。上達したら補助を減らす種目として印を付ける
+    this.version(30)
+      .stores({})
+      .upgrade(async (tx) => {
+        await tx.table<Exercise, string>('exercises').where('id').anyOf(ASSIST_EXERCISES).modify((e) => { e.assist = true; });
       });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {

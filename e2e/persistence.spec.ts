@@ -287,3 +287,28 @@ test('筋トレ：マシンの「次の重さ」を重さごとに覚えて提�
   await page.reload();
   await expect(page.getByTestId('exercise-leg-press').getByLabel('レッグプレスの41kgの次の重さ')).toHaveValue('50');
 });
+
+test('筋トレ：アシスト懸垂マシンは数値が大きいほど楽なので、全セットできたら補助を減らす提案になる', async ({ page }) => {
+  await openApp(page);
+  // 今日はメニューB・ラットプルダウンの代わりにアシスト懸垂。前回（9/25）補助40kgで全セット上限回数
+  await dbPut(page, 'days', [{ date: '2026-09-28', menu: 'B', swaps: { 'lat-pulldown': 'assisted-pullup' } }]);
+  await dbPut(page, 'workoutSets', [0, 1, 2].map((i) => ({
+    id: `2026-09-25|assisted-pullup|${i}`, date: '2026-09-25', exerciseId: 'assisted-pullup', index: i, weight: 40, reps: 12, done: true,
+  })));
+  await page.reload();
+  const card = page.getByTestId('exercise-assisted-pullup');
+  const next = card.getByLabel('アシスト懸垂マシンの40kgの次の重さ');
+  await expect(card).toContainText('補助を減らす');
+  await expect(card).toContainText('前回 補助 40kg →');
+  await expect(next).toHaveValue('35');
+  await expect(card.getByLabel('アシスト懸垂マシン 1セット目の重さ')).toHaveValue('35');
+  // 補助を前回より増やす方向には直せない
+  await card.getByRole('button', { name: 'アシスト懸垂マシンの今日の重さを1kg上げる' }).click();
+  await expect(next).toHaveValue('36');
+  await expect(card).toContainText('✓ このマシンは補助 40kg の次が 36kg');
+  await next.fill('45');
+  await next.blur();
+  await expect(next).toHaveValue('36');
+  await expect.poll(() => dbGet(page, 'exercises', 'assisted-pullup')).toMatchObject({ nextWeights: { '40': 36 } });
+  await card.screenshot({ path: 'test-results/assist-pullup.png' });
+});

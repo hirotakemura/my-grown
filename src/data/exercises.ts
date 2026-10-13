@@ -59,7 +59,7 @@ const alternatives: Def[] = [
   ['back-extension', 'バックエクステンション', 10, 12, 2.5,
     'パッドが骨盤の少し下に来るように高さを合わせ、足首を固定する。上体を下ろしてから、体が一直線になるまで起こす（反りすぎない）。'],
   ['assisted-pullup', 'アシスト懸垂マシン', 10, 12, 5,
-    '膝（または足）を台に乗せ、肩幅より広くグリップを握る。あごがバーを越えるまで体を引き上げ、ゆっくり下ろす。数字が大きいほど楽になる。'],
+    '膝（または足）を台に乗せ、肩幅より広くグリップを握る。あごがバーを越えるまで体を引き上げ、ゆっくり下ろす。数字が大きいほど楽になるので、全セットできたら補助を減らす（数字を小さくする）。'],
   ['one-arm-row', 'ケーブル ワンハンドロウ', 10, 12, 2.5,
     'ケーブルをみぞおちの高さにしてハンドルを片手で持つ。肘を脇腹に沿わせて後ろへ引き、肩甲骨を寄せてからゆっくり戻す。'],
   ['cable-crossover', 'ケーブル クロスオーバー', 12, 15, 2.5,
@@ -70,8 +70,12 @@ const alternatives: Def[] = [
     '脇の下がパッドの上端に来るようにシートを合わせ、腕をパッドに乗せる。肘を固定したまま巻き上げ、伸び切る手前まで戻す。'],
 ];
 
+/** 補助の重さを選ぶマシン（数値が大きいほど楽。上達したら数値を小さくする） */
+export const ASSIST_EXERCISES = ['assisted-pullup'];
+
 const toExercise = ([id, name, repMin, repMax, increment, howTo, altId]: Def): Exercise => ({
   id, name, repMin, repMax, increment, howTo, altId, sets: 3,
+  ...(ASSIST_EXERCISES.includes(id) ? { assist: true } : {}),
 });
 
 export const SEED_EXERCISES: Exercise[] = [...main, ...alternatives].map(toExercise);

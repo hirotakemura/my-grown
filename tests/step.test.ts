@@ -48,4 +48,22 @@ describe('マシンの次の重さ', () => {
       db.close();
     }
   });
+
+  it('v30：アシスト懸垂マシンに「補助を減らす種目」の印を付ける（記録はそのまま）', async () => {
+    const name = 'v29-assist';
+    names.push(name);
+    const v29 = new Dexie(name);
+    v29.version(29).stores({
+      settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId',
+      expenses: 'id, date', categoryRules: 'name',
+    });
+    await v29.table('settings').put(defaultSettings('2026-10-01'));
+    await v29.table('products').bulkAdd(SEED_PRODUCTS);
+    await v29.table('exercises').bulkAdd(SEED_EXERCISES.map(({ assist: _, ...e }) => (e.id === 'assisted-pullup' ? { ...e, nextWeights: { '40': 36 } } : e)));
+    v29.close();
+    const db = new AppDB(name);
+    expect(await db.exercises.get('assisted-pullup')).toMatchObject({ assist: true, nextWeights: { '40': 36 } });
+    expect((await db.exercises.get('leg-press'))?.assist).toBeUndefined();
+    db.close();
+  });
 });

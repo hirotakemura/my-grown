@@ -106,7 +106,8 @@ function NextWeight({ ex, from, weight, known }: { ex: Exercise; from: number; w
 
   const save = async (n: number) => {
     const w = Math.round(n * 100) / 100;
-    if (!(w > from)) { setText(String(weight)); return; }
+    // ふつうは前回より重く、アシストマシンは前回より補助を少なく（0kg以上）
+    if (!(ex.assist ? w < from && w >= 0 : w > from)) { setText(String(weight)); return; }
     setText(String(w));
     if (w === weight && known) return;
     await db.exercises.update(ex.id, { nextWeights: { ...ex.nextWeights, [String(from)]: w } });
@@ -117,11 +118,11 @@ function NextWeight({ ex, from, weight, known }: { ex: Exercise; from: number; w
     <div className="next-weight" data-testid={`next-weight-${ex.id}`}>
       <img className="ui-icon" src={weightUpIcon} alt="" />
       <div className="nw-label">
-        <span className="nw-title">重さアップ</span>
-        <span className="nw-from">前回 {from}kg →</span>
+        <span className="nw-title">{ex.assist ? '補助を減らす' : '重さアップ'}</span>
+        <span className="nw-from">前回{ex.assist ? ' 補助' : ''} {from}kg →</span>
       </div>
       <div className="nw-stepper">
-        <button aria-label={`${ex.name}の今日の重さを1kg下げる`} disabled={current - 1 <= from} onClick={() => void save(current - 1)}>−</button>
+        <button aria-label={`${ex.name}の今日の重さを1kg下げる`} disabled={ex.assist ? current - 1 < 0 : current - 1 <= from} onClick={() => void save(current - 1)}>−</button>
         <label className="nw-value">
           <input
             type="number"
@@ -135,10 +136,14 @@ function NextWeight({ ex, from, weight, known }: { ex: Exercise; from: number; w
           />
           <em>kg</em>
         </label>
-        <button aria-label={`${ex.name}の今日の重さを1kg上げる`} onClick={() => void save(current + 1)}>＋</button>
+        <button aria-label={`${ex.name}の今日の重さを1kg上げる`} disabled={ex.assist ? current + 1 >= from : false} onClick={() => void save(current + 1)}>＋</button>
       </div>
       <div className={`nw-hint ${known ? 'known' : ''}`}>
-        {known ? `✓ このマシンは ${from}kg の次が ${weight}kg` : 'マシンの次の重さに合わせて −＋ で直すと覚えます'}
+        {known
+          ? `✓ このマシンは${ex.assist ? '補助' : ''} ${from}kg の次が ${weight}kg`
+          : ex.assist
+            ? '数値が大きいほど楽なので、補助を1段階減らします。マシンの目盛りに合わせて −＋ で直すと覚えます'
+            : 'マシンの次の重さに合わせて −＋ で直すと覚えます'}
       </div>
     </div>
   );
@@ -161,13 +166,13 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
 
   const onDone = async (set: WorkoutSet) => {
     const previous = sets.filter((s) => s.done && s.exerciseId === set.exerciseId && s.id !== set.id && s.date <= date);
-    const pb = isPersonalBest(set, previous);
+    const pb = isPersonalBest(set, previous, ex);
     await saveSet(set);
     // 予定の全セットが終わったら自動で完了にする
     const doneAfter = sets.filter((s) => s.date === date && s.done && s.id !== set.id).length + 1;
     await patchDay(date, { menu, gymStatus: doneAfter >= plannedSets ? 'done' : 'started' });
     timer.start(settings.restSeconds);
-    if (pb) toast(`🏆 自己ベスト更新！ ${ex.name} ${set.weight}kg × ${set.reps}回`, 'pb');
+    if (pb) toast(`🏆 自己ベスト更新！ ${ex.name} ${ex.assist ? '補助' : ''}${set.weight}kg × ${set.reps}回`, 'pb');
   };
 
   return (

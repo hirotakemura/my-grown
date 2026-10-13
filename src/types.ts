@@ -113,6 +113,8 @@ export interface Exercise {
   increment: number; // 次の重さがわからないときに増やす重さ（kg・目安）
   /** マシンの「この重さの次」の重さ。マシンによって1段階の幅が違う（41→45→50）ので重さごとに覚える */
   nextWeights?: Record<string, number>;
+  /** アシスト（補助）マシン：数値が大きいほど楽なので、上達すると数値を小さくする */
+  assist?: boolean;
   howTo: string;
   altId?: string;
   sets: number;

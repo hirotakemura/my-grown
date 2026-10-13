@@ -50,7 +50,7 @@ export function Records({ data }: { data: AppData }) {
   const sessions = current ? sessionsOf(current.id, data.sets) : [];
   const latestBest = (id: string) => {
     const s = sessionsOf(id, data.sets);
-    return s.length ? bestOf(s[s.length - 1].sets) : undefined;
+    return s.length ? bestOf(s[s.length - 1].sets, data.exercises.get(id)) : undefined;
   };
 
   return (
@@ -142,11 +142,11 @@ export function Records({ data }: { data: AppData }) {
             ))}
             {current && <h3 className="card-title" style={{ fontSize: 15, marginTop: 4 }}>{current.name}</h3>}
             {current && sessions.length > 0 && <LineChart
-              label={`${current.name}の最高重量`}
+              label={current.assist ? `${current.name}の補助の重さ（少ないほど上達）` : `${current.name}の最高重量`}
               unit="kg"
               points={sessions.map((s) => {
-                const b = bestOf(s.sets)!;
-                return { date: s.date, value: b.weight, note: `最高 ${b.weight}kg×${b.reps}回` };
+                const b = bestOf(s.sets, current)!;
+                return { date: s.date, value: b.weight, note: `${current.assist ? '補助' : '最高'} ${b.weight}kg×${b.reps}回` };
               })}
             />}
             <table className="table" data-testid="exercise-history">
