@@ -196,6 +196,7 @@ export const ADDED_IN: Record<number, string[]> = {
   28: ['eo-karaage-1'],
   29: ['cup-tenkaippin-mini'],
   31: ['7-shio-chanko-soup'],
+  32: ['eo-yoshinoya-negitama-gyudon', 'eo-yoshinoya-tonjiru'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -217,6 +218,8 @@ const other: Row[] = [
   ['eo-gyudon', '牛丼 並', '外食・定食', 650, 20, 20, 95],
   ['eo-chicken-teishoku', '鶏むね・ささみ系の定食', '外食・定食', 650, 40, 12, 90],
   ['eo-salad', '生野菜サラダ（外食）', '外食・定食', 30, 1, 0.3, 6],
+  ['eo-yoshinoya-negitama-gyudon', '吉野家 ねぎ玉牛丼（並盛）', '外食・定食', 775, 25.5, 24.5, 110.5],
+  ['eo-yoshinoya-tonjiru', '吉野家 豚汁', '汁物・サラダ', 200, 9, 12, 13],
   // 鶏もも唐揚げ 1個（約30g）の一般的な目安
   ['eo-karaage-1', '唐揚げ（1個・約30g）', 'チキン・肉', 80, 5, 5, 3.5],
   ['eo-matsuya-negitama-gyumeshi', '松屋 ネギたっぷり旨辛ネギたま牛めし', '外食・定食', 821, 24.7, 36.2, 94.5],
