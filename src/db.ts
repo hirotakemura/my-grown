@@ -260,6 +260,14 @@ export class AppDB extends Dexie {
       .upgrade(async (tx) => {
         await tx.table<Exercise, string>('exercises').where('id').anyOf(ASSIST_EXERCISES).modify((e) => { e.assist = true; });
       });
+    // v31: セブン 塩ちゃんこスープ
+    this.version(31)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[31].includes(p.id) && !have.has(p.id)));
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());

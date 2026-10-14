@@ -9,7 +9,7 @@ export const VERIFIED = new Set([
   '7-smoked-nitamago',
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
   'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria', 'l-rosu-katsudon',
-  'l-toridango-shirataki-soup', 'cup-tenkaippin-mini',
+  'l-toridango-shirataki-soup', 'cup-tenkaippin-mini', '7-shio-chanko-soup',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -155,6 +155,7 @@ const seven: Row[] = [
   ['7-goma-mushidori-soba', 'セブン ピリ辛濃厚ごまだれ 冷し蒸し鶏そば', '麺', 630, 27.7, 33.1, 58.3],
   // セブン‐イレブン公式サイトの栄養成分（item/104228）
   ['7-tonshabu-salad', 'セブン たんぱく質が摂れる豚しゃぶサラダ', '汁物・サラダ', 131, 18.2, 5.3, 3.6],
+  ['7-shio-chanko-soup', 'セブン 塩ちゃんこスープ', '汁物・サラダ', 121, 12.3, 5, 7.8],
   ['7-ebi-doria', 'セブン クリーミーソースの海老ドリア', '外食・定食', 412, 13.7, 11.5, 65.1],
 ];
 
@@ -194,6 +195,7 @@ export const ADDED_IN: Record<number, string[]> = {
   27: ['l-toridango-shirataki-soup'],
   28: ['eo-karaage-1'],
   29: ['cup-tenkaippin-mini'],
+  31: ['7-shio-chanko-soup'],
 };
 
 // どちらのコンビニでも買えるもの
