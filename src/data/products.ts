@@ -10,7 +10,7 @@ export const VERIFIED = new Set([
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
   'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria', 'l-rosu-katsudon',
   'l-toridango-shirataki-soup', 'cup-tenkaippin-mini', '7-shio-chanko-soup', '7-onigiri-tamago-shoyu',
-  '7-rosu-katsudon', '7-zakuchiki-umakara',
+  '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -204,6 +204,7 @@ export const ADDED_IN: Record<number, string[]> = {
   33: ['7-onigiri-tamago-shoyu'],
   34: ['7-rosu-katsudon', '7-zakuchiki-umakara'],
   35: ['home-mabo-chicken-rice'],
+  36: ['tori-liver-5'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -212,6 +213,8 @@ const common: Row[] = [
   ['savas-milk-cocoa-430', 'ザバス MILK PROTEIN 脂肪0 ココア味 430ml', 'プロテイン', 160, 20, 0, 20],
   ['savas-milk-fruit-430', 'ザバス MILK PROTEIN 脂肪0 フルーツミックス風味 430ml', 'プロテイン', 135, 20, 0, 15.8],
   ['cup-tenkaippin-mini', 'サッポロ一番 名店の味 天下一品 京都濃厚鶏白湯 ミニ（56g）', '麺', 250, 5.4, 11.7, 30.8],
+  // 脂質は文字認識で欠けていたため、熱量・たんぱく質・炭水化物から逆算（7.1g）
+  ['tori-liver-5', '新・炭火焼鳥レバー（5本入り）', 'チキン・肉', 254, 32.9, 7.1, 14.7],
   ['natto', '納豆', '卵・乳製品', 90, 8, 4.5, 6],
   ['tofu', '豆腐', '卵・乳製品', 80, 7, 4.5, 2.5],
   ['banana', 'バナナ', 'その他', 90, 1, 0.2, 22],
