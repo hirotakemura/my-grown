@@ -10,6 +10,7 @@ export const VERIFIED = new Set([
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
   'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria', 'l-rosu-katsudon',
   'l-toridango-shirataki-soup', 'cup-tenkaippin-mini', '7-shio-chanko-soup', '7-onigiri-tamago-shoyu',
+  '7-rosu-katsudon', '7-zakuchiki-umakara',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -131,6 +132,7 @@ const seven: Row[] = [
   ['7-tonjiru', 'セブン コクと旨味の豚汁', '汁物・サラダ', 148, 12.1, 7.6, 9.3],
   ['7-salad', 'セブン サラダ（ノンオイル）', '汁物・サラダ', 50, 2, 0.5, 9],
   ['7-nanachiki', 'セブン ななチキ', 'ホットスナック', 174, 13.4, 9, 10],
+  ['7-zakuchiki-umakara', 'セブン ザクチキ（魅惑のうま辛）', 'ホットスナック', 218, 12.2, 13.2, 13],
   ['7-broccoli-chicken-egg', 'セブン ブロッコリーチキンエッグ', 'チキン・肉', 180, 20, 9, 5],
   ['7-onigiri-saba', 'セブン 長野県産コシヒカリおむすび 炭火焼さば', 'おにぎり', 220, 7, 6, 35],
   // セブン‐イレブン公式サイトの栄養成分（1食あたり、item/105215）
@@ -156,6 +158,7 @@ const seven: Row[] = [
   // セブン‐イレブン公式サイトの栄養成分（item/104228）
   ['7-tonshabu-salad', 'セブン たんぱく質が摂れる豚しゃぶサラダ', '汁物・サラダ', 131, 18.2, 5.3, 3.6],
   ['7-onigiri-tamago-shoyu', 'セブン たまご醤油おむすび', 'おにぎり', 206, 4.7, 4, 38.6],
+  ['7-rosu-katsudon', 'セブン 特製ロースかつ丼', '外食・定食', 726, 27.2, 21, 107.1],
   ['7-shio-chanko-soup', 'セブン 塩ちゃんこスープ', '汁物・サラダ', 121, 12.3, 5, 7.8],
   ['7-ebi-doria', 'セブン クリーミーソースの海老ドリア', '外食・定食', 412, 13.7, 11.5, 65.1],
 ];
@@ -199,6 +202,7 @@ export const ADDED_IN: Record<number, string[]> = {
   31: ['7-shio-chanko-soup'],
   32: ['eo-yoshinoya-negitama-gyudon', 'eo-yoshinoya-tonjiru'],
   33: ['7-onigiri-tamago-shoyu'],
+  34: ['7-rosu-katsudon', '7-zakuchiki-umakara'],
 };
 
 // どちらのコンビニでも買えるもの
