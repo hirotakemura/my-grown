@@ -205,6 +205,7 @@ export const ADDED_IN: Record<number, string[]> = {
   34: ['7-rosu-katsudon', '7-zakuchiki-umakara'],
   35: ['home-mabo-chicken-rice'],
   36: ['tori-liver-5'],
+  37: ['home-fried-egg'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -243,6 +244,8 @@ const other: Row[] = [
   ['belc-cabbage-sengiri-mini', 'ベルク 千切りキャベツ ミニ（1袋）', '自炊', 20, 1, 0.2, 5],
   ['belc-salad-chicken-herb', 'ベルク サラダチキン ハーブ', '自炊', 110, 24, 1.5, 1],
   ['belc-sausage-steak', 'ベルク あらびきソーセージステーキ（100g）', '自炊', 320, 12, 29, 3],
+  // 卵1個（M・約50g）＋油 約2g で計算
+  ['home-fried-egg', '目玉焼き（卵1個）', '自炊', 90, 6.1, 7.1, 0.2],
   ['home-alpron-soy-cookie', 'ALPRON ソイプロテイン クッキー&クリーム味（1杯30g）', '自炊', 115, 20, 2, 4.5],
   ['home-moyashi', 'もやし（1袋200g）', '自炊', 30, 3.4, 0.2, 5.2],
   ['home-enoki', 'えのき（1袋100g）', '自炊', 34, 2.7, 0.2, 7.6],
