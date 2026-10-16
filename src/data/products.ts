@@ -203,6 +203,7 @@ export const ADDED_IN: Record<number, string[]> = {
   32: ['eo-yoshinoya-negitama-gyudon', 'eo-yoshinoya-tonjiru'],
   33: ['7-onigiri-tamago-shoyu'],
   34: ['7-rosu-katsudon', '7-zakuchiki-umakara'],
+  35: ['home-mabo-chicken-rice'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -246,6 +247,8 @@ const other: Row[] = [
   ['home-tkg', '卵かけご飯（ご飯150g＋卵1個）', '自炊', 300, 9.4, 5.5, 52],
   ['home-natto-gohan', '納豆かけご飯（ご飯150g＋納豆1パック）', '自炊', 320, 11, 5, 59],
   // 豚こま150g＋ブロッコリー100g＋ポン酢で計算
+  // 鶏ひき肉150g（171kcal/100g）＋もめん豆腐150g＋麻婆豆腐の素1人前＋パックご飯150gで計算
+  ['home-mabo-chicken-rice', '鶏ひき肉の麻婆豆腐＋ご飯（鶏ひき肉150g）', '自炊', 647, 41.8, 29.4, 58.8],
   ['home-pork-broccoli-steam', '豚こま肉とブロッコリーのレンジ蒸し（豚こま150g）', '自炊', 375, 31.5, 24.5, 7.3],
 ];
 
