@@ -208,6 +208,7 @@ export const ADDED_IN: Record<number, string[]> = {
   37: ['home-fried-egg'],
   38: ['home-kewpie-arrabbiata'],
   39: ['oikos-pro-240'],
+  40: ['home-pasta-100'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -249,6 +250,8 @@ const other: Row[] = [
   ['belc-sausage-steak', 'ベルク あらびきソーセージステーキ（100g）', '自炊', 320, 12, 29, 3],
   // 卵1個（M・約50g）＋油 約2g で計算
   ['home-fried-egg', '目玉焼き（卵1個）', '自炊', 90, 6.1, 7.1, 0.2],
+  // 日本食品標準成分表（マカロニ・スパゲッティ 乾）より
+  ['home-pasta-100', 'パスタ（乾麺100g）', '自炊', 347, 12.9, 1.8, 73.1],
   ['home-kewpie-arrabbiata', 'キユーピー アラビアータ ソース（1人前・ソースのみ）', '自炊', 101, 2.2, 5.5, 10.6],
   ['home-alpron-soy-cookie', 'ALPRON ソイプロテイン クッキー&クリーム味（1杯30g）', '自炊', 115, 20, 2, 4.5],
   ['home-moyashi', 'もやし（1袋200g）', '自炊', 30, 3.4, 0.2, 5.2],
