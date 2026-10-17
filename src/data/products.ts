@@ -10,7 +10,7 @@ export const VERIFIED = new Set([
   'l-chicken-stick-yuzu', 'l-tororo-soba', 'l-tofu-stick-konbu', '7-goma-mushidori-soba', 'savas-milk-fruit-430', '7-tonshabu-salad',
   'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria', 'l-rosu-katsudon',
   'l-toridango-shirataki-soup', 'cup-tenkaippin-mini', '7-shio-chanko-soup', '7-onigiri-tamago-shoyu',
-  '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5',
+  '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5', 'home-kewpie-arrabbiata',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -206,6 +206,7 @@ export const ADDED_IN: Record<number, string[]> = {
   35: ['home-mabo-chicken-rice'],
   36: ['tori-liver-5'],
   37: ['home-fried-egg'],
+  38: ['home-kewpie-arrabbiata'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -246,6 +247,7 @@ const other: Row[] = [
   ['belc-sausage-steak', 'ベルク あらびきソーセージステーキ（100g）', '自炊', 320, 12, 29, 3],
   // 卵1個（M・約50g）＋油 約2g で計算
   ['home-fried-egg', '目玉焼き（卵1個）', '自炊', 90, 6.1, 7.1, 0.2],
+  ['home-kewpie-arrabbiata', 'キユーピー アラビアータ ソース（1人前・ソースのみ）', '自炊', 101, 2.2, 5.5, 10.6],
   ['home-alpron-soy-cookie', 'ALPRON ソイプロテイン クッキー&クリーム味（1杯30g）', '自炊', 115, 20, 2, 4.5],
   ['home-moyashi', 'もやし（1袋200g）', '自炊', 30, 3.4, 0.2, 5.2],
   ['home-enoki', 'えのき（1袋100g）', '自炊', 34, 2.7, 0.2, 7.6],
