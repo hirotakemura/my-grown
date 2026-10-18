@@ -9,6 +9,40 @@ import { ProductEditor } from './ProductEditor';
 import { useToast } from './Toast';
 
 type Tab = 'all' | 'mysets' | Category;
+
+/** 数量の表示（0.5・1.5 など小数もそのまま） */
+export const fmtQty = (q: number) => String(Math.round(q * 100) / 100);
+// −：1より多ければ1つ減らし、1なら半分（0.5）、それ未満なら外す ／ ＋：1未満なら1に、それ以上は1つ増やす
+const qtyDown = (q: number) => (q > 1 ? Math.round((q - 1) * 100) / 100 : q > 0.5 ? 0.5 : 0);
+const qtyUp = (q: number) => (q < 1 ? 1 : Math.round((q + 1) * 100) / 100);
+
+/** 数量。−＋のほか、数字をタップして 0.5 や 0.4 のように直接入れられる */
+function QtyInput({ name, qty, onChange }: { name: string; qty: number; onChange: (q: number) => void }) {
+  const [text, setText] = useState<string | null>(null);
+  const commit = () => {
+    if (text == null) return;
+    const n = Number(text.replace(',', '.'));
+    setText(null);
+    if (Number.isFinite(n) && n >= 0) onChange(Math.round(n * 100) / 100);
+  };
+  return (
+    <div className="qty">
+      <button className="icon-btn" aria-label="1つ減らす" onClick={() => onChange(qtyDown(qty))}>−</button>
+      <input
+        className="qty-input num"
+        type="text"
+        inputMode="decimal"
+        aria-label={`${name}の数量`}
+        value={text ?? fmtQty(qty)}
+        onFocus={(e) => { setText(fmtQty(qty)); e.target.select(); }}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+      />
+      <button className="icon-btn" aria-label="1つ増やす" onClick={() => onChange(qtyUp(qty))}>＋</button>
+    </div>
+  );
+}
 export type StoreFilter = 'all' | 'lawson' | 'seven' | 'other';
 
 const STORE_TABS: { id: StoreFilter; label: string }[] = [
@@ -160,7 +194,7 @@ export function ProductPicker({ date, slot, title, initial, initialStore = 'all'
             <div className="row">
               <div className="grow">
                 <div className="total num" data-testid="picker-total">
-                  {sel.reduce((n, i) => n + i.qty, 0)}品　{fmtNut(total)}
+                  {fmtQty(sel.reduce((n, i) => n + i.qty, 0))}品　{fmtNut(total)}
                 </div>
                 <div className="muted">{formatMD(date)} {SLOT_LABEL[slot]}</div>
               </div>
@@ -193,7 +227,7 @@ export function ProductPicker({ date, slot, title, initial, initialStore = 'all'
                       onClick={() => window.confirm(`マイセット「${s.name}」を削除しますか？`) && deleteMySet(s.id)}
                     >🗑</button>
                   </div>
-                  <div className="sub">{items.map((i) => `${i.name}${i.qty > 1 ? `×${i.qty}` : ''}`).join('、')}</div>
+                  <div className="sub">{items.map((i) => `${i.name}${i.qty !== 1 ? `×${fmtQty(i.qty)}` : ''}`).join('、')}</div>
                   <div className="total num">{fmtNut(t)}</div>
                   <div className="btn-grid">
                     <button className="btn" onClick={() => addSet(s)}>選択に追加</button>
@@ -213,7 +247,7 @@ export function ProductPicker({ date, slot, title, initial, initialStore = 'all'
                   <div key={keyOf(i)} className="prow sel">
                     <div className="main">
                       <div className="name"><span>{i.name}</span></div>
-                      <div className="nut">{fmtNut(i)} ×{i.qty}</div>
+                      <div className="nut">{fmtNut(i)} ×{fmtQty(i.qty)}</div>
                     </div>
                     <button className="btn small ghost" onClick={() => setSel((c) => c.filter((x) => keyOf(x) !== keyOf(i)))}>外す</button>
                   </div>
@@ -233,11 +267,7 @@ export function ProductPicker({ date, slot, title, initial, initialStore = 'all'
                       <span className="nut">{store === 'all' && p.store !== 'common' ? `${STORE_LABEL[p.store]}・` : ''}{fmtNut(p)}</span>
                     </button>
                     {q > 0 ? (
-                      <div className="qty">
-                        <button className="icon-btn" aria-label="1つ減らす" onClick={() => setQty(p, q - 1)}>−</button>
-                        <b className="num">{q}</b>
-                        <button className="icon-btn" aria-label="1つ増やす" onClick={() => setQty(p, q + 1)}>＋</button>
-                      </div>
+                      <QtyInput name={p.name} qty={q} onChange={(n) => setQty(p, n)} />
                     ) : (
                       <>
                         <button

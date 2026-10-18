@@ -312,3 +312,27 @@ test('筋トレ：アシスト懸垂マシンは数値が大きいほど楽な�
   await expect.poll(() => dbGet(page, 'exercises', 'assisted-pullup')).toMatchObject({ nextWeights: { '40': 36 } });
   await card.screenshot({ path: 'test-results/assist-pullup.png' });
 });
+
+test('食事：数量は半分（0.5）や0.4のような小数でも記録できる', async ({ page }) => {
+  await openApp(page);
+  await page.getByTestId('meal-dinner').getByRole('button', { name: '食べたものを選ぶ' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('button', { name: 'チキン・肉' }).click();
+  await dialog.getByRole('button', { name: /^サラダチキン プレーン（たんぱく質30.3g）/ }).first().click();
+  const qty = dialog.getByLabel('サラダチキン プレーン（たんぱく質30.3g）の数量');
+  await expect(qty).toHaveValue('1');
+  // −で1から半分に
+  await dialog.getByRole('button', { name: '1つ減らす' }).click();
+  await expect(qty).toHaveValue('0.5');
+  await expect(dialog.getByTestId('picker-total')).toContainText('0.5品');
+  // 数字を直接入れる
+  await qty.fill('0.4');
+  await qty.blur();
+  await expect(qty).toHaveValue('0.4');
+  await expect(dialog.getByTestId('picker-total')).toContainText('P12.1');
+  await dialog.getByRole('button', { name: '食べた', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByTestId('meal-dinner')).toContainText('サラダチキン プレーン（たんぱく質30.3g） ×0.4');
+  await page.reload();
+  await expect(page.getByTestId('meal-dinner')).toContainText('×0.4');
+});

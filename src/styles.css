@@ -287,6 +287,7 @@ textarea.input { height: auto; min-height: 44px; resize: vertical; font-size: 16
 .prow .nut { font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
 .qty { display: flex; align-items: center; gap: 2px; }
 .qty b { min-width: 20px; text-align: center; }
+.qty-input { width: 44px; height: 32px; padding: 0 2px; text-align: center; font-weight: 700; font-size: 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); }
 .star[aria-pressed='true'] { color: #e0a100; }
 
 /* ---- グラフ ---- */

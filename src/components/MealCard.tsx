@@ -33,7 +33,7 @@ export function ItemList({ items }: { items: MealItem[] }) {
     <ul className="items">
       {items.map((i, n) => (
         <li key={n}>
-          <span>{i.name}{i.qty > 1 ? ` ×${i.qty}` : ''}</span>
+          <span>{i.name}{i.qty !== 1 ? ` ×${Math.round(i.qty * 100) / 100}` : ''}</span>
           <span>{Math.round(i.kcal * i.qty)}kcal・P{g1(i.protein * i.qty)}</span>
         </li>
       ))}
