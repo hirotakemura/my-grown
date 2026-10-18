@@ -11,6 +11,7 @@ export const VERIFIED = new Set([
   'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria', 'l-rosu-katsudon',
   'l-toridango-shirataki-soup', 'cup-tenkaippin-mini', '7-shio-chanko-soup', '7-onigiri-tamago-shoyu',
   '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5', 'home-kewpie-arrabbiata', 'oikos-pro-240',
+  '7-curry-udon',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -159,6 +160,7 @@ const seven: Row[] = [
   ['7-tonshabu-salad', 'セブン たんぱく質が摂れる豚しゃぶサラダ', '汁物・サラダ', 131, 18.2, 5.3, 3.6],
   ['7-onigiri-tamago-shoyu', 'セブン たまご醤油おむすび', 'おにぎり', 206, 4.7, 4, 38.6],
   ['7-rosu-katsudon', 'セブン 特製ロースかつ丼', '外食・定食', 726, 27.2, 21, 107.1],
+  ['7-curry-udon', 'セブン 鰹出汁香る コク旨カレーうどん', '麺', 523, 18.5, 14.1, 80.5],
   ['7-shio-chanko-soup', 'セブン 塩ちゃんこスープ', '汁物・サラダ', 121, 12.3, 5, 7.8],
   ['7-ebi-doria', 'セブン クリーミーソースの海老ドリア', '外食・定食', 412, 13.7, 11.5, 65.1],
 ];
@@ -209,6 +211,7 @@ export const ADDED_IN: Record<number, string[]> = {
   38: ['home-kewpie-arrabbiata'],
   39: ['oikos-pro-240'],
   40: ['home-pasta-100'],
+  41: ['7-curry-udon'],
 };
 
 // どちらのコンビニでも買えるもの
