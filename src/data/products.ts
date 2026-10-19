@@ -11,7 +11,7 @@ export const VERIFIED = new Set([
   'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria', 'l-rosu-katsudon',
   'l-toridango-shirataki-soup', 'cup-tenkaippin-mini', '7-shio-chanko-soup', '7-onigiri-tamago-shoyu',
   '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5', 'home-kewpie-arrabbiata', 'oikos-pro-240',
-  '7-curry-udon',
+  '7-curry-udon', 'home-alpron-soy-strawberry',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -213,6 +213,7 @@ export const ADDED_IN: Record<number, string[]> = {
   40: ['home-pasta-100'],
   41: ['7-curry-udon'],
   42: ['home-karaage-skinless'],
+  43: ['home-alpron-soy-strawberry'],
 };
 
 // どちらのコンビニでも買えるもの
@@ -259,6 +260,8 @@ const other: Row[] = [
   // 皮なし鶏むね肉（約1枚）を片栗粉・醤油・酒・生姜・にんにくで揚げた合計の目安
   ['home-karaage-skinless', '鶏むね肉の唐揚げ（皮なし・1枚分）', '自炊', 540, 60, 30.3, 10.8],
   ['home-kewpie-arrabbiata', 'キユーピー アラビアータ ソース（1人前・ソースのみ）', '自炊', 101, 2.2, 5.5, 10.6],
+  // kcalは表示のPFCから計算（4×P＋9×F＋4×C）
+  ['home-alpron-soy-strawberry', 'ALPRON ソイプロテイン ストロベリー風味（1杯30g）', '自炊', 112, 20.5, 0.8, 5.8],
   ['home-alpron-soy-cookie', 'ALPRON ソイプロテイン クッキー&クリーム味（1杯30g）', '自炊', 115, 20, 2, 4.5],
   ['home-moyashi', 'もやし（1袋200g）', '自炊', 30, 3.4, 0.2, 5.2],
   ['home-enoki', 'えのき（1袋100g）', '自炊', 34, 2.7, 0.2, 7.6],
