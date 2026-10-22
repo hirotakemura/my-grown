@@ -11,7 +11,7 @@ export const VERIFIED = new Set([
   'eo-matsuya-negitama-gyumeshi', 'l-tori-liver', '7-chicken-bar-smoke-pepper', '7-ebi-doria', 'l-rosu-katsudon',
   'l-toridango-shirataki-soup', 'cup-tenkaippin-mini', '7-shio-chanko-soup', '7-onigiri-tamago-shoyu',
   '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5', 'home-kewpie-arrabbiata', 'oikos-pro-240',
-  '7-curry-udon', 'home-alpron-soy-strawberry',
+  '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -95,6 +95,7 @@ const lawson: Row[] = [
   ['l-tonshabu-pasta', '0秒パスタサラダ 豚しゃぶ', '麺', 404, 16, 20.5, 41.3],
   ['l-tonjiru-yadoroku', 'おにぎり浅草宿六監修 こだわり味噌の豚汁', '汁物・サラダ', 111, 10, 6.4, 4.8],
   ['l-wafu-soup', '食物繊維が摂れる 地鶏出汁きかせた和風スープ', '汁物・サラダ', 77, 6.7, 1.4, 11.2],
+  ['l-samgyetang-soup', 'もち麦入り たんぱく質たっぷり参鶏湯風スープ', '汁物・サラダ', 140, 14.1, 2.6, 16.1],
   ['l-toridango-shirataki-soup', '鶏団子としらたき麺の和風スープ', '汁物・サラダ', 127, 11.1, 5.8, 8.9],
   ['l-kake-soba', 'つゆが主役！かけそば', '麺', 272, 20.7, 1.7, 45.7],
   ['l-nebaneba-soba', '香りとのど越し ミニネバネバそば', '麺', 238, 13.3, 4.2, 39.1],
@@ -214,6 +215,7 @@ export const ADDED_IN: Record<number, string[]> = {
   41: ['7-curry-udon'],
   42: ['home-karaage-skinless'],
   43: ['home-alpron-soy-strawberry'],
+  44: ['l-samgyetang-soup'],
 };
 
 // どちらのコンビニでも買えるもの
