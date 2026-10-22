@@ -308,6 +308,13 @@ textarea.input { height: auto; min-height: 44px; resize: vertical; font-size: 16
 .expense-row > :nth-child(2) { grid-area: price; }
 .expense-row > :nth-child(3) { grid-area: cat; }
 .expense-row > :nth-child(4) { grid-area: del; justify-self: end; }
+.past-search { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--card-2); }
+.past-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; overscroll-behavior: contain; }
+.past-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); text-align: left; cursor: pointer; font: inherit; }
+.past-item .grow { display: flex; flex-direction: column; min-width: 0; }
+.past-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.past-item .muted { font-size: 12px; }
+.past-add { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-weight: 700; flex: none; }
 .ex-group { border: 1px solid var(--border); border-radius: 12px; padding: 0 12px; }
 .ex-group summary { gap: 8px; color: var(--text); }
 .ex-group summary::before { content: '▸'; color: var(--muted); transition: transform 0.15s; }

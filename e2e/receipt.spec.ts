@@ -143,3 +143,46 @@ test('支出：その月の記録が10件を超えたら、一覧のブロック
   expect(box.client / rowH).toBeCloseTo(10, 0);
   await page.screenshot({ path: 'test-results/money-scroll.png' });
 });
+
+test('支出：手入力で追加するとき、過去に買った品目を検索して金額・費目ごと追加できる', async ({ page }) => {
+  await openMoney(page);
+  await page.evaluate(
+    (rows) =>
+      new Promise<void>((resolve, reject) => {
+        const req = indexedDB.open('my-grown');
+        req.onerror = () => reject(req.error);
+        req.onsuccess = () => {
+          const tx = req.result.transaction('expenses', 'readwrite');
+          for (const r of rows) tx.objectStore('expenses').put(r);
+          tx.oncomplete = () => { req.result.close(); resolve(); };
+        };
+      }),
+    [
+      { id: 'p1', date: '2026-09-20', store: 'lawson', source: 'manual', createdAt: 1, items: [{ name: 'サラダチキン', price: 228, category: 'meal' }, { name: 'アイスコーヒー', price: 151, category: 'drink' }] },
+      { id: 'p2', date: '2026-09-25', store: 'belc', source: 'receipt', createdAt: 2, items: [{ name: '緑豆もやし', price: 18, category: 'meal' }, { name: 'サラダチキン', price: 248, category: 'meal' }] },
+    ],
+  );
+  await page.reload();
+  await page.getByRole('navigation').getByRole('button', { name: '支出' }).click();
+  await page.getByRole('button', { name: '✎ 手入力で追加' }).click();
+  const sheet = page.getByRole('dialog', { name: '支出を追加' });
+  await sheet.getByRole('button', { name: '🔍 過去の品目から' }).click();
+  const search = sheet.getByTestId('past-search');
+  // よく買う順（サラダチキンが2回）で、金額は一番新しい記録
+  await expect(search.getByRole('button').first()).toContainText('サラダチキン');
+  await expect(search.getByRole('button').first()).toContainText('¥248');
+  await sheet.getByLabel('過去の品目を検索').fill('こーひー');
+  await expect(search.getByRole('button')).toHaveCount(1);
+  await search.getByRole('button', { name: 'アイスコーヒーを追加' }).click();
+  await expect(sheet.getByLabel('1行目の品名')).toHaveValue('アイスコーヒー');
+  await expect(sheet.getByLabel('1行目の金額')).toHaveValue('151');
+  await expect(sheet.getByLabel('1行目の費目')).toHaveValue('drink');
+  // お店が「その他」のままなら、その品目を買ったお店になる
+  await expect(sheet.getByLabel('お店')).toHaveValue('lawson');
+  await sheet.getByLabel('過去の品目を検索').fill('もやし');
+  await search.getByRole('button', { name: '緑豆もやしを追加' }).click();
+  await expect(sheet.getByLabel('2行目の品名')).toHaveValue('緑豆もやし');
+  await expect(sheet.getByTestId('expense-total')).toHaveText('合計 ¥169');
+  await sheet.getByRole('button', { name: 'この内容で保存' }).click();
+  await expect(page.getByTestId('expense-list')).toContainText('アイスコーヒー、緑豆もやし');
+});

@@ -214,6 +214,7 @@ export function Money({ data }: { data: AppData }) {
           rules={rules}
           photoUrl={editing.photoUrl}
           rawText={editing.rawText}
+          history={data.expenses}
           onClose={closeEditor}
         />
       )}
