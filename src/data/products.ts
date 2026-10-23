@@ -12,7 +12,7 @@ export const VERIFIED = new Set([
   'l-toridango-shirataki-soup', 'cup-tenkaippin-mini', '7-shio-chanko-soup', '7-onigiri-tamago-shoyu',
   '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5', 'home-kewpie-arrabbiata', 'oikos-pro-240',
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
-  'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake',
+  'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -218,6 +218,7 @@ export const ADDED_IN: Record<number, string[]> = {
   43: ['home-alpron-soy-strawberry'],
   44: ['l-samgyetang-soup'],
   45: ['f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake'],
+  46: ['eo-yoshinoya-kakuni-teishoku'],
 };
 
 // ファミリーマート
@@ -250,6 +251,7 @@ const other: Row[] = [
   ['eo-chicken-teishoku', '鶏むね・ささみ系の定食', '外食・定食', 650, 40, 12, 90],
   ['eo-salad', '生野菜サラダ（外食）', '外食・定食', 30, 1, 0.3, 6],
   ['eo-yoshinoya-negitama-gyudon', '吉野家 ねぎ玉牛丼（並盛）', '外食・定食', 775, 25.5, 24.5, 110.5],
+  ['eo-yoshinoya-kakuni-teishoku', '吉野家 厚切り豚角煮牛小鉢定食', '外食・定食', 1291, 39.5, 76.4, 114],
   ['eo-yoshinoya-tonjiru', '吉野家 豚汁', '汁物・サラダ', 200, 9, 12, 13],
   // 鶏もも唐揚げ 1個（約30g）の一般的な目安
   ['eo-karaage-1', '唐揚げ（1個・約30g）', 'チキン・肉', 80, 5, 5, 3.5],
