@@ -220,6 +220,8 @@ describe('レシートの読み取り', () => {
   it('お店・日付がわからないときは「その他」・未設定', () => {
     expect(detectStore('どこかのお店')).toBe('other');
     expect(detectStore('ベルク 越谷店')).toBe('belc');
+    expect(detectStore('ファミリーマート 越谷駅前店')).toBe('famima');
+    expect(detectStore('FamilyMart')).toBe('famima');
     expect(detectDate('日付なし')).toBeUndefined();
     expect(detectDate('2026.9.5 8:00')).toBe('2026-09-05');
   });

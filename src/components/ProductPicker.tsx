@@ -43,16 +43,17 @@ function QtyInput({ name, qty, onChange }: { name: string; qty: number; onChange
     </div>
   );
 }
-export type StoreFilter = 'all' | 'lawson' | 'seven' | 'other';
+export type StoreFilter = 'all' | 'lawson' | 'seven' | 'famima' | 'other';
 
 const STORE_TABS: { id: StoreFilter; label: string }[] = [
   { id: 'all', label: 'すべて' },
   { id: 'lawson', label: 'ローソン' },
   { id: 'seven', label: 'セブン' },
+  { id: 'famima', label: 'ファミマ' },
   { id: 'other', label: '外食・自炊' },
 ];
 
-/** ローソン／セブンを選んだときは「コンビニ共通」の商品も出す */
+/** ローソン／セブン／ファミマを選んだときは「コンビニ共通」の商品も出す */
 export function matchStore(store: Store, filter: StoreFilter): boolean {
   if (filter === 'all') return true;
   if (filter === 'other') return store === 'other';
@@ -175,7 +176,7 @@ export function ProductPicker({ date, slot, title, initial, initialStore = 'all'
                 aria-label="商品名で検索"
               />
             </div>
-            <div className="seg" role="group" aria-label="お店" style={{ margin: '0 12px 8px' }}>
+            <div className="seg store-seg" role="group" aria-label="お店" style={{ margin: '0 12px 8px' }}>
               {STORE_TABS.map((t) => (
                 <button key={t.id} aria-pressed={store === t.id} onClick={() => { setStore(t.id); if (tab !== 'all' && tab !== 'mysets') setTab('all'); }}>
                   {t.label}

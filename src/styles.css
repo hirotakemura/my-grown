@@ -131,6 +131,8 @@ h1, h2, h3, p { margin: 0; }
 .seg button[aria-pressed='true'] .ui-icon { opacity: 1; }
 .seg button[aria-pressed='true'] { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgb(0 0 0 / 0.12); }
 .seg.tall button { min-height: 44px; }
+/* お店が5つ並ぶので、文字を折り返さずに詰める */
+.store-seg button { flex: 1 1 auto; padding: 0 4px; font-size: 13px; white-space: nowrap; }
 
 .chip {
   display: inline-flex; align-items: center; gap: 4px;

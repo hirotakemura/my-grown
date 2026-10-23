@@ -27,20 +27,22 @@ export const CATEGORIES: Category[] = [
   'その他',
 ];
 
-/** 商品の買える場所。common はローソンでもセブンでも買えるもの */
-export type Store = 'lawson' | 'seven' | 'common' | 'other';
+/** 商品の買える場所。common はどのコンビニでも買えるもの */
+export type Store = 'lawson' | 'seven' | 'famima' | 'common' | 'other';
 export const STORE_LABEL: Record<Store, string> = {
   lawson: 'ローソン',
   seven: 'セブン',
+  famima: 'ファミマ',
   common: 'コンビニ共通',
   other: '外食・自炊',
 };
 
 /** 食事をどこで調達するか（提案の絞り込みに使う） */
-export type Place = 'lawson' | 'seven' | 'eatout' | 'home' | 'belc';
+export type Place = 'lawson' | 'seven' | 'famima' | 'eatout' | 'home' | 'belc';
 export const PLACE_LABEL: Record<Place, string> = {
   lawson: 'ローソン',
   seven: 'セブン',
+  famima: 'ファミマ',
   eatout: '外食',
   home: '家で食べる',
   belc: 'ベルクで買って自炊',
@@ -161,11 +163,12 @@ export const EXPENSE_CATEGORY_LABEL: Record<ExpenseCategory, string> = {
   other: 'その他',
 };
 
-export type ExpenseStore = 'lawson' | 'seven' | 'belc' | 'other';
-export const EXPENSE_STORES: ExpenseStore[] = ['lawson', 'seven', 'belc', 'other'];
+export type ExpenseStore = 'lawson' | 'seven' | 'famima' | 'belc' | 'other';
+export const EXPENSE_STORES: ExpenseStore[] = ['lawson', 'seven', 'famima', 'belc', 'other'];
 export const EXPENSE_STORE_LABEL: Record<ExpenseStore, string> = {
   lawson: 'ローソン',
   seven: 'セブン',
+  famima: 'ファミマ',
   belc: 'ベルク',
   other: 'その他',
 };

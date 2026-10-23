@@ -202,8 +202,8 @@ export function suggestionList(slot: MealSlot, kind: DayKind): Suggestion[] {
   return (kind === 'work' ? WEEKDAY_MENUS : HOLIDAY_MENUS)[slot];
 }
 
-/** その食事の提案に出てくる場所（ローソン・セブン・外食…） */
-const PLACE_ORDER: Place[] = ['lawson', 'seven', 'eatout', 'home', 'belc'];
+/** その食事の提案に出てくる場所（ローソン・セブン・ファミマ・外食…） */
+const PLACE_ORDER: Place[] = ['lawson', 'seven', 'famima', 'eatout', 'home', 'belc'];
 
 export function placesFor(slot: MealSlot, kind: DayKind): Place[] {
   const used = new Set(suggestionList(slot, kind).map((s) => s.place));

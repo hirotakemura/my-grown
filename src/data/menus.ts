@@ -109,6 +109,18 @@ export const WEEKDAY_MENUS: Record<MealSlot, Suggestion[]> = {
       items: [p('salad-chicken'), p('onigiri-sake'), p('onigiri-ume'), p('miso-soup'), p('boiled-egg')],
     },
     {
+      id: 'wl-f-nanban',
+      place: 'famima',
+      title: 'チキン南蛮＋タンスティック＋手巻 紅しゃけ',
+      items: [p('f-chicken-nanban'), p('f-tan-stick-yuzu'), p('f-onigiri-benishake')],
+    },
+    {
+      id: 'wl-f-tan',
+      place: 'famima',
+      title: 'タンスティック2本＋手巻 紅しゃけ＋ミルクプロテイン',
+      items: [p('f-tan-stick-yuzu', 2), p('f-onigiri-benishake'), p('savas-milk')],
+    },
+    {
       id: 'wl-tororo',
       place: 'lawson',
       title: '冷しとろろそば＋サラダチキンスティック＋ゆで卵',

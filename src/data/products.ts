@@ -12,6 +12,7 @@ export const VERIFIED = new Set([
   'l-toridango-shirataki-soup', 'cup-tenkaippin-mini', '7-shio-chanko-soup', '7-onigiri-tamago-shoyu',
   '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5', 'home-kewpie-arrabbiata', 'oikos-pro-240',
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
+  'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -216,9 +217,17 @@ export const ADDED_IN: Record<number, string[]> = {
   42: ['home-karaage-skinless'],
   43: ['home-alpron-soy-strawberry'],
   44: ['l-samgyetang-soup'],
+  45: ['f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake'],
 };
 
-// どちらのコンビニでも買えるもの
+// ファミリーマート
+const famima: Row[] = [
+  ['f-tan-stick-yuzu', 'ファミマ 炭火焼きタンスティック 柚子こしょう', 'チキン・肉', 78, 9.4, 3.4, 2.4],
+  ['f-chicken-nanban', 'ファミマ 甘酢たれとタルタルソースのチキン南蛮', 'チキン・肉', 265, 13.8, 16.5, 15.3],
+  ['f-onigiri-benishake', 'ファミマ 手巻 紅しゃけ', 'おにぎり', 174, 4.7, 1.3, 35.8],
+];
+
+// どのコンビニでも買えるもの
 const common: Row[] = [
   ['savas-milk', 'ザバス ミルクプロテイン 脂肪0 200ml', 'プロテイン', 102, 15, 0, 10.5],
   ['savas-milk-cocoa-430', 'ザバス MILK PROTEIN 脂肪0 ココア味 430ml', 'プロテイン', 160, 20, 0, 20],
@@ -284,6 +293,7 @@ const build = (rows: Row[], store: Store): Product[] =>
 export const SEED_PRODUCTS: Product[] = [
   ...build(lawson, 'lawson'),
   ...build(seven, 'seven'),
+  ...build(famima, 'famima'),
   ...build(common, 'common'),
   ...build(other, 'other'),
 ];

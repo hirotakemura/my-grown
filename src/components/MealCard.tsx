@@ -21,13 +21,13 @@ const fmt = fmtNut;
 
 /** 提案の場所 → 「食べたものを選ぶ」を開いたときのお店タブ */
 export function storeForPlace(place?: Place): StoreFilter {
-  if (place === 'lawson' || place === 'seven') return place;
+  if (place === 'lawson' || place === 'seven' || place === 'famima') return place;
   // 休日の自炊（ベルク）も「外食・自炊」タブを開く
   if (place === 'eatout' || place === 'home' || place === 'belc') return 'other';
   return 'all';
 }
 
-const SHORT_PLACE: Record<Place, string> = { lawson: 'ローソン', seven: 'セブン', eatout: '外食', home: '家', belc: 'ベルク' };
+const SHORT_PLACE: Record<Place, string> = { lawson: 'ローソン', seven: 'セブン', famima: 'ファミマ', eatout: '外食', home: '家', belc: 'ベルク' };
 export function ItemList({ items }: { items: MealItem[] }) {
   return (
     <ul className="items">

@@ -13,7 +13,7 @@ interface Props {
   onClose: () => void;
 }
 
-const STORES: Store[] = ['lawson', 'seven', 'common', 'other'];
+const STORES: Store[] = ['lawson', 'seven', 'famima', 'common', 'other'];
 
 function NumInput({ label, value, set }: { label: string; value: string; set: (v: string) => void }) {
   return (

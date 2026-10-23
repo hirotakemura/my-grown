@@ -128,6 +128,7 @@ export function detectStore(text: string): ExpenseStore {
   const t = normalizeText(text).toUpperCase();
   if (/LAWSON|ローソン/.test(t)) return 'lawson';
   if (/セブン|7-ELEVEN|7ELEVEN|SEVEN|ｾﾌﾞﾝ/.test(t)) return 'seven';
+  if (/ファミリーマート|ファミマ|FAMILYMART|FAMILY MART|ﾌｧﾐﾘｰﾏｰﾄ/.test(t)) return 'famima';
   if (/ベルク|BELC/.test(t)) return 'belc';
   return 'other';
 }

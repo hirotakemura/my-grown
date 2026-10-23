@@ -191,7 +191,7 @@ export function SettingsScreen({ data }: { data: AppData }) {
       </section>
 
       <section className="card">
-        <h2 className="card-title">商品（ローソン・セブン・外食）</h2>
+        <h2 className="card-title">商品（ローソン・セブン・ファミマ・外食）</h2>
         <p className="muted">{data.products.length}品登録（うち目安の数値 {data.products.filter((p) => p.estimate).length}品）</p>
         <button className="btn block" onClick={() => setShowProducts(true)}>商品の追加・編集・削除</button>
       </section>
