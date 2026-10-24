@@ -219,6 +219,7 @@ export const ADDED_IN: Record<number, string[]> = {
   44: ['l-samgyetang-soup'],
   45: ['f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake'],
   46: ['eo-yoshinoya-kakuni-teishoku'],
+  47: ['eo-kashiwa-udon'],
 };
 
 // ファミリーマート
@@ -251,6 +252,8 @@ const other: Row[] = [
   ['eo-chicken-teishoku', '鶏むね・ささみ系の定食', '外食・定食', 650, 40, 12, 90],
   ['eo-salad', '生野菜サラダ（外食）', '外食・定食', 30, 1, 0.3, 6],
   ['eo-yoshinoya-negitama-gyudon', '吉野家 ねぎ玉牛丼（並盛）', '外食・定食', 775, 25.5, 24.5, 110.5],
+  // PFCは概算、kcalはPFCから計算（4×P＋9×F＋4×C）
+  ['eo-kashiwa-udon', 'かしわうどん', '麺', 467, 21, 7, 80],
   ['eo-yoshinoya-kakuni-teishoku', '吉野家 厚切り豚角煮牛小鉢定食', '外食・定食', 1291, 39.5, 76.4, 114],
   ['eo-yoshinoya-tonjiru', '吉野家 豚汁', '汁物・サラダ', 200, 9, 12, 13],
   // 鶏もも唐揚げ 1個（約30g）の一般的な目安
