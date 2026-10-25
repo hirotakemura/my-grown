@@ -156,6 +156,7 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
   const sug = suggestWeight(ex, last);
   const swapped = ex.id !== main.id;
   const todays = sets.filter((s) => s.date === date && s.exerciseId === ex.id);
+  const doneCount = todays.filter((s) => s.done).length;
 
   const toggleSwap = () => {
     const swaps = { ...day?.swaps };
@@ -176,12 +177,15 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
   };
 
   return (
-    <div className="ex-card" data-testid={`exercise-${ex.id}`}>
+    <div className={`ex-card ${doneCount >= ex.sets ? 'all-done' : ''}`} data-testid={`exercise-${ex.id}`}>
       <div className="row">
         <div className="grow">
           <div className="ex-name">{ex.name}</div>
           <div className="muted">{ex.repMin}〜{ex.repMax}回 × {ex.sets}セット{swapped ? `（${main.name}の代わり）` : ''}</div>
         </div>
+        <span className={`chip num ${doneCount >= ex.sets ? 'ok' : ''}`} aria-label={`${ex.name} ${doneCount}/${ex.sets}セット完了`}>
+          {doneCount >= ex.sets ? '✓ ' : ''}{doneCount}/{ex.sets}
+        </span>
       </div>
       {last ? (
         <div className="sub num">

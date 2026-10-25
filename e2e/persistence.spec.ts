@@ -28,6 +28,8 @@ function dbGet(page: Page, store: string, key: string) {
 }
 
 const tab = (page: Page, name: string) => page.getByRole('navigation').getByRole('button', { name, exact: true }).click();
+/** 今日の画面の「食事／筋トレ」の切り替え */
+const mode = (page: Page, name: '食事' | '筋トレ') => page.getByRole('tab', { name: new RegExp(`^${name}`) }).click();
 
 /** 体重は「記録」タブで入れる（入れたら「今日」タブに戻る） */
 async function enterWeight(page: Page, value: string) {
@@ -55,7 +57,9 @@ test('記録した食事・体重・セットがリロード後も残る', async
   // 体重
   await enterWeight(page, '71.6');
 
-  // レッグプレス 1セット目
+  // レッグプレス 1セット目（筋トレに切り替える）
+  await tab(page, '今日');
+  await mode(page, '筋トレ');
   const lp = page.getByTestId('exercise-leg-press');
   await lp.getByLabel('レッグプレス 1セット目の重さ').fill('60');
   await lp.getByLabel('レッグプレス 1セット目の回数').fill('12');
@@ -64,11 +68,14 @@ test('記録した食事・体重・セットがリロード後も残る', async
 
   await page.reload();
 
-  await expect(page.getByTestId('meal-lunch').getByText('✓ 食べた')).toBeVisible();
+  // トレの途中で開き直すと筋トレから表示される
   const lp2 = page.getByTestId('exercise-leg-press');
+  await expect(page.getByRole('tab', { name: /^筋トレ/ })).toHaveAttribute('aria-selected', 'true');
   await expect(lp2.getByLabel('レッグプレス 1セット目の重さ')).toHaveValue('60');
   await expect(lp2.getByLabel('レッグプレス 1セット目の回数')).toHaveValue('12');
   await expect(lp2.getByRole('button', { name: '1セット目を完了' })).toHaveAttribute('aria-pressed', 'true');
+  await mode(page, '食事');
+  await expect(page.getByTestId('meal-lunch').getByText('✓ 食べた')).toBeVisible();
   await expect(await weightInput(page)).toHaveValue('71.6');
   await tab(page, '今日');
 
@@ -154,6 +161,7 @@ test('セブンの商品と外食（手入力）で記録し、その日のPFC�
 
   // その日の合計（昼のセブン提案＋夜の外食）
   const progress = page.getByTestId('progress');
+  await progress.getByText('脂質・炭水化物・PFCバランス').click();
   await expect(progress.getByRole('progressbar', { name: 'F 脂質' })).toBeVisible();
   const lunchText = await page.getByTestId('meal-lunch').innerText();
   expect(lunchText).toContain('セブン');
@@ -166,8 +174,10 @@ test('セブンの商品と外食（手入力）で記録し、その日のPFC�
   expect(Number(cells[3])).toBeGreaterThan(35);
 });
 
-test('期間（いつからいつまで）を今日の画面から変更でき、リロード後も残る', async ({ page }) => {
+test('期間（いつからいつまで）を記録の画面から変更でき、リロード後も残る。今日の画面には要約が出る', async ({ page }) => {
   await openApp(page);
+  // 今日の画面の要約から記録の画面のカレンダーへ
+  await page.getByTestId('goal-brief').click();
   const goal = page.getByTestId('goal');
   await goal.getByRole('button', { name: '期間を変更' }).click();
   const editor = page.getByTestId('period-editor');
@@ -187,6 +197,8 @@ test('期間（いつからいつまで）を今日の画面から変更でき�
   await expect(goal.getByTestId('days-left')).toHaveText('83');
 
   await page.reload();
+  await expect(page.getByTestId('goal-brief')).toContainText('ゴールまで83日');
+  await tab(page, '記録');
   await expect(page.getByTestId('period')).toHaveText('9/28(月)〜12/20(日)（84日間）');
   await page.getByRole('button', { name: '設定' }).click();
   await expect(page.getByTestId('period-editor').getByLabel('ゴール日（期限）')).toHaveValue('2026-12-20');
@@ -266,6 +278,7 @@ test('筋トレ：マシンの「次の重さ」を重さごとに覚えて提�
     id: `2026-09-25|leg-press|${i}`, date: '2026-09-25', exerciseId: 'leg-press', index: i, weight: 41, reps: 12, done: true,
   })));
   await page.reload();
+  await mode(page, '筋トレ');
   const card = page.getByTestId('exercise-leg-press');
   const next = card.getByLabel('レッグプレスの41kgの次の重さ');
   await expect(card).toContainText('前回 41kg →');
@@ -285,6 +298,7 @@ test('筋トレ：マシンの「次の重さ」を重さごとに覚えて提�
   await expect.poll(() => dbGet(page, 'exercises', 'leg-press')).toMatchObject({ nextWeights: { '41': 50 } });
 
   await page.reload();
+  await mode(page, '筋トレ');
   await expect(page.getByTestId('exercise-leg-press').getByLabel('レッグプレスの41kgの次の重さ')).toHaveValue('50');
 });
 
@@ -296,6 +310,7 @@ test('筋トレ：アシスト懸垂マシンは数値が大きいほど楽な�
     id: `2026-09-25|assisted-pullup|${i}`, date: '2026-09-25', exerciseId: 'assisted-pullup', index: i, weight: 40, reps: 12, done: true,
   })));
   await page.reload();
+  await mode(page, '筋トレ');
   const card = page.getByTestId('exercise-assisted-pullup');
   const next = card.getByLabel('アシスト懸垂マシンの40kgの次の重さ');
   await expect(card).toContainText('補助を減らす');
@@ -335,4 +350,58 @@ test('食事：数量は半分（0.5）や0.4のような小数でも記録で�
   await expect(page.getByTestId('meal-dinner')).toContainText('サラダチキン プレーン（たんぱく質30.3g） ×0.4');
   await page.reload();
   await expect(page.getByTestId('meal-dinner')).toContainText('×0.4');
+});
+
+test('今日：食事と筋トレを切り替えて表示し、切り替えても入力中の内容や記録は消えない', async ({ page }) => {
+  await openApp(page);
+  const summary = page.getByTestId('progress');
+  await expect(summary).toContainText('カロリー');
+  await expect(summary).toContainText('/ 2000kcal');
+  await expect(summary).toContainText('/ 135g');
+  await expect(page.getByTestId('today-achieved')).toHaveText('まだ途中');
+
+  // 初めは食事だけが出ている
+  await expect(page.getByTestId('meal-lunch')).toBeVisible();
+  await expect(page.getByTestId('workout')).toBeHidden();
+  // 「次にやること」の「記録する」で、その食事の枠が目立つ
+  await page.getByTestId('next-action').getByRole('button', { name: '記録する' }).click();
+  await expect(page.locator('.card.meal.focused')).toHaveCount(1);
+
+  // 食事を記録すると、サマリーの数字が増え、記録済みの枠は1行にまとまる（内容の変更・取り消しはそのまま）
+  const lunch = page.getByTestId('meal-lunch');
+  await lunch.getByRole('button', { name: 'これを食べた' }).click();
+  await expect(lunch.getByText('✓ 食べた')).toBeVisible();
+  await expect(lunch.getByRole('button', { name: '内容を変更' })).toBeVisible();
+  await expect(lunch.getByRole('button', { name: '取り消す' })).toBeVisible();
+  await expect(summary).not.toContainText('あと 135g');
+
+  // 筋トレに切り替えて、重さだけ入れた（まだ保存していない）状態で食事に戻り、また筋トレへ
+  await mode(page, '筋トレ');
+  await expect(page.getByTestId('meal-lunch')).toBeHidden();
+  const weight = page.getByLabel('レッグプレス 1セット目の重さ');
+  await weight.fill('55');
+  await mode(page, '食事');
+  await expect(page.getByTestId('meal-lunch').getByText('✓ 食べた')).toBeVisible();
+  await mode(page, '筋トレ');
+  await expect(weight).toHaveValue('55');
+  // 回数を入れないと完了にならない
+  await page.getByTestId('exercise-leg-press').getByRole('button', { name: '1セット目を完了' }).click();
+  await expect(page.getByTestId('exercise-leg-press').getByRole('button', { name: '1セット目を完了' })).toHaveAttribute('aria-pressed', 'false');
+  await page.getByLabel('レッグプレス 1セット目の回数').fill('12');
+  await page.getByTestId('exercise-leg-press').getByRole('button', { name: '1セット目を完了' }).click();
+  await expect(page.getByTestId('exercise-leg-press')).toContainText('1/3');
+  await expect(page.getByRole('tab', { name: /^筋トレ/ })).toContainText('1/18');
+  // iPhoneの幅で横にはみ出さない（筋トレ・食事とも）
+  const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(await overflow()).toBeLessThanOrEqual(0);
+  await mode(page, '食事');
+  expect(await overflow()).toBeLessThanOrEqual(0);
+  await mode(page, '筋トレ');
+
+  // トレ中は「次にやること」から筋トレを開ける
+  await mode(page, '食事');
+  await expect(page.getByTestId('next-action')).toContainText('トレ中：1 / 18 セット完了');
+  await page.getByTestId('next-action').getByRole('button', { name: '筋トレを開く' }).click();
+  await expect(page.getByRole('tab', { name: /^筋トレ/ })).toHaveAttribute('aria-selected', 'true');
+  await expect(weight).toHaveValue('55');
 });

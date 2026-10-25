@@ -6,6 +6,7 @@ import { SettingsScreen } from './screens/SettingsScreen';
 import { Money } from './screens/Money';
 import { ToastProvider } from './components/Toast';
 import { RestTimerProvider } from './components/RestTimer';
+import type { TodayMode } from './components/TodaySummary';
 
 type Tab = 'today' | 'records' | 'money' | 'settings';
 
@@ -40,6 +41,9 @@ export default function App() {
   const today = useToday();
   const [tab, setTab] = useState<Tab>('today');
   const [date, setDate] = useState<string | null>(null); // null = いつも今日
+  // 食事／筋トレ：最初は食事。今日のトレの途中で開き直したときは筋トレから
+  const [chosenMode, setTodayMode] = useState<TodayMode | null>(null);
+  const todayMode: TodayMode = chosenMode ?? (data?.days.get(today)?.gymStatus === 'started' ? 'workout' : 'meal');
 
   return (
     <ToastProvider>
@@ -48,7 +52,14 @@ export default function App() {
           {!data ? (
             <p className="muted" style={{ padding: 24, textAlign: 'center' }}>読み込み中…</p>
           ) : tab === 'today' ? (
-            <Today data={data} date={date ?? today} setDate={(d) => setDate(d === today ? null : d)} />
+            <Today
+              data={data}
+              date={date ?? today}
+              setDate={(d) => setDate(d === today ? null : d)}
+              mode={todayMode}
+              setMode={setTodayMode}
+              onOpenRecords={() => { setTab('records'); window.scrollTo(0, 0); }}
+            />
           ) : tab === 'records' ? (
             <Records data={data} />
           ) : tab === 'money' ? (

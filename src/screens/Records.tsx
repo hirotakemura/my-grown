@@ -6,6 +6,8 @@ import { dayStatus } from '../lib/plan';
 import { bestOf, sessionsOf } from '../lib/progression';
 import { LineChart } from '../components/LineChart';
 import { WeightCard } from '../components/WeightCard';
+import { GoalCard } from '../components/GoalCard';
+import { goalProgress } from '../lib/plan';
 import { g1 } from '../lib/format';
 
 export function Records({ data }: { data: AppData }) {
@@ -28,6 +30,8 @@ export function Records({ data }: { data: AppData }) {
       days: [...st].reverse(),
     };
   }, [data, today]);
+
+  const progress = useMemo(() => goalProgress(data, today), [data, today]);
 
   const weights = [...data.days.values()]
     .filter((d) => d.weight != null)
@@ -56,6 +60,8 @@ export function Records({ data }: { data: AppData }) {
   return (
     <div className="screen">
       <h1 className="page-title">記録</h1>
+
+      <GoalCard progress={progress} settings={data.settings} today={today} />
 
       <section className="card">
         <h2 className="card-title">直近7日</h2>

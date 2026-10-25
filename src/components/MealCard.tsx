@@ -15,6 +15,8 @@ export interface MealCardProps {
   products: Map<string, Product>;
   mySets: MySet[];
   onPick: (slot: MealSlot, initial: MealItem[], store?: StoreFilter) => void;
+  /** 「次にやること」から開いたときに少し目立たせる */
+  focused?: boolean;
 }
 
 const fmt = fmtNut;
@@ -78,10 +80,12 @@ export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick
       )}
       <div>
         <div className="muted">{PLACE_LABEL[sug.place]}・提案</div>
-        <div className="card-title" data-testid={`suggestion-${slot}`}>{sug.title}</div>
+        <div className="sug-title" data-testid={`suggestion-${slot}`}>{sug.title}</div>
       </div>
-      <ItemList items={items} />
-      <div className="total num">合計 {fmt(total)}</div>
+      <details className="fold">
+        <summary><span className="total num">合計 {fmt(total)}</span><span className="muted">内訳</span></summary>
+        <ItemList items={items} />
+      </details>
       {sug.recipe && (
         <details>
           <summary>作り方を見る</summary>
@@ -110,22 +114,28 @@ export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick
           ))}
         </div>
       )}
-      <div className="btn-grid">
-        <button className="btn primary span2" onClick={() => eat(items)}>これを食べた</button>
-        <button className="btn span2" onClick={() => onPick(slot, [], storeForPlace(place ?? (kind === 'off' ? 'belc' : undefined)))}>{pickLabel()}</button>
-        <button className="btn" onClick={nextIdea} disabled={choiceCount < 2}>
-          別の案{choiceCount > 1 ? `（${choiceCount}案）` : ''}
+      {/* 主な操作：提案どおりに記録／違うものを選んで記録。サブ：提案を変える／この食事はとらない */}
+      <div className="meal-actions">
+        <button className="btn primary" onClick={() => eat(items)}>これを食べた</button>
+        <button className="btn" onClick={() => onPick(slot, [], storeForPlace(place ?? (kind === 'off' ? 'belc' : undefined)))}>{pickLabel()}</button>
+      </div>
+      <div className="meal-sub">
+        <button className="btn small ghost" onClick={nextIdea} disabled={choiceCount < 2}>
+          ↻ 別の案{choiceCount > 1 ? `（${choiceCount}案）` : ''}
         </button>
-        <button className="btn" onClick={() => skipMeal(date, slot)}>食べない</button>
+        <button className="btn small ghost" onClick={() => skipMeal(date, slot)}>食べない</button>
       </div>
     </div>
   );
 }
 
+const qtyText = (q: number) => (q !== 1 ? ` ×${Math.round(q * 100) / 100}` : '');
+
 export function MealCard(props: MealCardProps) {
-  const { date, slot, time, meal, onPick } = props;
+  const { date, slot, time, meal, onPick, focused } = props;
+  const state = meal?.status ?? 'open';
   return (
-    <section className="card" data-testid={`meal-${slot}`}>
+    <section className={`card meal ${state} ${focused ? 'focused' : ''}`} data-testid={`meal-${slot}`}>
       <div className="card-head">
         <h3 className="card-title">{SLOT_LABEL[slot]} <span className="muted">{time}</span></h3>
         {meal?.status === 'eaten' && <span className="chip ok">✓ 食べた</span>}
@@ -134,16 +144,23 @@ export function MealCard(props: MealCardProps) {
       {!meal && <MealSuggestion {...props} />}
       {meal?.status === 'eaten' && (
         <>
-          <ItemList items={meal.items} />
-          <div className="total num">合計 {fmt(itemsTotal(meal.items))}</div>
-          <div className="btn-grid">
-            <button className="btn" onClick={() => onPick(slot, meal.items)}>内容を変更</button>
-            <button className="btn ghost" onClick={() => clearMeal(date, slot)}>取り消す</button>
+          {/* 記録済みは1行にまとめる。内訳は開いて確認できる */}
+          <details className="fold">
+            <summary>
+              <span className="eaten-names">{meal.items.map((i) => `${i.name}${qtyText(i.qty)}`).join('、')}</span>
+            </summary>
+            <ItemList items={meal.items} />
+            <div className="total num">合計 {fmt(itemsTotal(meal.items))}</div>
+          </details>
+          <div className="row">
+            <span className="grow total num">{Math.round(itemsTotal(meal.items).kcal)}kcal・P{g1(itemsTotal(meal.items).protein)}</span>
+            <button className="btn small" onClick={() => onPick(slot, meal.items)}>内容を変更</button>
+            <button className="btn small ghost" onClick={() => clearMeal(date, slot)}>取り消す</button>
           </div>
         </>
       )}
       {meal?.status === 'skipped' && (
-        <button className="btn ghost" onClick={() => clearMeal(date, slot)}>取り消す</button>
+        <button className="btn small ghost" style={{ alignSelf: 'flex-start' }} onClick={() => clearMeal(date, slot)}>取り消す</button>
       )}
     </section>
   );

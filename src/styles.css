@@ -384,3 +384,59 @@ input[type='time'].input::-webkit-date-and-time-value {
 .nw-value em { font-style: normal; font-size: 12px; color: var(--muted); padding-right: 4px; }
 .nw-hint { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
 .nw-hint.known { color: var(--accent); }
+
+/* ---- 今日のサマリー ---- */
+.summary { gap: 10px; }
+.sum-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.seg.mini button { min-height: 36px; font-size: 13px; padding: 0 10px; gap: 4px; white-space: nowrap; }
+.seg.mini .ui-icon { width: 18px; height: 18px; }
+.sum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sum-num { display: flex; flex-direction: column; gap: 4px; background: var(--card-2); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+.sum-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.sum-num b { font-size: 26px; line-height: 1.1; letter-spacing: -0.01em; }
+.sum-num small { font-size: 13px; color: var(--muted); }
+.sum-left { font-size: 13px; font-weight: 600; color: var(--accent); }
+.sum-left.over { color: var(--warn); }
+.bar.thin { height: 6px; position: relative; background: var(--card); }
+.bar-line { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--text-2); opacity: 0.5; }
+.sum-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 13px; color: var(--text-2); margin-top: -2px; }
+.ok-text { color: var(--accent); font-weight: 600; }
+.next-step { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+.next-title { font-weight: 700; font-size: 15px; }
+.next-btns { display: flex; gap: 6px; flex-shrink: 0; }
+.next-step .btn { flex-shrink: 0; }
+.sum-more summary { min-height: 32px; font-size: 13px; }
+.sum-goal { background: none; border: none; padding: 0; text-align: left; cursor: pointer; min-height: 28px; margin-top: -6px; }
+
+/* ---- 食事／筋トレの切り替え（日付バーの下に貼り付く） ---- */
+.mode-switch {
+  position: sticky; z-index: 15; margin: 0 -12px; padding: 6px 12px;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.mode-switch .seg button[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); box-shadow: none; }
+.seg-badge { font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--card); color: var(--text-2); }
+.mode-switch .seg button[aria-pressed='true'] .seg-badge { background: color-mix(in srgb, var(--accent-ink) 22%, transparent); color: var(--accent-ink); }
+.mode-anchor { height: 0; margin-bottom: -12px; }
+.panel { display: flex; flex-direction: column; gap: 12px; }
+.panel[hidden] { display: none; }
+
+/* ---- 食事カード ---- */
+.card.meal { gap: 8px; padding: 12px 14px; }
+.card.meal.eaten { border-left: 4px solid var(--accent); }
+.card.meal.skipped { border-left: 4px solid var(--cell-miss); padding-bottom: 10px; }
+.card.meal.eaten .card-title, .card.meal.skipped .card-title { font-size: 15px; }
+.card.meal.focused { box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); border-color: var(--accent); }
+.sug-title { font-size: 16px; font-weight: 700; line-height: 1.4; }
+.fold summary { min-height: 32px; gap: 8px; color: var(--text); font-weight: 400; justify-content: space-between; }
+.fold summary .muted::after { content: ' ▾'; }
+.fold[open] summary .muted::after { content: ' ▴'; }
+.eaten-names { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2); font-size: 14px; }
+.fold[open] .eaten-names { white-space: normal; }
+.meal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.meal-actions .btn { white-space: nowrap; padding: 0 8px; font-size: 15px; }
+.meal-sub { display: flex; justify-content: space-between; gap: 8px; margin-top: -2px; }
+.meal-sub .btn { min-height: 40px; color: var(--text-2); }
+
+/* ---- 筋トレ：終わった種目 ---- */
+.ex-card.all-done .ex-name { color: var(--accent); }
