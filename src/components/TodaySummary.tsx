@@ -77,7 +77,7 @@ export function TodaySummary({ date, today, status, progress, kind, autoKind, ac
           ))}
         </div>
         <span className={`chip ${status.achieved ? 'ok' : ''}`} data-testid="today-achieved">
-          {status.achieved ? '✓ 今日は達成' : isToday ? 'まだ途中' : '未達成'}
+          {status.achieved ? (isToday ? '✓ 今日は達成' : '✓ 達成') : isToday ? 'まだ途中' : date > today ? 'これから' : '未達成'}
         </span>
       </div>
 
