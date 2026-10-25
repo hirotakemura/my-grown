@@ -13,10 +13,13 @@ export function RestTimerProvider({ children }: { children: ReactNode }) {
   const [finished, setFinished] = useState(false);
   const [flash, setFlash] = useState(0);
   const [now, setNow] = useState(Date.now());
+  // 残量バー用：今回の休憩の長さ（+30秒で伸びる）
+  const [total, setTotal] = useState(1);
 
   const start = useCallback((seconds: number) => {
     setFinished(false);
     setEndAt(Date.now() + seconds * 1000);
+    setTotal(seconds * 1000);
     setNow(Date.now());
   }, []);
 
@@ -55,20 +58,24 @@ export function RestTimerProvider({ children }: { children: ReactNode }) {
       {running && (
         <div className={`timer ${finished ? 'finished' : ''}`} role="timer" aria-live="assertive">
           {finished ? (
-            <span className="time" style={{ fontSize: 18 }}>休憩終了！次のセットへ</span>
+            <span className="timer-done">休憩終了！次のセットへ</span>
           ) : (
             <span className="time">
-              休憩 {Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}
+              <small>休憩</small>
+              <b className="num">{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</b>
             </span>
           )}
           {!finished && (
-            <button className="btn small" onClick={() => setEndAt((e) => (e ?? Date.now()) + 30_000)}>
+            <button className="btn small" onClick={() => { setEndAt((e) => (e ?? Date.now()) + 30_000); setTotal((t) => t + 30_000); }}>
               +30秒
             </button>
           )}
           <button className="btn small" onClick={() => { setEndAt(null); setFinished(false); }}>
             {finished ? '閉じる' : 'スキップ'}
           </button>
+          {!finished && (
+            <i className="timer-bar" aria-hidden style={{ transform: `scaleX(${Math.min(1, (left * 1000) / total)})` }} />
+          )}
         </div>
       )}
     </Ctx.Provider>

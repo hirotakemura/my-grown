@@ -243,6 +243,9 @@ test('オフラインでも起動でき、データも読める', async ({ page,
   await page.reload();
   await expect(page.getByTestId('current-date')).toContainText('9/28(月)');
   await expect(await weightInput(page)).toHaveValue('71.2');
+  // 数字のフォント（Inter）はアプリに同梱していて、オフラインでも読み込める
+  await tab(page, '今日');
+  expect(await page.evaluate(async () => { await document.fonts.load('700 28px Inter'); return document.fonts.check('700 28px Inter'); })).toBe(true);
   await context.setOffline(false);
 });
 
@@ -404,4 +407,41 @@ test('今日：食事と筋トレを切り替えて表示し、切り替えて�
   await page.getByTestId('next-action').getByRole('button', { name: '筋トレを開く' }).click();
   await expect(page.getByRole('tab', { name: /^筋トレ/ })).toHaveAttribute('aria-selected', 'true');
   await expect(weight).toHaveValue('55');
+});
+
+test('筋トレ：各セットの横に前回の重さ・回数が出て、休憩タイマーが次のセットの入力欄を隠さない', async ({ page }) => {
+  await openApp(page);
+  // 前回（9/25）レッグプレス 40kg × 10・10・9回（上限に届いていないので同じ重さの提案）
+  await dbPut(page, 'workoutSets', [10, 10, 9].map((reps, i) => ({
+    id: `2026-09-25|leg-press|${i}`, date: '2026-09-25', exerciseId: 'leg-press', index: i, weight: 40, reps, done: true,
+  })));
+  await page.reload();
+  await mode(page, '筋トレ');
+  const card = page.getByTestId('exercise-leg-press');
+  await expect(card).toContainText('前回 9/25');
+  await expect(card.getByLabel('前回 40kg 9回')).toBeVisible();
+  // 前回の値が初期値として入っていても、完了を押すまでは完了扱いにしない
+  await expect(card.getByLabel('レッグプレス 1セット目の重さ')).toHaveValue('40');
+  await expect(card).toContainText('0/3');
+
+  // 1セット目を画面の一番下（タブのすぐ上）に置いてから完了する
+  await page.evaluate(() => {
+    const row = document.querySelector<HTMLElement>('[data-testid="exercise-leg-press"] .set-row')!;
+    window.scrollBy(0, row.getBoundingClientRect().bottom - (window.innerHeight - 70));
+  });
+  await card.getByLabel('レッグプレス 1セット目の回数').fill('11');
+  await card.getByRole('button', { name: '1セット目を完了' }).click();
+  const timer = page.getByRole('timer');
+  await expect(timer).toBeVisible();
+  await expect(card).toContainText('1/3');
+  // 次のセットの行が、タイマーより上に見えている
+  await expect.poll(async () => {
+    const t = await timer.boundingBox();
+    const r = await card.getByLabel('レッグプレス 2セット目の回数').boundingBox();
+    return t && r ? t.y - (r.y + r.height) : -1;
+  }).toBeGreaterThanOrEqual(0);
+  await expect(timer).toContainText('休憩');
+  await timer.getByRole('button', { name: '+30秒' }).click();
+  await timer.getByRole('button', { name: 'スキップ' }).click();
+  await expect(timer).toBeHidden();
 });

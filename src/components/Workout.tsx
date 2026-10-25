@@ -23,37 +23,49 @@ export function WorkoutSection({ date, menu, day, settings, exercises, sets, pla
   const ids = menuExerciseIds(settings, menu);
   const doneToday = sets.filter((s) => s.date === date && s.done).length;
 
+  const pct = plannedSets > 0 ? Math.min(100, (doneToday / plannedSets) * 100) : 0;
+
   return (
-    <section className="card" id="workout" data-testid="workout">
-      <div className="card-head">
-        <h2 className="card-title">筋トレ</h2>
-        {menu !== 'rest' && <span className="chip num">{doneToday} / {plannedSets} セット</span>}
+    <section className="workout" id="workout" data-testid="workout">
+      {/* 今日のメニューと進み具合 */}
+      <div className="card workout-head">
+        <div className="card-head">
+          <h2 className="card-title">筋トレ</h2>
+          {menu !== 'rest' && <span className={`chip num ${doneToday >= plannedSets && plannedSets > 0 ? 'ok' : ''}`}>{doneToday} / {plannedSets} セット</span>}
+        </div>
+        <div className="seg tall" role="group" aria-label="メニュー">
+          {(['A', 'B', 'rest'] as const).map((m) => (
+            <button key={m} aria-pressed={menu === m} onClick={() => patchDay(date, { menu: m })}>
+              {m === 'rest' ? '休み' : `メニュー${m}`}
+            </button>
+          ))}
+        </div>
+        {menu === 'rest' ? (
+          <p className="sub">今日は休養日。たんぱく質をしっかりとって回復に回しましょう。</p>
+        ) : (
+          <>
+            <div className="row">
+              <span className="grow sub">{menu === 'A' ? '押す日（脚・胸・肩・三頭）' : '引く日（もも裏・背中・胸・肩・二頭）'}</span>
+              <label className="row" style={{ gap: 4 }}>
+                <span className="muted">ジム</span>
+                <input
+                  className="input num"
+                  type="time"
+                  style={{ width: 120 }}
+                  value={gymTimeOf(settings, day)}
+                  onChange={(e) => e.target.value && patchDay(date, { gymTime: e.target.value })}
+                  aria-label="この日のジムの時間"
+                />
+              </label>
+            </div>
+            <div className="bar thin" role="progressbar" aria-valuenow={doneToday} aria-valuemax={plannedSets} aria-label="今日のセットの進み具合">
+              <div style={{ width: `${pct}%` }} />
+            </div>
+          </>
+        )}
       </div>
-      <div className="seg tall" role="group" aria-label="メニュー">
-        {(['A', 'B', 'rest'] as const).map((m) => (
-          <button key={m} aria-pressed={menu === m} onClick={() => patchDay(date, { menu: m })}>
-            {m === 'rest' ? '休み' : `メニュー${m}`}
-          </button>
-        ))}
-      </div>
-      {menu === 'rest' ? (
-        <p className="sub">今日は休養日。たんぱく質をしっかりとって回復に回しましょう。</p>
-      ) : (
+      {menu !== 'rest' && (
         <>
-          <div className="row">
-            <span className="grow sub">{menu === 'A' ? '押す日（脚・胸・肩・三頭）' : '引く日（もも裏・背中・胸・肩・二頭）'}</span>
-            <label className="row" style={{ gap: 4 }}>
-              <span className="muted">ジム</span>
-              <input
-                className="input"
-                type="time"
-                style={{ width: 132 }}
-                value={gymTimeOf(settings, day)}
-                onChange={(e) => e.target.value && patchDay(date, { gymTime: e.target.value })}
-                aria-label="この日のジムの時間"
-              />
-            </label>
-          </div>
           {ids.map((id) => {
             const main = exercises.get(id);
             if (!main) return null;
@@ -75,13 +87,29 @@ export function WorkoutSection({ date, menu, day, settings, exercises, sets, pla
             );
           })}
           {day?.gymStatus === 'started' && (
-            <button className="btn primary block" onClick={() => patchDay(date, { gymStatus: 'done' })}>トレを終える</button>
+            <button className="btn primary block tall" onClick={() => patchDay(date, { gymStatus: 'done' })}>トレを終える</button>
           )}
           {day?.gymStatus === 'done' && <p className="chip ok" style={{ alignSelf: 'flex-start' }}>✓ トレ完了</p>}
         </>
       )}
     </section>
   );
+}
+
+/** 休憩タイマーの下に隠れないよう、次に入力するセットを画面内に入れる */
+function revealNextSet(current: HTMLElement | null) {
+  if (!current) return;
+  const rows = Array.from(document.querySelectorAll<HTMLElement>('#workout .set-row'));
+  const next = rows[rows.indexOf(current) + 1];
+  if (!next) return;
+  requestAnimationFrame(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const tab = parseFloat(cs.getPropertyValue('--tab-h')) || 60;
+    const timer = document.querySelector('.timer')?.getBoundingClientRect().height ?? 56;
+    const limit = window.innerHeight - tab - timer - 24;
+    const r = next.getBoundingClientRect();
+    if (r.bottom > limit) window.scrollBy({ top: r.bottom - limit, behavior: 'smooth' });
+  });
 }
 
 interface CardProps {
@@ -165,7 +193,7 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
     void patchDay(date, { swaps });
   };
 
-  const onDone = async (set: WorkoutSet) => {
+  const onDone = async (set: WorkoutSet, row: HTMLElement | null) => {
     const previous = sets.filter((s) => s.done && s.exerciseId === set.exerciseId && s.id !== set.id && s.date <= date);
     const pb = isPersonalBest(set, previous, ex);
     await saveSet(set);
@@ -173,56 +201,65 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
     const doneAfter = sets.filter((s) => s.date === date && s.done && s.id !== set.id).length + 1;
     await patchDay(date, { menu, gymStatus: doneAfter >= plannedSets ? 'done' : 'started' });
     timer.start(settings.restSeconds);
+    revealNextSet(row);
     if (pb) toast(`🏆 自己ベスト更新！ ${ex.name} ${ex.assist ? '補助' : ''}${set.weight}kg × ${set.reps}回`, 'pb');
   };
 
   return (
-    <div className={`ex-card ${doneCount >= ex.sets ? 'all-done' : ''}`} data-testid={`exercise-${ex.id}`}>
-      <div className="row">
+    <div className={`card ex-card ${doneCount >= ex.sets ? 'all-done' : ''}`} data-testid={`exercise-${ex.id}`}>
+      <div className="ex-head">
         <div className="grow">
           <div className="ex-name">{ex.name}</div>
-          <div className="muted">{ex.repMin}〜{ex.repMax}回 × {ex.sets}セット{swapped ? `（${main.name}の代わり）` : ''}</div>
+          <div className="ex-target num">
+            {ex.repMin}〜{ex.repMax}回 × {ex.sets}セット{swapped ? <span className="muted">（{main.name}の代わり）</span> : null}
+          </div>
         </div>
         <span className={`chip num ${doneCount >= ex.sets ? 'ok' : ''}`} aria-label={`${ex.name} ${doneCount}/${ex.sets}セット完了`}>
           {doneCount >= ex.sets ? '✓ ' : ''}{doneCount}/{ex.sets}
         </span>
       </div>
-      {last ? (
-        <div className="sub num">
-          前回 {formatMD(last.date)}：{last.sets.map((s) => `${s.weight}kg×${s.reps}`).join(' / ')}
-        </div>
-      ) : null}
       {sug.increase && sug.from != null && sug.weight != null ? (
         <NextWeight key={`${ex.id}-${sug.from}`} ex={ex} from={sug.from} weight={sug.weight} known={!!sug.known} />
       ) : (
         <div className="suggest">{sug.text}</div>
       )}
-      <details>
-        <summary>やり方</summary>
-        <p className="sub">{ex.howTo}</p>
-      </details>
-      {Array.from({ length: ex.sets }, (_, i) => {
-        const stored = todays.find((s) => s.index === i);
-        // 前のセットで入れた重さを引き継ぐ（なければ提案の重さ）
-        const prevRow = todays.filter((s) => s.index < i && s.weight != null).sort((a, b) => b.index - a.index)[0];
-        const defaultWeight = sug.weight ?? null;
-        return (
-          <SetRow
-            key={`${ex.id}-${i}`}
-            date={date}
-            exercise={ex}
-            index={i}
-            stored={stored}
-            defaultWeight={stored?.weight ?? prevRow?.weight ?? defaultWeight}
-            onDone={onDone}
-          />
-        );
-      })}
-      {(alt || swapped) && (
-        <button className="btn small ghost" style={{ alignSelf: 'flex-start' }} onClick={toggleSwap}>
-          ⇄ {swapped ? `${main.name}に戻す` : `空いていない → ${alt!.name}`}
-        </button>
-      )}
+      <div className="set-table">
+        <div className="set-cols" aria-hidden>
+          <span />
+          <span>{ex.assist ? '補助' : '重さ'}</span>
+          <span>回数</span>
+          <span>{last ? `前回 ${formatMD(last.date)}` : ''}</span>
+        </div>
+        {Array.from({ length: ex.sets }, (_, i) => {
+          const stored = todays.find((s) => s.index === i);
+          // 前のセットで入れた重さを引き継ぐ（なければ提案の重さ）
+          const prevRow = todays.filter((s) => s.index < i && s.weight != null).sort((a, b) => b.index - a.index)[0];
+          const defaultWeight = sug.weight ?? null;
+          return (
+            <SetRow
+              key={`${ex.id}-${i}`}
+              date={date}
+              exercise={ex}
+              index={i}
+              stored={stored}
+              previous={last?.sets.find((s) => s.index === i)}
+              defaultWeight={stored?.weight ?? prevRow?.weight ?? defaultWeight}
+              onDone={onDone}
+            />
+          );
+        })}
+      </div>
+      <div className="ex-foot">
+        <details>
+          <summary>やり方</summary>
+          <p className="sub">{ex.howTo}</p>
+        </details>
+        {(alt || swapped) && (
+          <button className="btn small ghost" onClick={toggleSwap}>
+            ⇄ {swapped ? `${main.name}に戻す` : `空いていない → ${alt!.name}`}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -232,12 +269,15 @@ interface RowProps {
   exercise: Exercise;
   index: number;
   stored?: WorkoutSet;
+  /** 前回の同じセット（入力の目安として横に出す） */
+  previous?: WorkoutSet;
   defaultWeight: number | null;
-  onDone: (s: WorkoutSet) => Promise<void>;
+  onDone: (s: WorkoutSet, row: HTMLElement | null) => Promise<void>;
 }
 
-function SetRow({ date, exercise, index, stored, defaultWeight, onDone }: RowProps) {
+function SetRow({ date, exercise, index, stored, previous, defaultWeight, onDone }: RowProps) {
   const toast = useToast();
+  const rowRef = useRef<HTMLDivElement>(null);
   const [weight, setWeight] = useState(stored?.weight != null ? String(stored.weight) : defaultWeight != null ? String(defaultWeight) : '');
   const [reps, setReps] = useState(stored?.reps != null ? String(stored.reps) : '');
   const repsRef = useRef<HTMLInputElement>(null);
@@ -282,15 +322,15 @@ function SetRow({ date, exercise, index, stored, defaultWeight, onDone }: RowPro
       if (reps === '') repsRef.current?.focus();
       return;
     }
-    await onDone(build(true));
+    await onDone(build(true), rowRef.current);
   };
 
   return (
-    <div className={`set-row ${done ? 'done' : ''}`}>
-      <span className="idx">{index + 1}</span>
+    <div ref={rowRef} className={`set-row ${done ? 'done' : ''}`}>
+      <span className="idx num">{index + 1}</span>
       <div className="unit-input">
         <input
-          className="input"
+          className="input num"
           type="number"
           inputMode="decimal"
           step="any"
@@ -304,7 +344,7 @@ function SetRow({ date, exercise, index, stored, defaultWeight, onDone }: RowPro
       <div className="unit-input">
         <input
           ref={repsRef}
-          className="input"
+          className="input num"
           type="number"
           inputMode="numeric"
           value={reps}
@@ -315,6 +355,9 @@ function SetRow({ date, exercise, index, stored, defaultWeight, onDone }: RowPro
         />
         <em>回</em>
       </div>
+      <span className="prev num" aria-label={previous ? `前回 ${previous.weight ?? '-'}kg ${previous.reps ?? '-'}回` : undefined}>
+        {previous ? <>{previous.weight ?? '-'}<small>kg</small>×{previous.reps ?? '-'}</> : <small>—</small>}
+      </span>
       <button className="check" aria-pressed={done} onClick={toggle} aria-label={`${index + 1}セット目を完了`}>
         ✓
       </button>
