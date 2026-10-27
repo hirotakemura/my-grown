@@ -13,7 +13,7 @@ export const VERIFIED = new Set([
   '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5', 'home-kewpie-arrabbiata', 'oikos-pro-240',
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
-  'l-yakitori-harami-sunagimo',
+  'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -164,6 +164,7 @@ const seven: Row[] = [
   // セブン‐イレブン公式サイトの栄養成分（item/104228）
   ['7-tonshabu-salad', 'セブン たんぱく質が摂れる豚しゃぶサラダ', '汁物・サラダ', 131, 18.2, 5.3, 3.6],
   ['7-onigiri-tamago-shoyu', 'セブン たまご醤油おむすび', 'おにぎり', 206, 4.7, 4, 38.6],
+  ['7-dashimusubi-nikumiso', 'セブン だしむすび 肉味噌 江戸甘味噌使用', 'おにぎり', 201, 4.9, 2.8, 39.9],
   ['7-rosu-katsudon', 'セブン 特製ロースかつ丼', '外食・定食', 726, 27.2, 21, 107.1],
   ['7-curry-udon', 'セブン 鰹出汁香る コク旨カレーうどん', '麺', 523, 18.5, 14.1, 80.5],
   ['7-shio-chanko-soup', 'セブン 塩ちゃんこスープ', '汁物・サラダ', 121, 12.3, 5, 7.8],
@@ -224,6 +225,7 @@ export const ADDED_IN: Record<number, string[]> = {
   46: ['eo-yoshinoya-kakuni-teishoku'],
   47: ['eo-kashiwa-udon'],
   48: ['l-yakitori-harami-sunagimo'],
+  49: ['7-dashimusubi-nikumiso'],
 };
 
 // ファミリーマート
