@@ -13,7 +13,7 @@ export const VERIFIED = new Set([
   '7-rosu-katsudon', '7-zakuchiki-umakara', 'tori-liver-5', 'home-kewpie-arrabbiata', 'oikos-pro-240',
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
-  'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso',
+  'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -226,6 +226,7 @@ export const ADDED_IN: Record<number, string[]> = {
   47: ['eo-kashiwa-udon'],
   48: ['l-yakitori-harami-sunagimo'],
   49: ['7-dashimusubi-nikumiso'],
+  50: ['belc-potato-salad'],
 };
 
 // ファミリーマート
@@ -275,6 +276,7 @@ const other: Row[] = [
   ['belc-cabbage-sengiri-mini', 'ベルク 千切りキャベツ ミニ（1袋）', '自炊', 20, 1, 0.2, 5],
   ['belc-salad-chicken-herb', 'ベルク サラダチキン ハーブ', '自炊', 110, 24, 1.5, 1],
   ['belc-sausage-steak', 'ベルク あらびきソーセージステーキ（100g）', '自炊', 320, 12, 29, 3],
+  ['belc-potato-salad', 'ベルク ポテトサラダ', '自炊', 370, 6.7, 23.4, 32.6],
   // 卵1個（M・約50g）＋油 約2g で計算
   ['home-fried-egg', '目玉焼き（卵1個）', '自炊', 90, 6.1, 7.1, 0.2],
   // 日本食品標準成分表（マカロニ・スパゲッティ 乾）より

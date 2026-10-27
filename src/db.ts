@@ -412,6 +412,14 @@ export class AppDB extends Dexie {
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[49].includes(p.id) && !have.has(p.id)));
       });
+    // v50: ベルク ポテトサラダ
+    this.version(50)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[50].includes(p.id) && !have.has(p.id)));
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());

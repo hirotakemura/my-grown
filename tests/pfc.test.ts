@@ -163,7 +163,7 @@ describe('v4：自炊の商品追加', () => {
   });
 });
 
-it.each([4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
+it.each([4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49])('v%i のDBに、それ以降に追加した商品が足される', async (from) => {
   const name = `migrate-v${from}`;
   names.push(name);
   const v4 = new Dexie(name);
@@ -221,6 +221,7 @@ it.each([4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 
   expect(await db.products.get('eo-kashiwa-udon')).toMatchObject({ store: 'other', category: '麺', kcal: 467, protein: 21, estimate: true });
   expect(await db.products.get('l-yakitori-harami-sunagimo')).toMatchObject({ store: 'lawson', kcal: 182, protein: 23.1, estimate: false });
   expect(await db.products.get('7-dashimusubi-nikumiso')).toMatchObject({ store: 'seven', kcal: 201, protein: 4.9, estimate: false });
+  expect(await db.products.get('belc-potato-salad')).toMatchObject({ kcal: 370, protein: 6.7, fat: 23.4, estimate: false });
   expect(await db.products.get('l-oyakodon')).toMatchObject({ store: 'lawson', category: '外食・定食', kcal: 497, estimate: false });
   expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
   db.close();
