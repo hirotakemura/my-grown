@@ -28,7 +28,14 @@ jobs:
       - name: 型チェック＋ユニットテスト（保存・バックアップ・達成判定など）
         run: npx tsc -b && npm test
       - name: Playwright のブラウザを用意
-        run: npx playwright install --with-deps chromium
+        # ダウンロードが止まることがあるので、1回5分で打ち切って3回まで試す
+        timeout-minutes: 16
+        run: |
+          for i in 1 2 3; do
+            timeout 300 npx playwright install --with-deps chromium && exit 0
+            echo "ブラウザの用意に失敗（$i 回目）。やり直します"
+          done
+          exit 1
       - name: E2E テスト（リロード後もデータが残ること・オフライン起動）
         run: npm run test:e2e
         env:
