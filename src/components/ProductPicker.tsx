@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CATEGORIES, SLOT_LABEL, STORE_LABEL, type Category, type MealItem, type MealSlot, type MySet, type Product, type Store } from '../types';
+import { CATEGORIES, SLOT_LABEL, STORE_LABEL, type Category, type MealItem, type MealRecord, type MealSlot, type MySet, type Product, type Store } from '../types';
 import { itemsTotal } from '../lib/plan';
 import { recordMeal, saveMySet, deleteMySet, saveProduct, productToItem } from '../lib/actions';
 import { fmtNut } from '../lib/format';
@@ -68,19 +68,40 @@ interface Props {
   initialStore?: StoreFilter;
   products: Product[];
   mySets: MySet[];
+  /** 食べた記録（最近選んだ商品を上に並べるため） */
+  meals?: MealRecord[];
   onClose: () => void;
 }
 
-/** よく選ぶ → お気に入り → たんぱく質が多い順 */
-export function sortProducts(list: Product[]): Product[] {
-  return [...list].sort(
-    (a, b) => b.useCount - a.useCount || Number(b.favorite) - Number(a.favorite) || b.protein - a.protein,
-  );
+/** 商品ごとに、最後に食べた記録の新しさ（食べた日 → 記録した時刻の順で比べられる文字列） */
+export function lastEatenOf(meals: MealRecord[]): Map<string, string> {
+  const last = new Map<string, string>();
+  for (const m of meals) {
+    if (m.status !== 'eaten') continue;
+    const key = `${m.date}|${String(m.updatedAt).padStart(15, '0')}`;
+    for (const i of m.items) {
+      if (!i.productId) continue;
+      const cur = last.get(i.productId);
+      if (!cur || key > cur) last.set(i.productId, key);
+    }
+  }
+  return last;
+}
+
+/** 最近食べた順（記録があれば）→ よく選ぶ → お気に入り → たんぱく質が多い順 */
+export function sortProducts(list: Product[], lastEaten?: Map<string, string>): Product[] {
+  const recent = (p: Product) => lastEaten?.get(p.id) ?? '';
+  return [...list].sort((a, b) => {
+    const ra = recent(a);
+    const rb = recent(b);
+    if (ra !== rb) return ra < rb ? 1 : -1;
+    return b.useCount - a.useCount || Number(b.favorite) - Number(a.favorite) || b.protein - a.protein;
+  });
 }
 
 const keyOf = (i: MealItem) => i.productId ?? `custom:${i.name}`;
 
-export function ProductPicker({ date, slot, title, initial, initialStore = 'all', products, mySets, onClose }: Props) {
+export function ProductPicker({ date, slot, title, initial, initialStore = 'all', products, mySets, meals, onClose }: Props) {
   const toast = useToast();
   const [store, setStore] = useState<StoreFilter>(initialStore);
   const [tab, setTab] = useState<Tab>('all');
@@ -92,6 +113,8 @@ export function ProductPicker({ date, slot, title, initial, initialStore = 'all'
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
   const qtyOf = (id: string) => sel.find((i) => i.productId === id)?.qty ?? 0;
 
+  // 開いた時点の並びで固定する（記録しても選んでいる途中で順番が動かないように）
+  const lastEaten = useMemo(() => lastEatenOf(meals ?? []), []);
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return sortProducts(
@@ -101,8 +124,9 @@ export function ProductPicker({ date, slot, title, initial, initialStore = 'all'
           (tab === 'all' || tab === 'mysets' || p.category === tab) &&
           (!q || p.name.toLowerCase().includes(q)),
       ),
+      lastEaten,
     );
-  }, [products, store, tab, query]);
+  }, [products, store, tab, query, lastEaten]);
 
   // 選んでいる場所に商品があるカテゴリだけ出す
   const cats = CATEGORIES.filter((c) => products.some((p) => p.category === c && matchStore(p.store, store)));

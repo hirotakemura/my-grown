@@ -177,6 +177,7 @@ export function Today({ data, date, setDate, mode, setMode, onOpenRecords }: Pro
           initialStore={picker.store}
           products={data.products}
           mySets={data.mySets}
+          meals={data.meals}
           onClose={() => setPicker(null)}
         />
       )}
