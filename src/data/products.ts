@@ -14,6 +14,7 @@ export const VERIFIED = new Set([
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
+  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -227,6 +228,7 @@ export const ADDED_IN: Record<number, string[]> = {
   48: ['l-yakitori-harami-sunagimo'],
   49: ['7-dashimusubi-nikumiso'],
   50: ['belc-potato-salad'],
+  51: ['eo-kyubeiya-ninniku-seabura-tsukejiru-udon'],
 };
 
 // ファミリーマート
@@ -261,6 +263,7 @@ const other: Row[] = [
   ['eo-yoshinoya-negitama-gyudon', '吉野家 ねぎ玉牛丼（並盛）', '外食・定食', 775, 25.5, 24.5, 110.5],
   // PFCは概算、kcalはPFCから計算（4×P＋9×F＋4×C）
   ['eo-kashiwa-udon', 'かしわうどん', '麺', 467, 21, 7, 80],
+  ['eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '久兵衛屋 旨辛にんにく背脂肉つけ汁うどん（並盛）', '麺', 740, 24, 34, 86],
   ['eo-yoshinoya-kakuni-teishoku', '吉野家 厚切り豚角煮牛小鉢定食', '外食・定食', 1291, 39.5, 76.4, 114],
   ['eo-yoshinoya-tonjiru', '吉野家 豚汁', '汁物・サラダ', 200, 9, 12, 13],
   // 鶏もも唐揚げ 1個（約30g）の一般的な目安
