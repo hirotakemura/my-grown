@@ -14,7 +14,7 @@ export const VERIFIED = new Set([
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
-  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon',
+  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -164,6 +164,7 @@ const seven: Row[] = [
   ['7-goma-mushidori-soba', 'セブン ピリ辛濃厚ごまだれ 冷し蒸し鶏そば', '麺', 630, 27.7, 33.1, 58.3],
   // セブン‐イレブン公式サイトの栄養成分（item/104228）
   ['7-tonshabu-salad', 'セブン たんぱく質が摂れる豚しゃぶサラダ', '汁物・サラダ', 131, 18.2, 5.3, 3.6],
+  ['7-yuzu-dashi-tonshabu-nabe', 'セブン 柚子とおだしでたべる野菜豚しゃぶ鍋', '汁物・サラダ', 177, 17, 9.2, 8.8],
   ['7-onigiri-tamago-shoyu', 'セブン たまご醤油おむすび', 'おにぎり', 206, 4.7, 4, 38.6],
   ['7-dashimusubi-nikumiso', 'セブン だしむすび 肉味噌 江戸甘味噌使用', 'おにぎり', 201, 4.9, 2.8, 39.9],
   ['7-rosu-katsudon', 'セブン 特製ロースかつ丼', '外食・定食', 726, 27.2, 21, 107.1],
@@ -229,6 +230,7 @@ export const ADDED_IN: Record<number, string[]> = {
   49: ['7-dashimusubi-nikumiso'],
   50: ['belc-potato-salad'],
   51: ['eo-kyubeiya-ninniku-seabura-tsukejiru-udon'],
+  52: ['7-yuzu-dashi-tonshabu-nabe'],
 };
 
 // ファミリーマート
