@@ -231,6 +231,7 @@ export const ADDED_IN: Record<number, string[]> = {
   50: ['belc-potato-salad'],
   51: ['eo-kyubeiya-ninniku-seabura-tsukejiru-udon'],
   52: ['7-yuzu-dashi-tonshabu-nabe'],
+  53: ['eo-tokusei-shoyu-ramen', 'eo-ramen-kaedama', 'eo-aburi-chashu-don'],
 };
 
 // ファミリーマート
@@ -266,6 +267,10 @@ const other: Row[] = [
   // PFCは概算、kcalはPFCから計算（4×P＋9×F＋4×C）
   ['eo-kashiwa-udon', 'かしわうどん', '麺', 467, 21, 7, 80],
   ['eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '久兵衛屋 旨辛にんにく背脂肉つけ汁うどん（並盛）', '麺', 740, 24, 34, 86],
+  // お店で見た「約」の値なので目安。チャーシュー丼の炭水化物は表示がないため、kcal・P・F から計算（(480−22×4−18×9)÷4）
+  ['eo-tokusei-shoyu-ramen', '特製醤油らぁ麺（鴨×大山鶏出汁・焼き豚・鶏むね・卵）', '麺', 650, 35, 20, 75],
+  ['eo-ramen-kaedama', '替え玉（1玉）', '麺', 340, 9, 2, 68],
+  ['eo-aburi-chashu-don', '炙りチャーシュー丼', '外食・定食', 480, 22, 18, 57.5],
   ['eo-yoshinoya-kakuni-teishoku', '吉野家 厚切り豚角煮牛小鉢定食', '外食・定食', 1291, 39.5, 76.4, 114],
   ['eo-yoshinoya-tonjiru', '吉野家 豚汁', '汁物・サラダ', 200, 9, 12, 13],
   // 鶏もも唐揚げ 1個（約30g）の一般的な目安
