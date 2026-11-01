@@ -14,7 +14,7 @@ export const VERIFIED = new Set([
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
-  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe',
+  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -101,6 +101,7 @@ const lawson: Row[] = [
   ['l-tonjiru-yadoroku', 'おにぎり浅草宿六監修 こだわり味噌の豚汁', '汁物・サラダ', 111, 10, 6.4, 4.8],
   ['l-wafu-soup', '食物繊維が摂れる 地鶏出汁きかせた和風スープ', '汁物・サラダ', 77, 6.7, 1.4, 11.2],
   ['l-samgyetang-soup', 'もち麦入り たんぱく質たっぷり参鶏湯風スープ', '汁物・サラダ', 140, 14.1, 2.6, 16.1],
+  ['l-bouillabaisse-soup', 'きまぐれクック監修 魚介の旨味が決め手！ブイヤベーススープ', '汁物・サラダ', 78, 9.9, 3.1, 3.8],
   ['l-toridango-shirataki-soup', '鶏団子としらたき麺の和風スープ', '汁物・サラダ', 127, 11.1, 5.8, 8.9],
   ['l-kake-soba', 'つゆが主役！かけそば', '麺', 272, 20.7, 1.7, 45.7],
   ['l-nebaneba-soba', '香りとのど越し ミニネバネバそば', '麺', 238, 13.3, 4.2, 39.1],
@@ -232,6 +233,7 @@ export const ADDED_IN: Record<number, string[]> = {
   51: ['eo-kyubeiya-ninniku-seabura-tsukejiru-udon'],
   52: ['7-yuzu-dashi-tonshabu-nabe'],
   53: ['eo-tokusei-shoyu-ramen', 'eo-ramen-kaedama', 'eo-aburi-chashu-don'],
+  54: ['l-bouillabaisse-soup'],
 };
 
 // ファミリーマート
