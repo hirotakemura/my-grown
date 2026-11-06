@@ -14,7 +14,7 @@ export const VERIFIED = new Set([
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
-  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo',
+  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -104,6 +104,7 @@ const lawson: Row[] = [
   ['l-bouillabaisse-soup', 'きまぐれクック監修 魚介の旨味が決め手！ブイヤベーススープ', '汁物・サラダ', 78, 9.9, 3.1, 3.8],
   // kcal の表示がないため P・F・C から計算（12.4×4＋13.5×9＋15×4＝231）
   ['l-tonshabu-lettuce-paitan-soup', '豚しゃぶとレタスの白湯スープ', '汁物・サラダ', 231, 12.4, 13.5, 15],
+  ['l-goro-yasai-pot-au-feu', 'ごろっと野菜のポトフ', '汁物・サラダ', 174, 9.7, 10.3, 12.7],
   ['l-toridango-shirataki-soup', '鶏団子としらたき麺の和風スープ', '汁物・サラダ', 127, 11.1, 5.8, 8.9],
   ['l-kake-soba', 'つゆが主役！かけそば', '麺', 272, 20.7, 1.7, 45.7],
   ['l-nebaneba-soba', '香りとのど越し ミニネバネバそば', '麺', 238, 13.3, 4.2, 39.1],
@@ -239,6 +240,7 @@ export const ADDED_IN: Record<number, string[]> = {
   54: ['l-bouillabaisse-soup'],
   55: ['l-tonshabu-lettuce-paitan-soup'],
   56: ['7-onigiri-sausage-garlic-mayo'],
+  57: ['l-goro-yasai-pot-au-feu'],
 };
 
 // ファミリーマート
