@@ -14,7 +14,7 @@ export const VERIFIED = new Set([
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
-  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu',
+  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -74,6 +74,7 @@ const lawson: Row[] = [
   ['l-salad-chicken-umeshiso', 'サラダチキン 梅しそ', 'チキン・肉', 130, 24.9, 1.7, 3.9],
   ['l-sunagimo', '炭火香る！砂肝の焼鳥', 'チキン・肉', 70, 11.9, 1.4, 2.4],
   ['l-tori-liver', '炭火香る！鶏レバー焼', 'チキン・肉', 99, 14.6, 3.4, 2.3],
+  ['l-sunagimo-ninniku', '若鶏の砂肝にんにく', 'チキン・肉', 160, 21.4, 4.9, 9],
   // 公式の値（1504264・1パック110g）
   ['l-yakitori-harami-sunagimo', '炭火焼鳥2種 ハラミ＆砂肝（110g）', 'チキン・肉', 182, 23.1, 9.5, 1.1],
   ['l-nankotsu-tsukune', '炭火香る！なんこつ塩つくね', 'チキン・肉', 102, 12.4, 5, 2],
@@ -241,6 +242,7 @@ export const ADDED_IN: Record<number, string[]> = {
   55: ['l-tonshabu-lettuce-paitan-soup'],
   56: ['7-onigiri-sausage-garlic-mayo'],
   57: ['l-goro-yasai-pot-au-feu'],
+  59: ['l-sunagimo-ninniku'],
 };
 
 // ファミリーマート
