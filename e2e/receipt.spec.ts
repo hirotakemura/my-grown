@@ -109,6 +109,12 @@ test('手入力で支出を追加・修正・削除でき、出社日の1日平�
   // 覚えた費目：次に「コーヒー」を入れると飲み物になる（自動判定でも同じだが、手で変えたものが優先される確認）
   await page.getByTestId('expense-list').getByRole('button', { name: /セブン/ }).click();
   await page.getByRole('dialog', { name: '支出を編集' }).getByRole('button', { name: '削除' }).click();
+  // アプリ内の確認：キャンセルなら消えない
+  const ask = page.getByRole('alertdialog', { name: 'この支出を削除しますか？' });
+  await ask.getByRole('button', { name: 'キャンセル' }).click();
+  await expect(ask).toBeHidden();
+  await page.getByRole('dialog', { name: '支出を編集' }).getByRole('button', { name: '削除' }).click();
+  await ask.getByRole('button', { name: '削除する' }).click();
   await expect(page.getByTestId('money-total')).toHaveText('¥0');
 });
 

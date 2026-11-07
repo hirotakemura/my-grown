@@ -11,6 +11,7 @@ import { ProductEditor } from '../components/ProductEditor';
 import { Sheet } from '../components/Sheet';
 import { PeriodEditor } from '../components/PeriodEditor';
 import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/Confirm';
 
 function NumField({ label, value, unit, onSave, step = 1 }: { label: string; value: number; unit: string; onSave: (n: number) => void; step?: number }) {
   const [v, setV] = useState(String(value));
@@ -46,6 +47,7 @@ function TimeField({ label, value, onSave }: { label: string; value: string; onS
 export function SettingsScreen({ data }: { data: AppData }) {
   const { settings } = data;
   const toast = useToast();
+  const confirm = useConfirm();
   const [storage, setStorage] = useState<StorageStatus | null>(null);
   const [showProducts, setShowProducts] = useState(false);
   const [editingEx, setEditingEx] = useState<Exercise | 'new' | null>(null);
@@ -85,7 +87,13 @@ export function SettingsScreen({ data }: { data: AppData }) {
     try {
       const backup = parseBackup(await file.text());
       const when = new Date(backup.exportedAt).toLocaleString('ja-JP');
-      if (!window.confirm(`${when} のバックアップで、今のデータをすべて置き換えます。よろしいですか？`)) return;
+      const ok = await confirm({
+        title: 'バックアップから復元しますか？',
+        message: `${when} のバックアップで、今のデータをすべて置き換えます。`,
+        confirmLabel: '置き換える',
+        danger: true,
+      });
+      if (!ok) return;
       await importBackup(db, backup);
       toast('バックアップから復元しました');
     } catch (e) {
@@ -124,7 +132,20 @@ export function SettingsScreen({ data }: { data: AppData }) {
                 </button>
                 <button className="icon-btn" aria-label="上へ" disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
                 <button className="icon-btn" aria-label="下へ" disabled={i === ids.length - 1} onClick={() => move(i, 1)}>↓</button>
-                <button className="icon-btn" aria-label="メニューから外す" onClick={() => set({ [key]: ids.filter((x) => x !== id) })}>✕</button>
+                <button
+                  className="icon-btn"
+                  aria-label="メニューから外す"
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: `「${ex?.name ?? 'この種目'}」を${title}から外しますか？`,
+                      message: 'これまでの記録は残ります。外したあとも「＋ 種目を追加」から戻せます。',
+                      confirmLabel: '外す',
+                      danger: true,
+                    });
+                    // 確認している間にほかで変わっていても、今の一覧から外す
+                    if (ok) set({ [key]: settings[key].filter((x) => x !== id) });
+                  }}
+                >✕</button>
               </div>
             );
           })}

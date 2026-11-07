@@ -3,6 +3,7 @@ import type { CategoryRule, DayRecord, Exercise, Expense, MealItem, MealRecord, 
 import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12, UPDATED_TO_OFFICIAL_V16 } from './data/products';
 import { ASSIST_EXERCISES, DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
+import { restoreMenu } from './lib/menuRestore';
 
 export const DB_NAME = 'my-grown';
 
@@ -475,6 +476,24 @@ export class AppDB extends Dexie {
         const products = tx.table<Product, string>('products');
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[57].includes(p.id) && !have.has(p.id)));
+      });
+    // v58: 間違えて外した「引く日（メニューB）」の種目を、トレの記録から戻す（今ある種目はそのまま）
+    this.version(58)
+      .stores({})
+      .upgrade(async (tx) => {
+        const settingsTable = tx.table<Settings, string>('settings');
+        const s = await settingsTable.get('main');
+        if (!s) return;
+        const menuB = restoreMenu({
+          menu: 'B',
+          current: s.menuB ?? [],
+          other: s.menuA ?? [],
+          defaults: DEFAULT_MENU_B,
+          days: await tx.table<DayRecord, string>('days').toArray(),
+          sets: await tx.table<WorkoutSet, string>('workoutSets').toArray(),
+          exerciseIds: new Set(await tx.table<Exercise, string>('exercises').toCollection().primaryKeys()),
+        });
+        if (menuB.length !== (s.menuB ?? []).length) await settingsTable.update('main', { menuB });
       });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {

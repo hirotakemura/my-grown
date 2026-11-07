@@ -3,6 +3,7 @@ import { CATEGORIES, STORE_LABEL, type Category, type MealItem, type Product, ty
 import { deleteProduct, productToItem, saveProduct } from '../lib/actions';
 import { newId } from '../db';
 import { Sheet } from './Sheet';
+import { useConfirm } from './Confirm';
 
 interface Props {
   product?: Product; // 未指定なら新規追加
@@ -25,6 +26,7 @@ function NumInput({ label, value, set }: { label: string; value: string; set: (v
 }
 
 export function ProductEditor({ product, defaultCategory, defaultStore, onAddToMeal, onClose }: Props) {
+  const confirm = useConfirm();
   const manual = !!onAddToMeal;
   const [name, setName] = useState(product?.name ?? '');
   const [category, setCategory] = useState<Category>(product?.category ?? defaultCategory ?? (manual ? '外食・定食' : 'その他'));
@@ -74,7 +76,7 @@ export function ProductEditor({ product, defaultCategory, defaultStore, onAddToM
   };
 
   const remove = async () => {
-    if (product && window.confirm(`「${product.name}」を削除しますか？\n（これまでの食事の記録は残ります）`)) {
+    if (product && (await confirm({ title: `「${product.name}」を削除しますか？`, message: 'これまでの食事の記録は残ります。', confirmLabel: '削除する', danger: true }))) {
       await deleteProduct(product.id);
       onClose();
     }

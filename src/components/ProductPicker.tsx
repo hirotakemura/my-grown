@@ -7,6 +7,7 @@ import { formatMD } from '../lib/date';
 import { Sheet } from './Sheet';
 import { ProductEditor } from './ProductEditor';
 import { useToast } from './Toast';
+import { useConfirm } from './Confirm';
 
 type Tab = 'all' | 'mysets' | Category;
 
@@ -103,6 +104,7 @@ const keyOf = (i: MealItem) => i.productId ?? `custom:${i.name}`;
 
 export function ProductPicker({ date, slot, title, initial, initialStore = 'all', products, mySets, meals, onClose }: Props) {
   const toast = useToast();
+  const confirm = useConfirm();
   const [store, setStore] = useState<StoreFilter>(initialStore);
   const [tab, setTab] = useState<Tab>('all');
   const [manual, setManual] = useState(false);
@@ -249,7 +251,7 @@ export function ProductPicker({ date, slot, title, initial, initialStore = 'all'
                     <button
                       className="icon-btn"
                       aria-label={`${s.name}を削除`}
-                      onClick={() => window.confirm(`マイセット「${s.name}」を削除しますか？`) && deleteMySet(s.id)}
+                      onClick={async () => { if (await confirm({ title: `マイセット「${s.name}」を削除しますか？`, confirmLabel: '削除する', danger: true })) await deleteMySet(s.id); }}
                     >🗑</button>
                   </div>
                   <div className="sub">{items.map((i) => `${i.name}${i.qty !== 1 ? `×${fmtQty(i.qty)}` : ''}`).join('、')}</div>

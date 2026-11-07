@@ -7,6 +7,7 @@ import { categorize, sumItems } from '../lib/receipt';
 import { deleteExpense, saveExpense } from '../lib/actions';
 import { Sheet } from './Sheet';
 import { useToast } from './Toast';
+import { useConfirm } from './Confirm';
 
 export const yen = (n: number) => `¥${Math.round(n).toLocaleString('ja-JP')}`;
 
@@ -56,6 +57,7 @@ let seq = 0;
 /** 支出の確認・修正（レシートの読み取り結果もここで直す） */
 export function ExpenseEditor({ expense, isNew, rules, photoUrl, rawText, onClose, history = [] }: Props) {
   const toast = useToast();
+  const confirm = useConfirm();
   const [date, setDate] = useState(expense.date);
   const [store, setStore] = useState(expense.store);
   const [rows, setRows] = useState<Row[]>(() =>
@@ -100,7 +102,7 @@ export function ExpenseEditor({ expense, isNew, rules, photoUrl, rawText, onClos
   };
 
   const remove = async () => {
-    if (window.confirm('この支出を削除しますか？')) {
+    if (await confirm({ title: 'この支出を削除しますか？', confirmLabel: '削除する', danger: true })) {
       await deleteExpense(expense.id);
       onClose();
     }

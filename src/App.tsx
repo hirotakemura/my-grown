@@ -5,6 +5,7 @@ import { Records } from './screens/Records';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { Money } from './screens/Money';
 import { ToastProvider } from './components/Toast';
+import { ConfirmProvider } from './components/Confirm';
 import { RestTimerProvider } from './components/RestTimer';
 import type { TodayMode } from './components/TodaySummary';
 
@@ -47,6 +48,7 @@ export default function App() {
 
   return (
     <ToastProvider>
+      <ConfirmProvider>
       <RestTimerProvider>
         <div className="app">
           {!data ? (
@@ -77,6 +79,7 @@ export default function App() {
           </nav>
         </div>
       </RestTimerProvider>
+      </ConfirmProvider>
     </ToastProvider>
   );
 }

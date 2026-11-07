@@ -232,6 +232,7 @@ test('バックアップを書き出して、別の端末に復元できる', as
   await expect(await weightInput(p2)).toHaveValue('');
   await p2.getByRole('button', { name: '設定' }).click();
   await p2.getByTestId('restore-input').setInputFiles(path);
+  await p2.getByRole('alertdialog', { name: 'バックアップから復元しますか？' }).getByRole('button', { name: '置き換える' }).click();
   await expect(await weightInput(p2)).toHaveValue('70.9');
   await p2.reload();
   await expect(await weightInput(p2)).toHaveValue('70.9');
@@ -457,4 +458,23 @@ test('筋トレ：各セットの横に前回の重さ・回数が出て、休�
   await timer.getByRole('button', { name: '+30秒' }).click();
   await timer.getByRole('button', { name: 'スキップ' }).click();
   await expect(timer).toBeHidden();
+});
+
+test('設定：メニューから種目を外す前にアプリ内で確認し、キャンセルなら残る', async ({ page }) => {
+  await openApp(page);
+  await tab(page, '設定');
+  const removeFirst = () => page.getByRole('button', { name: 'メニューから外す' }).nth(6); // メニューBの1つ目（レッグカール）
+  await removeFirst().click();
+  const ask = page.getByRole('alertdialog', { name: /「レッグカール」を.*から外しますか？/ });
+  await expect(ask).toContainText('これまでの記録は残ります');
+  await ask.getByRole('button', { name: 'キャンセル' }).click();
+  await expect(ask).toBeHidden();
+  await expect.poll(async () => ((await dbGet(page, 'settings', 'main')) as { menuB: string[] }).menuB[0]).toBe('leg-curl');
+
+  await removeFirst().click();
+  await ask.getByRole('button', { name: '外す' }).click();
+  await expect.poll(async () => ((await dbGet(page, 'settings', 'main')) as { menuB: string[] }).menuB).not.toContain('leg-curl');
+  // 「＋ 種目を追加」から戻せる
+  await page.getByLabel(/メニューB.*に種目を追加/).selectOption('leg-curl');
+  await expect.poll(async () => ((await dbGet(page, 'settings', 'main')) as { menuB: string[] }).menuB).toContain('leg-curl');
 });
