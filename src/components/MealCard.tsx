@@ -1,6 +1,6 @@
-import { PLACE_LABEL, SLOT_LABEL, type DayKind, type DayRecord, type MealItem, type MealRecord, type MealSlot, type MySet, type Place, type Product } from '../types';
-import { itemsTotal, placesFor, suggestionChoices, suggestionFor } from '../lib/plan';
-import { clearMeal, patchDay, productToItem, recordMeal, resolveSuggestion, skipMeal } from '../lib/actions';
+import { SLOT_LABEL, type DayKind, type DayRecord, type MealItem, type MealRecord, type MealSlot, type MySet, type Product } from '../types';
+import { itemsTotal } from '../lib/plan';
+import { clearMeal, productToItem, recordMeal, skipMeal } from '../lib/actions';
 import { fmtNut, g1 } from '../lib/format';
 import type { StoreFilter } from './ProductPicker';
 import { useToast } from './Toast';
@@ -21,15 +21,6 @@ export interface MealCardProps {
 
 const fmt = fmtNut;
 
-/** 提案の場所 → 「食べたものを選ぶ」を開いたときのお店タブ */
-export function storeForPlace(place?: Place): StoreFilter {
-  if (place === 'lawson' || place === 'seven' || place === 'famima') return place;
-  // 休日の自炊（ベルク）も「外食・自炊」タブを開く
-  if (place === 'eatout' || place === 'home' || place === 'belc') return 'other';
-  return 'all';
-}
-
-const SHORT_PLACE: Record<Place, string> = { lawson: 'ローソン', seven: 'セブン', famima: 'ファミマ', eatout: '外食', home: '家', belc: 'ベルク' };
 export function ItemList({ items }: { items: MealItem[] }) {
   return (
     <ul className="items">
@@ -47,83 +38,30 @@ export function pickLabel() {
   return '食べたものを選ぶ';
 }
 
-/** まだ記録していない食事：提案とボタン */
-export function MealSuggestion({ date, slot, kind, day, products, mySets, onPick }: MealCardProps) {
+/** まだ記録していない食事：食べたものを選ぶ（マイセットはワンタップ）／食べない */
+function MealOpen({ date, slot, kind, products, mySets, onPick }: MealCardProps) {
   const toast = useToast();
-  const sug = suggestionFor(date, slot, kind, day);
-  const places = placesFor(slot, kind);
-  const place = day?.place?.[slot];
-  const setPlace = (p?: Place) => patchDay(date, { place: { ...day?.place, [slot]: p } });
-  const items = resolveSuggestion(sug, products);
-  const total = itemsTotal(items);
-
-  const eat = async (list: MealItem[]) => {
+  const eatSet = async (s: MySet) => {
+    const list = s.items.flatMap((it) => {
+      const p = products.get(it.productId);
+      return p ? [productToItem(p, it.qty)] : [];
+    });
     await recordMeal(date, slot, list);
     toast(`${SLOT_LABEL[slot]}を記録しました（${fmt(itemsTotal(list))}）`);
   };
-
-  // 選んだ場所の案が1つしかないときは「別の案」を押せないようにする
-  const choiceCount = suggestionChoices(slot, kind, day).length;
-  const nextIdea = () => patchDay(date, { rotation: { ...day?.rotation, [slot]: (day?.rotation?.[slot] ?? 0) + 1 } });
-
   return (
     <div className="stack">
-      {places.length > 1 && (
-        <div className="myset-chips" role="group" aria-label="どこで食べる">
-          <button className={`btn small ${place ? 'ghost' : 'primary'}`} aria-pressed={!place} onClick={() => setPlace(undefined)}>おまかせ</button>
-          {places.map((p) => (
-            <button key={p} className={`btn small ${place === p ? 'primary' : 'ghost'}`} aria-pressed={place === p} onClick={() => setPlace(p)}>
-              {SHORT_PLACE[p]}
-            </button>
-          ))}
-        </div>
-      )}
-      <div>
-        <div className="muted">{PLACE_LABEL[sug.place]}・提案</div>
-        <div className="sug-title" data-testid={`suggestion-${slot}`}>{sug.title}</div>
-      </div>
-      <details className="fold">
-        <summary><span className="total num">合計 {fmt(total)}</span><span className="muted">内訳</span></summary>
-        <ItemList items={items} />
-      </details>
-      {sug.recipe && (
-        <details>
-          <summary>作り方を見る</summary>
-          <div className="stack">
-            <div className="sub">材料：{sug.recipe.ingredients.map((i) => `${i.name} ${i.qty}${i.unit}`).join('、')}（調味料：{sug.recipe.seasonings.join('、')}）</div>
-            <ol>{sug.recipe.steps.map((s, i) => <li key={i}>{s}</li>)}</ol>
-            {sug.recipe.note && <p className="note">{sug.recipe.note}</p>}
-          </div>
-        </details>
-      )}
       {mySets.length > 0 && (
         <div className="myset-chips" aria-label="マイセットでワンタップ記録">
           {mySets.map((s) => (
-            <button
-              key={s.id}
-              className="btn small"
-              onClick={() =>
-                eat(s.items.flatMap((it) => {
-                  const p = products.get(it.productId);
-                  return p ? [productToItem(p, it.qty)] : [];
-                }))
-              }
-            >
-              ⚡ {s.name}
-            </button>
+            <button key={s.id} className="btn small" onClick={() => void eatSet(s)}>⚡ {s.name}</button>
           ))}
         </div>
       )}
-      {/* 主な操作：提案どおりに記録／違うものを選んで記録。サブ：提案を変える／この食事はとらない */}
-      <div className="meal-actions">
-        <button className="btn primary" onClick={() => eat(items)}>これを食べた</button>
-        <button className="btn" onClick={() => onPick(slot, [], storeForPlace(place ?? (kind === 'off' ? 'belc' : undefined)))}>{pickLabel()}</button>
-      </div>
-      <div className="meal-sub">
-        <button className="btn small ghost" onClick={nextIdea} disabled={choiceCount < 2}>
-          ↻ 別の案{choiceCount > 1 ? `（${choiceCount}案）` : ''}
-        </button>
-        <button className="btn small ghost" onClick={() => skipMeal(date, slot)}>食べない</button>
+      <div className="meal-open-actions">
+        {/* 休日は自炊・ベルクのタブ、出社日はすべてのお店から */}
+        <button className="btn primary" onClick={() => onPick(slot, [], kind === 'off' ? 'other' : 'all')}>{pickLabel()}</button>
+        <button className="btn ghost" onClick={() => skipMeal(date, slot)}>食べない</button>
       </div>
     </div>
   );
@@ -141,7 +79,7 @@ export function MealCard(props: MealCardProps) {
         {meal?.status === 'eaten' && <span className="chip ok">✓ 食べた</span>}
         {meal?.status === 'skipped' && <span className="chip">食べない</span>}
       </div>
-      {!meal && <MealSuggestion {...props} />}
+      {!meal && <MealOpen {...props} />}
       {meal?.status === 'eaten' && (
         <>
           {/* 記録済みは1行にまとめる。内訳は開いて確認できる */}

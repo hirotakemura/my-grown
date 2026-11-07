@@ -31,6 +31,17 @@ const tab = (page: Page, name: string) => page.getByRole('navigation').getByRole
 /** 今日の画面の「食事／筋トレ」の切り替え */
 const mode = (page: Page, name: '食事' | '筋トレ') => page.getByRole('tab', { name: new RegExp(`^${name}`) }).click();
 
+/** 食事の枠の「食べたものを選ぶ」から商品名で探して1つ記録する */
+async function eat(page: Page, slot: string, name: string, store?: string) {
+  await page.getByTestId(`meal-${slot}`).getByRole('button', { name: '食べたものを選ぶ' }).click();
+  const dialog = page.getByRole('dialog');
+  if (store) await dialog.getByRole('group', { name: 'お店' }).getByRole('button', { name: store, exact: true }).click();
+  await dialog.getByLabel('商品名で検索').fill(name);
+  await dialog.getByRole('button', { name: new RegExp(`^${name}`) }).first().click();
+  await dialog.getByRole('button', { name: '食べた', exact: true }).click();
+  await expect(dialog).toBeHidden();
+}
+
 /** 体重は「記録」タブで入れる（入れたら「今日」タブに戻る） */
 async function enterWeight(page: Page, value: string) {
   await tab(page, '記録');
@@ -49,9 +60,10 @@ async function weightInput(page: Page) {
 test('記録した食事・体重・セットがリロード後も残る', async ({ page }) => {
   await openApp(page);
 
-  // 提案をそのまま「これを食べた」
+  // 昼は「食べたものを選ぶ」から（提案はない）
   const lunch = page.getByTestId('meal-lunch');
-  await lunch.getByRole('button', { name: 'これを食べた' }).click();
+  await expect(lunch.getByRole('button', { name: 'これを食べた' })).toHaveCount(0);
+  await eat(page, 'lunch', 'サラダチキン プレーン');
   await expect(lunch.getByText('✓ 食べた')).toBeVisible();
 
   // 体重
@@ -132,19 +144,14 @@ test('コンビニの商品から複数選んで記録し、マイセット・�
 test('セブンの商品と外食（手入力）で記録し、その日のPFCがわかる', async ({ page }) => {
   await openApp(page);
 
-  // 昼：セブンに絞った提案をそのまま食べた
-  const lunch = page.getByTestId('meal-lunch');
-  await lunch.getByRole('button', { name: 'セブン', exact: true }).click();
-  await expect(lunch).toContainText('セブン・提案');
-  await lunch.getByRole('button', { name: 'これを食べた' }).click();
+  // 昼：セブンのタブから選んで食べた
+  await eat(page, 'lunch', 'セブン サラダチキン プレーン', 'セブン');
 
   // 夜：外食を手入力
   const dinner = page.getByTestId('meal-dinner');
-  await dinner.getByRole('button', { name: '外食', exact: true }).click();
-  await expect(dinner).toContainText('外食・提案');
   await dinner.getByRole('button', { name: '食べたものを選ぶ' }).click();
   const dialog = page.getByRole('dialog').first();
-  await expect(dialog.getByRole('group', { name: 'お店' }).getByRole('button', { name: '外食・自炊' })).toHaveAttribute('aria-pressed', 'true');
+  await dialog.getByRole('group', { name: 'お店' }).getByRole('button', { name: '外食・自炊' }).click();
   await dialog.getByRole('button', { name: /手入力で追加/ }).click();
   const form = page.getByRole('dialog', { name: '手入力で追加（外食など）' });
   await form.getByLabel('食べたもの').fill('定食屋 唐揚げ定食');
@@ -159,7 +166,7 @@ test('セブンの商品と外食（手入力）で記録し、その日のPFC�
 
   await page.reload();
 
-  // その日の合計（昼のセブン提案＋夜の外食）
+  // その日の合計（昼のセブン＋夜の外食）
   const progress = page.getByTestId('progress');
   await progress.getByText('脂質・炭水化物・PFCバランス').click();
   await expect(progress.getByRole('progressbar', { name: 'F 脂質' })).toBeVisible();
@@ -372,11 +379,17 @@ test('今日：食事と筋トレを切り替えて表示し、切り替えて�
 
   // 食事を記録すると、サマリーの数字が増え、記録済みの枠は1行にまとまる（内容の変更・取り消しはそのまま）
   const lunch = page.getByTestId('meal-lunch');
-  await lunch.getByRole('button', { name: 'これを食べた' }).click();
+  await eat(page, 'lunch', 'サラダチキン プレーン');
   await expect(lunch.getByText('✓ 食べた')).toBeVisible();
   await expect(lunch.getByRole('button', { name: '内容を変更' })).toBeVisible();
   await expect(lunch.getByRole('button', { name: '取り消す' })).toBeVisible();
   await expect(summary).not.toContainText('あと 135g');
+  // 食べない食事は「食べない」で閉じられ、取り消せる
+  const breakfast = page.getByTestId('meal-breakfast');
+  await breakfast.getByRole('button', { name: '食べない' }).click();
+  await expect(breakfast.getByText('食べない', { exact: true })).toBeVisible();
+  await breakfast.getByRole('button', { name: '取り消す' }).click();
+  await expect(breakfast.getByRole('button', { name: '食べたものを選ぶ' })).toBeVisible();
 
   // 筋トレに切り替えて、重さだけ入れた（まだ保存していない）状態で食事に戻り、また筋トレへ
   await mode(page, '筋トレ');

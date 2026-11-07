@@ -499,16 +499,15 @@ input[type='time'].input::-webkit-date-and-time-value {
 .card.meal.eaten .card-title, .card.meal.skipped .card-title { font-size: var(--fs-body); }
 .card.meal .card-title .muted { font-family: var(--font-num), var(--font-sans); font-weight: var(--fw-medium); margin-left: 2px; }
 .card.meal.focused { box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); border-color: var(--accent); }
-.sug-title { font-size: 16px; font-weight: var(--fw-semibold); line-height: 1.45; }
 .fold summary { min-height: 32px; gap: 8px; color: var(--text); font-weight: 400; justify-content: space-between; }
 .fold summary .muted::after { content: ' ▾'; }
 .fold[open] summary .muted::after { content: ' ▴'; }
 .eaten-names { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2); font-size: var(--fs-label); }
 .fold[open] .eaten-names { white-space: normal; }
-.meal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.meal-actions .btn { min-height: 48px; white-space: nowrap; padding: 0 8px; font-size: var(--fs-body); }
-.meal-sub { display: flex; justify-content: space-between; gap: 8px; margin-top: -2px; }
-.meal-sub .btn { min-height: 40px; color: var(--text-2); }
+/* まだ記録していない食事：主な操作「食べたものを選ぶ」と、控えめな「食べない」 */
+.meal-open-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.meal-open-actions .btn { min-height: 48px; white-space: nowrap; font-size: var(--fs-body); }
+.meal-open-actions .btn.ghost { color: var(--text-2); }
 
 /* ---- 筋トレ：終わった種目 ---- */
 .ex-card.all-done { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }

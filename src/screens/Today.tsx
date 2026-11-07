@@ -10,7 +10,6 @@ import {
 import { TodaySummary, type TodayMode } from '../components/TodaySummary';
 import { MealCard, pickLabel, type MealCardProps } from '../components/MealCard';
 import { WorkoutSection } from '../components/Workout';
-import { ShoppingList } from '../components/ShoppingList';
 import { ProductPicker, type StoreFilter } from '../components/ProductPicker';
 
 interface Props {
@@ -153,7 +152,6 @@ export function Today({ data, date, setDate, mode, setMode, onOpenRecords }: Pro
       {/* どちらも画面に残したまま隠すので、切り替えても入力中の内容は消えない */}
       <div id="panel-meal" role="tabpanel" className="panel" hidden={mode !== 'meal'}>
         {ordered.map((slot) => <MealCard key={slot} {...mealProps(slot)} focused={focusSlot === slot} />)}
-        {status.kind === 'off' && <ShoppingList date={date} days={data.days} />}
       </div>
 
       <div id="panel-workout" role="tabpanel" className="panel" hidden={mode !== 'workout'}>
