@@ -14,7 +14,7 @@ export const VERIFIED = new Set([
   '7-curry-udon', 'home-alpron-soy-strawberry', 'l-samgyetang-soup',
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
-  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen',
+  'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen', 'f-mentai-mayo-atsuyaki-tamago',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -244,6 +244,7 @@ export const ADDED_IN: Record<number, string[]> = {
   57: ['l-goro-yasai-pot-au-feu'],
   59: ['l-sunagimo-ninniku'],
   60: ['f-fukuchan-tonkotsu-ramen'],
+  61: ['f-mentai-mayo-atsuyaki-tamago'],
 };
 
 // ファミリーマート
@@ -252,6 +253,7 @@ const famima: Row[] = [
   ['f-chicken-nanban', 'ファミマ 甘酢たれとタルタルソースのチキン南蛮', 'チキン・肉', 265, 13.8, 16.5, 15.3],
   ['f-onigiri-benishake', 'ファミマ 手巻 紅しゃけ', 'おにぎり', 174, 4.7, 1.3, 35.8],
   ['f-fukuchan-tonkotsu-ramen', 'ファミマル ふくちゃんラーメン監修 コクとキレの豚骨ラーメン', '麺', 496, 12.5, 19.9, 66.8],
+  ['f-mentai-mayo-atsuyaki-tamago', 'ファミマル だしがじゅわ！明太マヨ厚焼き玉子', '卵・乳製品', 180, 11.7, 12.2, 6.1],
 ];
 
 // どのコンビニでも買えるもの
