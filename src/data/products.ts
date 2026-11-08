@@ -15,7 +15,7 @@ export const VERIFIED = new Set([
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
   'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen', 'f-mentai-mayo-atsuyaki-tamago',
-  'eo-mcd-chee-chee-double-sausage-muffin',
+  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -109,6 +109,7 @@ const lawson: Row[] = [
   ['l-goro-yasai-pot-au-feu', 'ごろっと野菜のポトフ', '汁物・サラダ', 174, 9.7, 10.3, 12.7],
   ['l-toridango-shirataki-soup', '鶏団子としらたき麺の和風スープ', '汁物・サラダ', 127, 11.1, 5.8, 8.9],
   ['l-kake-soba', 'つゆが主役！かけそば', '麺', 272, 20.7, 1.7, 45.7],
+  ['l-cheese-manpuku-noko-buta-ramen', 'とろ〜りチーズ満腹濃厚豚ラーメン', '麺', 787, 44.7, 32.8, 81.9],
   ['l-nebaneba-soba', '香りとのど越し ミニネバネバそば', '麺', 238, 13.3, 4.2, 39.1],
   ['l-niku-soba', '特盛！冷し肉そば', '麺', 614, 35.2, 14, 90.7],
   ['l-hiyashi-chuka', '冷し中華', '麺', 432, 21, 10.5, 65.6],
@@ -247,6 +248,7 @@ export const ADDED_IN: Record<number, string[]> = {
   60: ['f-fukuchan-tonkotsu-ramen'],
   61: ['f-mentai-mayo-atsuyaki-tamago'],
   62: ['eo-mcd-chee-chee-double-sausage-muffin'],
+  63: ['l-cheese-manpuku-noko-buta-ramen'],
 };
 
 // ファミリーマート
