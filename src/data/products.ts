@@ -15,6 +15,7 @@ export const VERIFIED = new Set([
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
   'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen', 'f-mentai-mayo-atsuyaki-tamago',
+  'eo-mcd-chee-chee-double-sausage-muffin',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -245,6 +246,7 @@ export const ADDED_IN: Record<number, string[]> = {
   59: ['l-sunagimo-ninniku'],
   60: ['f-fukuchan-tonkotsu-ramen'],
   61: ['f-mentai-mayo-atsuyaki-tamago'],
+  62: ['eo-mcd-chee-chee-double-sausage-muffin'],
 };
 
 // ファミリーマート
@@ -282,6 +284,7 @@ const other: Row[] = [
   // PFCは概算、kcalはPFCから計算（4×P＋9×F＋4×C）
   ['eo-kashiwa-udon', 'かしわうどん', '麺', 467, 21, 7, 80],
   ['eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '久兵衛屋 旨辛にんにく背脂肉つけ汁うどん（並盛）', '麺', 740, 24, 34, 86],
+  ['eo-mcd-chee-chee-double-sausage-muffin', 'マクドナルド チーチーダブチソーセージマフィン', '外食・定食', 745, 30.6, 54.6, 32.7],
   // お店で見た「約」の値なので目安。チャーシュー丼の炭水化物は表示がないため、kcal・P・F から計算（(480−22×4−18×9)÷4）
   ['eo-tokusei-shoyu-ramen', '特製醤油らぁ麺（鴨×大山鶏出汁・焼き豚・鶏むね・卵）', '麺', 650, 35, 20, 75],
   ['eo-ramen-kaedama', '替え玉（1玉）', '麺', 340, 9, 2, 68],
