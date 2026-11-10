@@ -249,6 +249,7 @@ export const ADDED_IN: Record<number, string[]> = {
   61: ['f-mentai-mayo-atsuyaki-tamago'],
   62: ['eo-mcd-chee-chee-double-sausage-muffin'],
   63: ['l-cheese-manpuku-noko-buta-ramen'],
+  64: ['home-seseri-250'],
 };
 
 // ファミリーマート
@@ -313,6 +314,8 @@ const other: Row[] = [
   ['home-pasta-100', 'パスタ（乾麺100g）', '自炊', 347, 12.9, 1.8, 73.1],
   // 皮なし鶏むね肉（約1枚）を片栗粉・醤油・酒・生姜・にんにくで揚げた合計の目安
   ['home-karaage-skinless', '鶏むね肉の唐揚げ（皮なし・1枚分）', '自炊', 540, 60, 30.3, 10.8],
+  // 「約」の値なので目安
+  ['home-seseri-250', 'せせり（250g）', '自炊', 523, 41.5, 39.8, 0],
   ['home-kewpie-arrabbiata', 'キユーピー アラビアータ ソース（1人前・ソースのみ）', '自炊', 101, 2.2, 5.5, 10.6],
   // kcalは表示のPFCから計算（4×P＋9×F＋4×C）
   ['home-alpron-soy-strawberry', 'ALPRON ソイプロテイン ストロベリー風味（1杯30g）', '自炊', 112, 20.5, 0.8, 5.8],
