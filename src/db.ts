@@ -4,6 +4,7 @@ import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12, UPDATED_T
 import { ASSIST_EXERCISES, DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_CATEGORY, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
 import { restoreMenu } from './lib/menuRestore';
+import { menuSlots } from './lib/exerciseCategory';
 
 export const DB_NAME = 'my-grown';
 
@@ -567,6 +568,18 @@ export class AppDB extends Dexie {
           if (!e.altIds && e.altId) e.altIds = [e.altId];
           delete e.altId;
         });
+      });
+    // v68: ほかの枠で選べる種目として入っている種目を、メニューの別の枠からは外す（二重に出ないように）
+    this.version(68)
+      .stores({})
+      .upgrade(async (tx) => {
+        const settingsTable = tx.table<Settings, string>('settings');
+        const s = await settingsTable.get('main');
+        if (!s) return;
+        const exercises = new Map((await tx.table<Exercise, string>('exercises').toArray()).map((e) => [e.id, e]));
+        const menuA = menuSlots(s.menuA ?? [], exercises);
+        const menuB = menuSlots(s.menuB ?? [], exercises);
+        if (menuA.length !== (s.menuA ?? []).length || menuB.length !== (s.menuB ?? []).length) await settingsTable.update('main', { menuA, menuB });
       });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {

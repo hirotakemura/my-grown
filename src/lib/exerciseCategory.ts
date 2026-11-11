@@ -25,5 +25,20 @@ export function groupByCategory<T extends Exercise>(list: T[]): { category: Exer
 
 /** その種目の枠で選べるほかの種目のid（古いデータの altId も読む） */
 export function optionsOf(ex: Exercise): string[] {
-  return ex.altIds ?? (ex.altId ? [ex.altId] : []);
+  return [...new Set(ex.altIds ?? (ex.altId ? [ex.altId] : []))].filter((id) => id !== ex.id);
+}
+
+/**
+ * メニューの種目を「枠」にする。ほかの枠で選べる種目として入っている種目は、別の枠としては出さない
+ * （前に別の枠として足した種目を、あとで枠の選択肢に入れたときに二重にならないように）。
+ */
+export function menuSlots(ids: string[], exercises: Map<string, Exercise>): string[] {
+  const opts = (id: string) => { const ex = exercises.get(id); return ex ? optionsOf(ex) : []; };
+  const kept: string[] = [];
+  for (const id of new Set(ids)) {
+    if (kept.some((k) => opts(k).includes(id))) continue;
+    kept.push(id);
+  }
+  // 後ろの枠の選択肢に入っている前の枠も外す（チェストプレスの前にケーブル チェストプレスがあった場合など）
+  return kept.filter((id, i) => !kept.some((k, j) => j > i && opts(k).includes(id)));
 }

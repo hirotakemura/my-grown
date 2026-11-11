@@ -120,7 +120,9 @@ export function SettingsScreen({ data }: { data: AppData }) {
       [next[i], next[i + d]] = [next[i + d], next[i]];
       set({ [key]: next });
     };
-    const candidates = [...data.exercises.values()].filter((e) => !ids.includes(e.id));
+    // メニューにある種目と、その枠で選べる種目は「＋ 種目を追加」に出さない（二重にならないように）
+    const inMenu = new Set(ids.flatMap((id) => { const e = data.exercises.get(id); return e ? [id, ...optionsOf(e)] : [id]; }));
+    const candidates = [...data.exercises.values()].filter((e) => !inMenu.has(e.id));
     return (
       <div className="stack">
         <h3 className="card-title" style={{ fontSize: 15 }}>{title}</h3>
@@ -128,7 +130,8 @@ export function SettingsScreen({ data }: { data: AppData }) {
           {ids.map((id, i) => {
             const ex = data.exercises.get(id);
             const opts = ex ? optionsOf(ex) : [];
-            const optCandidates = [...data.exercises.values()].filter((e) => e.id !== id && !opts.includes(e.id));
+            // このメニューのほかの枠の種目は選べる種目に入れない（枠が二重になるため）
+            const optCandidates = [...data.exercises.values()].filter((e) => e.id !== id && !opts.includes(e.id) && !ids.includes(e.id));
             return (
               <div key={id} className="menu-slot" data-testid={`slot-${id}`}>
                 <div className="list-row">

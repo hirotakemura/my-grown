@@ -535,3 +535,18 @@ test('筋トレ：1つの枠（胸）で、選べる種目からその日にや�
   await page.getByRole('alertdialog').getByRole('button', { name: '外す' }).click();
   await expect(slot.locator('.slot-chip', { hasText: 'パワーラック' })).toHaveCount(0);
 });
+
+test('筋トレ：前に別の枠として足した種目を、ほかの枠の選べる種目にしても二重に出ない', async ({ page }) => {
+  await openApp(page);
+  const settings = (await dbGet(page, 'settings', 'main')) as Record<string, unknown>;
+  await dbPut(page, 'settings', [{ ...settings, menuA: [...(settings.menuA as string[]), 'cable-chest-press'] }]);
+  await page.reload();
+  await mode(page, '筋トレ');
+  await expect(page.locator('[data-testid="workout"] .ex-card')).toHaveCount(6);
+  await expect(page.getByRole('group', { name: '胸：今日やる種目' })).toHaveCount(1);
+  await expect(page.getByRole('tab', { name: /^筋トレ/ })).toContainText('0/18');
+  // 設定の「＋ 種目を追加」にも、もう出ない
+  await tab(page, '設定');
+  const add = page.getByLabel('メニューA（押す日）に種目を追加');
+  await expect(add.locator('option', { hasText: 'ケーブル チェストプレス' })).toHaveCount(0);
+});

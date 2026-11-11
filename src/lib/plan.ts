@@ -2,6 +2,7 @@ import type {
   DayKind, DayRecord, Exercise, ISODate, MealItem, MealRecord, MealSlot, Place, Settings, WorkoutMenu, WorkoutSet,
 } from '../types';
 import { HOLIDAYS } from '../data/holidays';
+import { menuSlots } from './exerciseCategory';
 import { HOLIDAY_MENUS, WEEKDAY_MENUS, type Suggestion } from '../data/menus';
 import { addDays, dateRange, dayNumber, minutesToTime, timeToMinutes, weekday } from './date';
 
@@ -62,7 +63,7 @@ export function menuExerciseIds(settings: Settings, menu: WorkoutMenu): string[]
 }
 
 export function plannedSetCount(settings: Settings, menu: WorkoutMenu, exercises: Map<string, Exercise>): number {
-  return menuExerciseIds(settings, menu).reduce((n, id) => n + (exercises.get(id)?.sets ?? 3), 0);
+  return menuSlots(menuExerciseIds(settings, menu), exercises).reduce((n, id) => n + (exercises.get(id)?.sets ?? 3), 0);
 }
 
 export interface Nutrition {

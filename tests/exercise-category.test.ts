@@ -69,3 +69,40 @@ describe('同じ枠で選べる種目', () => {
     db.close();
   });
 });
+
+describe('メニューの枠がだぶらない', () => {
+  const ex = new Map(SEED_EXERCISES.map((e) => [e.id, e]));
+  it('ほかの枠で選べる種目は、別の枠としては出さない（前にあっても後ろにあっても）', async () => {
+    const { menuSlots } = await import('../src/lib/exerciseCategory');
+    expect(menuSlots(['leg-press', 'chest-press', 'cable-chest-press', 'shoulder-press'], ex)).toEqual(['leg-press', 'chest-press', 'shoulder-press']);
+    expect(menuSlots(['cable-chest-press', 'leg-press', 'chest-press'], ex)).toEqual(['leg-press', 'chest-press']);
+    expect(menuSlots(['chest-press', 'chest-press'], ex)).toEqual(['chest-press']);
+    // お互いに選べる種目にしていても、どちらか1つは残る
+    const mutual = new Map(ex);
+    mutual.set('cable-chest-press', { ...ex.get('cable-chest-press')!, altIds: ['chest-press'] });
+    expect(menuSlots(['chest-press', 'cable-chest-press'], mutual)).toEqual(['chest-press']);
+  });
+
+  it('予定のセット数もだぶって数えない', async () => {
+    const { plannedSetCount } = await import('../src/lib/plan');
+    const s = { ...defaultSettings('2026-10-01'), menuA: ['leg-press', 'chest-press', 'cable-chest-press'] };
+    expect(plannedSetCount(s, 'A', ex)).toBe(6);
+  });
+
+  it('v68：保存されたメニューからも、だぶっている枠を外す', async () => {
+    const name = 'v67-dup';
+    names.push(name);
+    const v67 = new Dexie(name);
+    v67.version(67).stores({
+      settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId',
+      expenses: 'id, date', categoryRules: 'name',
+    });
+    await v67.table('settings').put({ ...defaultSettings('2026-10-01'), menuA: ['leg-press', 'chest-press', 'cable-chest-press'] });
+    await v67.table('products').bulkAdd(SEED_PRODUCTS);
+    await v67.table('exercises').bulkAdd(SEED_EXERCISES);
+    v67.close();
+    const db = new AppDB(name);
+    expect((await db.settings.get('main'))?.menuA).toEqual(['leg-press', 'chest-press']);
+    db.close();
+  });
+});

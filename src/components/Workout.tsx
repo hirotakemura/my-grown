@@ -8,7 +8,7 @@ import { formatMD } from '../lib/date';
 import { useRestTimer } from './RestTimer';
 import { useToast } from './Toast';
 import { db } from '../db';
-import { categoryOf, optionsOf } from '../lib/exerciseCategory';
+import { categoryOf, menuSlots, optionsOf } from '../lib/exerciseCategory';
 
 interface Props {
   date: string;
@@ -21,7 +21,7 @@ interface Props {
 }
 
 export function WorkoutSection({ date, menu, day, settings, exercises, sets, plannedSets }: Props) {
-  const ids = menuExerciseIds(settings, menu);
+  const ids = menuSlots(menuExerciseIds(settings, menu), exercises);
   const doneToday = sets.filter((s) => s.date === date && s.done).length;
 
   const pct = plannedSets > 0 ? Math.min(100, (doneToday / plannedSets) * 100) : 0;
