@@ -1,4 +1,4 @@
-import type { Exercise } from '../types';
+import type { Exercise, ExerciseCategory } from '../types';
 
 type Def = [id: string, name: string, repMin: number, repMax: number, increment: number, howTo: string, altId?: string];
 
@@ -73,8 +73,18 @@ const alternatives: Def[] = [
 /** 補助の重さを選ぶマシン（数値が大きいほど楽。上達したら数値を小さくする） */
 export const ASSIST_EXERCISES = ['assisted-pullup'];
 
+/** 初期の種目の分類 */
+export const SEED_CATEGORY: Record<string, ExerciseCategory> = {
+  'chest-press': '胸', 'cable-chest-press': '胸', 'pec-fly': '胸', 'cable-crossover': '胸',
+  'lat-pulldown': '背中', 'seated-row': '背中', 'assisted-pullup': '背中', 'one-arm-row': '背中', 'back-extension': '背中',
+  'shoulder-press': '肩', 'smith-shoulder-press': '肩', 'cable-lateral': '肩', 'machine-lateral': '肩',
+  'pushdown': '腕', 'overhead-extension': '腕', 'cable-curl': '腕', 'machine-curl': '腕',
+  'leg-press': '脚', 'leg-press-low': '脚', 'leg-extension': '脚', 'leg-curl': '脚', 'smith-squat': '脚',
+  'abdominal': 'お腹', 'cable-crunch': 'お腹',
+};
+
 const toExercise = ([id, name, repMin, repMax, increment, howTo, altId]: Def): Exercise => ({
-  id, name, repMin, repMax, increment, howTo, altId, sets: 3,
+  id, name, repMin, repMax, increment, howTo, altId, sets: 3, category: SEED_CATEGORY[id],
   ...(ASSIST_EXERCISES.includes(id) ? { assist: true } : {}),
 });
 

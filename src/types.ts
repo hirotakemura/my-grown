@@ -107,9 +107,15 @@ export interface DayRecord {
   shoppingChecked?: string[];
 }
 
+/** 種目の分類（記録・種目を追加の一覧をこの見出しで分ける） */
+export const EXERCISE_CATEGORIES = ['胸', '背中', '肩', '腕', '脚', 'お腹', 'その他'] as const;
+export type ExerciseCategory = (typeof EXERCISE_CATEGORIES)[number];
+
 export interface Exercise {
   id: string;
   name: string;
+  /** 分類。無ければ名前から推測する（categoryOf） */
+  category?: ExerciseCategory;
   repMin: number;
   repMax: number;
   increment: number; // 次の重さがわからないときに増やす重さ（kg・目安）

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AppData } from '../hooks';
-import { STORE_LABEL, type Exercise, type Product, type Settings } from '../types';
+import { EXERCISE_CATEGORIES, STORE_LABEL, type Exercise, type ExerciseCategory, type Product, type Settings } from '../types';
+import { categoryOf, groupByCategory, guessCategory } from '../lib/exerciseCategory';
 import { fmtNut } from '../lib/format';
 import { db, newId, requestPersistence, type StorageStatus } from '../db';
 import { patchSettings } from '../lib/actions';
@@ -128,7 +129,7 @@ export function SettingsScreen({ data }: { data: AppData }) {
               <div key={id} className="list-row">
                 <button className="grow" style={{ background: 'none', border: 'none', textAlign: 'left', padding: 0, minHeight: 44, cursor: 'pointer' }} onClick={() => ex && setEditingEx(ex)}>
                   <div style={{ fontWeight: 600 }}>{ex?.name ?? '（削除された種目）'}</div>
-                  {ex && <div className="muted">{ex.repMin}〜{ex.repMax}回 × {ex.sets}　代替：{ex.altId ? data.exercises.get(ex.altId)?.name ?? 'なし' : 'なし'}</div>}
+                  {ex && <div className="muted">{categoryOf(ex)}・{ex.repMin}〜{ex.repMax}回 × {ex.sets}　代替：{ex.altId ? data.exercises.get(ex.altId)?.name ?? 'なし' : 'なし'}</div>}
                 </button>
                 <button className="icon-btn" aria-label="上へ" disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
                 <button className="icon-btn" aria-label="下へ" disabled={i === ids.length - 1} onClick={() => move(i, 1)}>↓</button>
@@ -160,7 +161,11 @@ export function SettingsScreen({ data }: { data: AppData }) {
           aria-label={`${title}に種目を追加`}
         >
           <option value="">＋ 種目を追加…</option>
-          {candidates.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+          {groupByCategory(candidates).map((g) => (
+            <optgroup key={g.category} label={g.category}>
+              {g.items.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+            </optgroup>
+          ))}
           <option value="__new">新しい種目を作る</option>
         </select>
       </div>
@@ -285,21 +290,27 @@ function ExerciseEditor({ exercise, all, onClose, onCreated }: { exercise?: Exer
   const [increment, setIncrement] = useState(String(exercise?.increment ?? 5));
   const [howTo, setHowTo] = useState(exercise?.howTo ?? '');
   const [altId, setAltId] = useState(exercise?.altId ?? '');
+  // 選んでいなければ名前から推測した分類を使う
+  const [category, setCategory] = useState<ExerciseCategory | ''>(exercise?.category ?? '');
+  const effectiveCategory = category || guessCategory(name);
   const valid = name.trim() !== '' && Number(repMin) > 0 && Number(repMax) >= Number(repMin) && Number(sets) > 0 && Number(increment) > 0;
 
   const save = async () => {
     if (!valid) return;
     const id = exercise?.id ?? newId();
-    await db.exercises.put({
-      id,
+    const fields = {
       name: name.trim(),
+      category: effectiveCategory,
       repMin: Number(repMin),
       repMax: Number(repMax),
       sets: Math.round(Number(sets)),
       increment: Number(increment),
       howTo: howTo.trim(),
       altId: altId || undefined,
-    });
+    };
+    // 既存の種目は、この画面で直した項目だけ書き換える（覚えている「次の重さ」やアシストの印は残す）
+    if (exercise) await db.exercises.update(id, fields);
+    else await db.exercises.put({ id, ...fields });
     if (!exercise) onCreated(id);
     onClose();
   };
@@ -312,6 +323,14 @@ function ExerciseEditor({ exercise, all, onClose, onCreated }: { exercise?: Exer
       footer={<button className="btn primary block" disabled={!valid} onClick={save}>保存</button>}
     >
       <label className="field"><span>種目名</span><input className="input" value={name} onChange={(e) => setName(e.target.value)} /></label>
+      <div className="field">
+        <span>分類</span>
+        <div className="seg ex-cat-seg" role="group" aria-label="分類">
+          {EXERCISE_CATEGORIES.map((c) => (
+            <button key={c} type="button" aria-pressed={effectiveCategory === c} onClick={() => setCategory(c)}>{c}</button>
+          ))}
+        </div>
+      </div>
       <div className="grid2">
         <label className="field"><span>回数（下限）</span><input className="input" type="number" inputMode="numeric" value={repMin} onChange={(e) => setRepMin(e.target.value)} /></label>
         <label className="field"><span>回数（上限）</span><input className="input" type="number" inputMode="numeric" value={repMax} onChange={(e) => setRepMax(e.target.value)} /></label>
@@ -329,7 +348,11 @@ function ExerciseEditor({ exercise, all, onClose, onCreated }: { exercise?: Exer
       <label className="field"><span>マシンが空いていないときの代替種目</span>
         <select className="input" value={altId} onChange={(e) => setAltId(e.target.value)}>
           <option value="">なし</option>
-          {all.filter((e) => e.id !== exercise?.id).map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+          {groupByCategory(all.filter((e) => e.id !== exercise?.id)).map((g) => (
+            <optgroup key={g.category} label={g.category}>
+              {g.items.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+            </optgroup>
+          ))}
         </select>
       </label>
     </Sheet>

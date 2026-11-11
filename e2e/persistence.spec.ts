@@ -94,14 +94,15 @@ test('記録した食事・体重・セットがリロード後も残る', async
   // 記録タブにも反映される
   await page.getByRole('navigation').getByRole('button', { name: '記録' }).click();
   // 種目ごとの推移：最初は折りたたまれていて、開くとトレした種目が選ばれた状態で前回の記録が出る
-  await expect(page.getByRole('group', { name: 'メニューA（押す日）' })).toBeHidden();
+  // 分類（胸・背中・脚…）ごとにまとまっている
+  await expect(page.getByRole('group', { name: '脚', exact: true })).toBeHidden();
   await expect(page.getByTestId('exercise-history')).toContainText('60×12');
-  await page.getByText('メニューA（押す日）').click();
-  await page.getByText('メニューB（引く日）').click();
-  const chip = page.getByRole('group', { name: 'メニューA（押す日）' }).getByRole('button', { name: /レッグプレス/ });
+  await page.locator('.ex-group summary', { hasText: '脚' }).click();
+  await page.locator('.ex-group summary', { hasText: '背中' }).click();
+  const chip = page.getByRole('group', { name: '脚', exact: true }).getByRole('button', { name: /レッグプレス/ });
   await expect(chip).toHaveAttribute('aria-pressed', 'true');
   await expect(chip).toContainText('前回 60kg×12');
-  await expect(page.getByRole('group', { name: 'メニューB（引く日）' }).getByRole('button', { name: /ラットプルダウン/ })).toBeDisabled();
+  await expect(page.getByRole('group', { name: '背中', exact: true }).getByRole('button', { name: /ラットプルダウン/ })).toBeDisabled();
   await expect(page.getByTestId('exercise-history')).toContainText('60×12');
 });
 
@@ -477,4 +478,28 @@ test('設定：メニューから種目を外す前にアプリ内で確認し�
   // 「＋ 種目を追加」から戻せる
   await page.getByLabel(/メニューB.*に種目を追加/).selectOption('leg-curl');
   await expect.poll(async () => ((await dbGet(page, 'settings', 'main')) as { menuB: string[] }).menuB).toContain('leg-curl');
+});
+
+test('種目：新しく作ると名前から分類が付き（パワーラック→胸）、変えられる。編集しても覚えた次の重さは消えない', async ({ page }) => {
+  await openApp(page);
+  await dbPut(page, 'exercises', [{ ...(await dbGet(page, 'exercises', 'chest-press') as object), nextWeights: { '35': 40 } }]);
+  await tab(page, '設定');
+  await page.getByLabel('メニューA（押す日）に種目を追加').selectOption('__new');
+  const sheet = page.getByRole('dialog', { name: '新しい種目' });
+  await sheet.getByLabel('種目名').fill('パワーラック ベンチプレス');
+  const cat = sheet.getByRole('group', { name: '分類' });
+  await expect(cat.getByRole('button', { name: '胸' })).toHaveAttribute('aria-pressed', 'true');
+  await sheet.getByRole('button', { name: '保存' }).click();
+  await expect(page.locator('.list-row', { hasText: 'パワーラック ベンチプレス' })).toContainText('胸・');
+
+  // 「＋ 種目を追加」の一覧は分類ごとに分かれている
+  const groups = await page.getByLabel('メニューB（引く日）に種目を追加').locator('optgroup').evaluateAll((els) => els.map((e) => e.getAttribute('label')));
+  expect(groups).toEqual(expect.arrayContaining(['胸', '肩', '脚']));
+
+  // 既存の種目を編集して分類を変えても、次の重さは残る
+  await page.locator('.list-row', { hasText: /^チェストプレス/ }).getByRole('button').first().click();
+  const edit = page.getByRole('dialog', { name: '種目を編集' });
+  await edit.getByRole('group', { name: '分類' }).getByRole('button', { name: 'その他' }).click();
+  await edit.getByRole('button', { name: '保存' }).click();
+  await expect.poll(() => dbGet(page, 'exercises', 'chest-press')).toMatchObject({ category: 'その他', nextWeights: { '35': 40 } });
 });

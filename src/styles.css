@@ -531,3 +531,6 @@ input[type='time'].input::-webkit-date-and-time-value {
 .btn.destructive { background: var(--danger); border-color: var(--danger); color: #fff; }
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes pop-in { from { transform: scale(0.94); opacity: 0; } }
+/* 種目の分類：7つを2段に並べる */
+.ex-cat-seg { flex-wrap: wrap; }
+.ex-cat-seg button { flex: 1 0 22%; min-height: 40px; }

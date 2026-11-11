@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { CategoryRule, DayRecord, Exercise, Expense, MealItem, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
 import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12, UPDATED_TO_OFFICIAL_V16 } from './data/products';
-import { ASSIST_EXERCISES, DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_EXERCISES } from './data/exercises';
+import { ASSIST_EXERCISES, DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_CATEGORY, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
 import { restoreMenu } from './lib/menuRestore';
 
@@ -550,6 +550,14 @@ export class AppDB extends Dexie {
         const products = tx.table<Product, string>('products');
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[65].includes(p.id) && !have.has(p.id)));
+      });
+    // v66: 種目に分類（胸・背中・肩・腕・脚・お腹）を付ける。初期の種目だけ。自分で付けた分類はそのまま
+    this.version(66)
+      .stores({})
+      .upgrade(async (tx) => {
+        await tx.table<Exercise, string>('exercises').toCollection().modify((e) => {
+          if (!e.category && SEED_CATEGORY[e.id]) e.category = SEED_CATEGORY[e.id];
+        });
       });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {

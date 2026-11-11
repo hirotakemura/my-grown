@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { groupByCategory } from '../lib/exerciseCategory';
 import type { AppData } from '../hooks';
 import { useToday } from '../hooks';
 import { addDays, dateRange, formatMD } from '../lib/date';
@@ -42,11 +43,12 @@ export function Records({ data }: { data: AppData }) {
   const doneSets = data.sets.filter((s) => s.done);
   const trainedIds = new Set(doneSets.map((s) => s.exerciseId));
   const { menuA, menuB } = data.settings;
-  const exGroups = [
-    { label: 'メニューA（押す日）', ids: menuA },
-    { label: 'メニューB（引く日）', ids: menuB },
-    { label: '代替・その他', ids: [...trainedIds].filter((id) => !menuA.includes(id) && !menuB.includes(id)) },
-  ].filter((g) => g.ids.some((id) => data.exercises.has(id)));
+  // メニューにある種目と、トレしたことがある種目を、分類（胸・背中…）ごとにまとめる
+  const shownIds = [...new Set([...menuA, ...menuB, ...trainedIds])].filter((id) => data.exercises.has(id));
+  const exGroups = groupByCategory(shownIds.map((id) => data.exercises.get(id)!)).map((g) => ({
+    label: g.category,
+    ids: g.items.map((e) => e.id),
+  }));
   // 最初は最後にトレした種目を選んでおく
   const lastTrainedId = [...doneSets].sort((a, b) => (a.date === b.date ? (a.doneAt ?? 0) - (b.doneAt ?? 0) : a.date < b.date ? -1 : 1)).pop()?.exerciseId;
   const [exId, setExId] = useState<string>('');
