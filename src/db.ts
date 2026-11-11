@@ -605,6 +605,14 @@ export class AppDB extends Dexie {
         });
         if (moved.menuA.length !== (s.menuA ?? []).length) await settingsTable.update('main', moved);
       });
+    // v71: セブン 濃厚豚骨醤油ご飯 半熟煮玉子おむすび
+    this.version(71)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[71].includes(p.id) && !have.has(p.id)));
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());

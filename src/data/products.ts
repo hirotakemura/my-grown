@@ -15,7 +15,7 @@ export const VERIFIED = new Set([
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
   'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen', 'f-mentai-mayo-atsuyaki-tamago',
-  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper', 'home-sanwa-yuba-nabe',
+  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper', 'home-sanwa-yuba-nabe', '7-onigiri-tonkotsu-shoyu-nitamago',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -176,6 +176,7 @@ const seven: Row[] = [
   ['7-onigiri-tamago-shoyu', 'セブン たまご醤油おむすび', 'おにぎり', 206, 4.7, 4, 38.6],
   ['7-dashimusubi-nikumiso', 'セブン だしむすび 肉味噌 江戸甘味噌使用', 'おにぎり', 201, 4.9, 2.8, 39.9],
   ['7-onigiri-sausage-garlic-mayo', 'セブン 直火焼ソーセージおむすび（ガーリックマヨネーズ）', 'おにぎり', 307, 7, 11.7, 44.2],
+  ['7-onigiri-tonkotsu-shoyu-nitamago', 'セブン 濃厚豚骨醤油ご飯 半熟煮玉子おむすび', 'おにぎり', 217, 6.2, 6.3, 34.7],
   ['7-rosu-katsudon', 'セブン 特製ロースかつ丼', '外食・定食', 726, 27.2, 21, 107.1],
   ['7-curry-udon', 'セブン 鰹出汁香る コク旨カレーうどん', '麺', 523, 18.5, 14.1, 80.5],
   ['7-shio-chanko-soup', 'セブン 塩ちゃんこスープ', '汁物・サラダ', 121, 12.3, 5, 7.8],
@@ -253,6 +254,7 @@ export const ADDED_IN: Record<number, string[]> = {
   64: ['home-seseri-250'],
   65: ['7-protein20-chicken-bar-smoke-pepper'],
   69: ['home-sanwa-yuba-nabe'],
+  71: ['7-onigiri-tonkotsu-shoyu-nitamago'],
 };
 
 // ファミリーマート
