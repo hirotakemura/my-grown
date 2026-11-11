@@ -124,7 +124,10 @@ export interface Exercise {
   /** アシスト（補助）マシン：数値が大きいほど楽なので、上達すると数値を小さくする */
   assist?: boolean;
   howTo: string;
+  /** 古い形（代わりの種目が1つだけ）。読むときは optionsOf を使う */
   altId?: string;
+  /** 同じ枠で選べるほかの種目（例：チェストプレスの枠でケーブル チェストプレス・パワーラック） */
+  altIds?: string[];
   sets: number;
 }
 

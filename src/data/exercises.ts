@@ -84,7 +84,8 @@ export const SEED_CATEGORY: Record<string, ExerciseCategory> = {
 };
 
 const toExercise = ([id, name, repMin, repMax, increment, howTo, altId]: Def): Exercise => ({
-  id, name, repMin, repMax, increment, howTo, altId, sets: 3, category: SEED_CATEGORY[id],
+  id, name, repMin, repMax, increment, howTo, sets: 3, category: SEED_CATEGORY[id],
+  ...(altId ? { altIds: [altId] } : {}),
   ...(ASSIST_EXERCISES.includes(id) ? { assist: true } : {}),
 });
 

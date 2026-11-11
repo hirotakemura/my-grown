@@ -94,15 +94,14 @@ test('記録した食事・体重・セットがリロード後も残る', async
   // 記録タブにも反映される
   await page.getByRole('navigation').getByRole('button', { name: '記録' }).click();
   // 種目ごとの推移：最初は折りたたまれていて、開くとトレした種目が選ばれた状態で前回の記録が出る
-  // 分類（胸・背中・脚…）ごとにまとまっている
-  await expect(page.getByRole('group', { name: '脚', exact: true })).toBeHidden();
+  await expect(page.getByRole('group', { name: 'メニューA（押す日）' })).toBeHidden();
   await expect(page.getByTestId('exercise-history')).toContainText('60×12');
-  await page.locator('.ex-group summary', { hasText: '脚' }).click();
-  await page.locator('.ex-group summary', { hasText: '背中' }).click();
-  const chip = page.getByRole('group', { name: '脚', exact: true }).getByRole('button', { name: /レッグプレス/ });
+  await page.getByText('メニューA（押す日）').click();
+  await page.getByText('メニューB（引く日）').click();
+  const chip = page.getByRole('group', { name: 'メニューA（押す日）' }).getByRole('button', { name: /^レッグプレス(?!（)/ });
   await expect(chip).toHaveAttribute('aria-pressed', 'true');
   await expect(chip).toContainText('前回 60kg×12');
-  await expect(page.getByRole('group', { name: '背中', exact: true }).getByRole('button', { name: /ラットプルダウン/ })).toBeDisabled();
+  await expect(page.getByRole('group', { name: 'メニューB（引く日）' }).getByRole('button', { name: /ラットプルダウン/ })).toBeDisabled();
   await expect(page.getByTestId('exercise-history')).toContainText('60×12');
 });
 
@@ -502,4 +501,37 @@ test('種目：新しく作ると名前から分類が付き（パワーラッ�
   await edit.getByRole('group', { name: '分類' }).getByRole('button', { name: 'その他' }).click();
   await edit.getByRole('button', { name: '保存' }).click();
   await expect.poll(() => dbGet(page, 'exercises', 'chest-press')).toMatchObject({ category: 'その他', nextWeights: { '35': 40 } });
+});
+
+test('筋トレ：1つの枠（胸）で、選べる種目からその日にやる種目を選べる。設定で枠に種目を足せる', async ({ page }) => {
+  await openApp(page);
+  // 設定：チェストプレスの枠に「新しい種目」でパワーラックを足す（メニューの枠の数は増えない）
+  await tab(page, '設定');
+  const slot = page.getByTestId('slot-chest-press');
+  await expect(slot.locator('.slot-chip')).toHaveText(['ケーブル チェストプレス✕']); // 初めから選べる種目
+  await slot.getByLabel('チェストプレスの枠に種目を追加').selectOption('__new');
+  const sheet = page.getByRole('dialog', { name: '新しい種目' });
+  await sheet.getByLabel('種目名').fill('パワーラック');
+  await sheet.getByRole('button', { name: '保存' }).click();
+  await expect(slot.locator('.slot-chip', { hasText: 'パワーラック' })).toHaveCount(1);
+  await expect.poll(async () => ((await dbGet(page, 'settings', 'main')) as { menuA: string[] }).menuA.length).toBe(6);
+
+  // 今日：胸の枠でパワーラックを選ぶと、その種目の入力になる
+  await tab(page, '今日');
+  await mode(page, '筋トレ');
+  const choices = page.getByRole('group', { name: '胸：今日やる種目' });
+  await expect(choices.getByRole('button')).toHaveText(['チェストプレス', 'ケーブル チェストプレス', 'パワーラック']);
+  await choices.getByRole('button', { name: 'パワーラック' }).click();
+  await expect(choices.getByRole('button', { name: 'パワーラック' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByLabel('パワーラック 1セット目の重さ')).toBeVisible();
+  await expect.poll(async () => ((await dbGet(page, 'days', '2026-09-28')) as { swaps?: Record<string, string> })?.swaps).toMatchObject({ 'chest-press': expect.any(String) });
+  // チェストプレスに戻せる
+  await choices.getByRole('button', { name: 'チェストプレス', exact: true }).click();
+  await expect(page.getByLabel('チェストプレス 1セット目の重さ')).toBeVisible();
+
+  // 枠から外すときも確認が出る
+  await tab(page, '設定');
+  await slot.getByRole('button', { name: 'パワーラックをチェストプレスの枠から外す' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: '外す' }).click();
+  await expect(slot.locator('.slot-chip', { hasText: 'パワーラック' })).toHaveCount(0);
 });

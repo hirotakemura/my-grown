@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { groupByCategory } from '../lib/exerciseCategory';
+import { optionsOf } from '../lib/exerciseCategory';
 import type { AppData } from '../hooks';
 import { useToday } from '../hooks';
 import { addDays, dateRange, formatMD } from '../lib/date';
@@ -43,12 +43,16 @@ export function Records({ data }: { data: AppData }) {
   const doneSets = data.sets.filter((s) => s.done);
   const trainedIds = new Set(doneSets.map((s) => s.exerciseId));
   const { menuA, menuB } = data.settings;
-  // メニューにある種目と、トレしたことがある種目を、分類（胸・背中…）ごとにまとめる
-  const shownIds = [...new Set([...menuA, ...menuB, ...trainedIds])].filter((id) => data.exercises.has(id));
-  const exGroups = groupByCategory(shownIds.map((id) => data.exercises.get(id)!)).map((g) => ({
-    label: g.category,
-    ids: g.items.map((e) => e.id),
-  }));
+  // メニューの種目と、その枠で選べる種目を並べる（押す日・引く日ごと）
+  const withOptions = (ids: string[]) =>
+    [...new Set(ids.flatMap((id) => { const ex = data.exercises.get(id); return ex ? [id, ...optionsOf(ex)] : []; }))];
+  const idsA = withOptions(menuA);
+  const idsB = withOptions(menuB).filter((id) => !idsA.includes(id));
+  const exGroups = [
+    { label: 'メニューA（押す日）', ids: idsA },
+    { label: 'メニューB（引く日）', ids: idsB },
+    { label: 'その他', ids: [...trainedIds].filter((id) => !idsA.includes(id) && !idsB.includes(id)) },
+  ].filter((g) => g.ids.some((id) => data.exercises.has(id)));
   // 最初は最後にトレした種目を選んでおく
   const lastTrainedId = [...doneSets].sort((a, b) => (a.date === b.date ? (a.doneAt ?? 0) - (b.doneAt ?? 0) : a.date < b.date ? -1 : 1)).pop()?.exerciseId;
   const [exId, setExId] = useState<string>('');

@@ -48,3 +48,24 @@ describe('種目の分類', () => {
     db.close();
   });
 });
+
+describe('同じ枠で選べる種目', () => {
+  it('v67：代わりの種目1つ（altId）を、選べる種目の一覧（altIds）にする', async () => {
+    const name = 'v66-altids';
+    names.push(name);
+    const v66 = new Dexie(name);
+    v66.version(66).stores({
+      settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId',
+      expenses: 'id, date', categoryRules: 'name',
+    });
+    await v66.table('settings').put(defaultSettings('2026-10-01'));
+    await v66.table('products').bulkAdd(SEED_PRODUCTS);
+    await v66.table('exercises').bulkAdd(SEED_EXERCISES.map(({ altIds, ...e }) => ({ ...e, ...(altIds ? { altId: altIds[0] } : {}) })));
+    v66.close();
+    const db = new AppDB(name);
+    const chest = await db.exercises.get('chest-press');
+    expect(chest?.altIds).toEqual(['cable-chest-press']);
+    expect(chest?.altId).toBeUndefined();
+    db.close();
+  });
+});

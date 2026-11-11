@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AppData } from '../hooks';
 import { EXERCISE_CATEGORIES, STORE_LABEL, type Exercise, type ExerciseCategory, type Product, type Settings } from '../types';
-import { categoryOf, groupByCategory, guessCategory } from '../lib/exerciseCategory';
+import { categoryOf, groupByCategory, guessCategory, optionsOf } from '../lib/exerciseCategory';
 import { fmtNut } from '../lib/format';
 import { db, newId, requestPersistence, type StorageStatus } from '../db';
 import { patchSettings } from '../lib/actions';
@@ -53,6 +53,8 @@ export function SettingsScreen({ data }: { data: AppData }) {
   const [showProducts, setShowProducts] = useState(false);
   const [editingEx, setEditingEx] = useState<Exercise | 'new' | null>(null);
   const [newExMenu, setNewExMenu] = useState<'A' | 'B'>('A');
+  // 新しく作った種目を入れる枠（メニューの種目のid）。null ならメニューに新しい枠として足す
+  const [attachTo, setAttachTo] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { void requestPersistence().then(setStorage); }, []);
@@ -125,28 +127,79 @@ export function SettingsScreen({ data }: { data: AppData }) {
         <div>
           {ids.map((id, i) => {
             const ex = data.exercises.get(id);
+            const opts = ex ? optionsOf(ex) : [];
+            const optCandidates = [...data.exercises.values()].filter((e) => e.id !== id && !opts.includes(e.id));
             return (
-              <div key={id} className="list-row">
-                <button className="grow" style={{ background: 'none', border: 'none', textAlign: 'left', padding: 0, minHeight: 44, cursor: 'pointer' }} onClick={() => ex && setEditingEx(ex)}>
-                  <div style={{ fontWeight: 600 }}>{ex?.name ?? '（削除された種目）'}</div>
-                  {ex && <div className="muted">{categoryOf(ex)}・{ex.repMin}〜{ex.repMax}回 × {ex.sets}　代替：{ex.altId ? data.exercises.get(ex.altId)?.name ?? 'なし' : 'なし'}</div>}
-                </button>
-                <button className="icon-btn" aria-label="上へ" disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                <button className="icon-btn" aria-label="下へ" disabled={i === ids.length - 1} onClick={() => move(i, 1)}>↓</button>
-                <button
-                  className="icon-btn"
-                  aria-label="メニューから外す"
-                  onClick={async () => {
-                    const ok = await confirm({
-                      title: `「${ex?.name ?? 'この種目'}」を${title}から外しますか？`,
-                      message: 'これまでの記録は残ります。外したあとも「＋ 種目を追加」から戻せます。',
-                      confirmLabel: '外す',
-                      danger: true,
-                    });
-                    // 確認している間にほかで変わっていても、今の一覧から外す
-                    if (ok) set({ [key]: settings[key].filter((x) => x !== id) });
-                  }}
-                >✕</button>
+              <div key={id} className="menu-slot" data-testid={`slot-${id}`}>
+                <div className="list-row">
+                  <button className="grow" style={{ background: 'none', border: 'none', textAlign: 'left', padding: 0, minHeight: 44, cursor: 'pointer' }} onClick={() => ex && setEditingEx(ex)}>
+                    <div style={{ fontWeight: 600 }}>{ex?.name ?? '（削除された種目）'}</div>
+                    {ex && <div className="muted">{categoryOf(ex)}・{ex.repMin}〜{ex.repMax}回 × {ex.sets}</div>}
+                  </button>
+                  <button className="icon-btn" aria-label="上へ" disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+                  <button className="icon-btn" aria-label="下へ" disabled={i === ids.length - 1} onClick={() => move(i, 1)}>↓</button>
+                  <button
+                    className="icon-btn"
+                    aria-label="メニューから外す"
+                    onClick={async () => {
+                      const ok = await confirm({
+                        title: `「${ex?.name ?? 'この種目'}」を${title}から外しますか？`,
+                        message: 'これまでの記録は残ります。外したあとも「＋ 種目を追加」から戻せます。',
+                        confirmLabel: '外す',
+                        danger: true,
+                      });
+                      // 確認している間にほかで変わっていても、今の一覧から外す
+                      if (ok) set({ [key]: settings[key].filter((x) => x !== id) });
+                    }}
+                  >✕</button>
+                </div>
+                {ex && (
+                  <div className="slot-options">
+                    <span className="muted">この枠で選べる：</span>
+                    {opts.map((o) => {
+                      const oe = data.exercises.get(o);
+                      return (
+                        <span key={o} className="slot-chip">
+                          {oe?.name ?? '（削除された種目）'}
+                          <button
+                            aria-label={`${oe?.name ?? 'この種目'}を${ex.name}の枠から外す`}
+                            onClick={async () => {
+                              const ok = await confirm({
+                                title: `「${oe?.name ?? 'この種目'}」を${ex.name}の枠から外しますか？`,
+                                message: 'これまでの記録は残ります。',
+                                confirmLabel: '外す',
+                                danger: true,
+                              });
+                              if (ok) {
+                                const cur = await db.exercises.get(id);
+                                if (cur) await db.exercises.update(id, { altIds: optionsOf(cur).filter((x) => x !== o) });
+                              }
+                            }}
+                          >✕</button>
+                        </span>
+                      );
+                    })}
+                    <select
+                      className="slot-add"
+                      value=""
+                      aria-label={`${ex.name}の枠に種目を追加`}
+                      onChange={async (e) => {
+                        const v = e.target.value;
+                        if (v === '__new') { setAttachTo(id); setEditingEx('new'); return; }
+                        const cur = v ? await db.exercises.get(id) : undefined;
+                        if (cur) await db.exercises.update(id, { altIds: [...optionsOf(cur), v] });
+                      }}
+                    >
+                      <option value="">＋ 追加</option>
+                      {groupByCategory(optCandidates).map((g) => (
+                        <optgroup key={g.category} label={g.category}>
+                          {g.items.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+                        </optgroup>
+                      ))}
+                      <option value="__new">新しい種目を作る</option>
+                    </select>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -155,7 +208,7 @@ export function SettingsScreen({ data }: { data: AppData }) {
           className="input"
           value=""
           onChange={(e) => {
-            if (e.target.value === '__new') { setNewExMenu(key === 'menuA' ? 'A' : 'B'); setEditingEx('new'); }
+            if (e.target.value === '__new') { setNewExMenu(key === 'menuA' ? 'A' : 'B'); setAttachTo(null); setEditingEx('new'); }
             else if (e.target.value) set({ [key]: [...ids, e.target.value] });
           }}
           aria-label={`${title}に種目を追加`}
@@ -211,7 +264,7 @@ export function SettingsScreen({ data }: { data: AppData }) {
 
       <section className="card">
         <h2 className="card-title">種目</h2>
-        <p className="muted">種目名をタップすると、回数・やり方・代替種目を編集できます。</p>
+        <p className="muted">種目名をタップすると、回数・やり方・分類を編集できます。「この枠で選べる」に足した種目は、今日の筋トレでその枠から選べます。</p>
         {menuEditor('menuA', 'メニューA（押す日）')}
         {menuEditor('menuB', 'メニューB（引く日）')}
       </section>
@@ -248,9 +301,14 @@ export function SettingsScreen({ data }: { data: AppData }) {
       {editingEx && (
         <ExerciseEditor
           exercise={editingEx === 'new' ? undefined : editingEx}
-          all={[...data.exercises.values()]}
-          onClose={() => setEditingEx(null)}
-          onCreated={(id) => {
+          onClose={() => { setEditingEx(null); setAttachTo(null); }}
+          onCreated={async (id) => {
+            if (attachTo) {
+              // 枠の「＋ 追加」から作ったときは、その枠で選べる種目にする
+              const cur = await db.exercises.get(attachTo);
+              if (cur) await db.exercises.update(attachTo, { altIds: [...optionsOf(cur), id] });
+              return;
+            }
             const key = newExMenu === 'A' ? 'menuA' : 'menuB';
             set({ [key]: [...settings[key], id] });
           }}
@@ -282,14 +340,13 @@ function ProductManager({ products, onClose }: { products: Product[]; onClose: (
   );
 }
 
-function ExerciseEditor({ exercise, all, onClose, onCreated }: { exercise?: Exercise; all: Exercise[]; onClose: () => void; onCreated: (id: string) => void }) {
+function ExerciseEditor({ exercise, onClose, onCreated }: { exercise?: Exercise; onClose: () => void; onCreated: (id: string) => void | Promise<void> }) {
   const [name, setName] = useState(exercise?.name ?? '');
   const [repMin, setRepMin] = useState(String(exercise?.repMin ?? 10));
   const [repMax, setRepMax] = useState(String(exercise?.repMax ?? 12));
   const [sets, setSets] = useState(String(exercise?.sets ?? 3));
   const [increment, setIncrement] = useState(String(exercise?.increment ?? 5));
   const [howTo, setHowTo] = useState(exercise?.howTo ?? '');
-  const [altId, setAltId] = useState(exercise?.altId ?? '');
   // 選んでいなければ名前から推測した分類を使う
   const [category, setCategory] = useState<ExerciseCategory | ''>(exercise?.category ?? '');
   const effectiveCategory = category || guessCategory(name);
@@ -306,12 +363,11 @@ function ExerciseEditor({ exercise, all, onClose, onCreated }: { exercise?: Exer
       sets: Math.round(Number(sets)),
       increment: Number(increment),
       howTo: howTo.trim(),
-      altId: altId || undefined,
     };
     // 既存の種目は、この画面で直した項目だけ書き換える（覚えている「次の重さ」やアシストの印は残す）
     if (exercise) await db.exercises.update(id, fields);
     else await db.exercises.put({ id, ...fields });
-    if (!exercise) onCreated(id);
+    if (!exercise) await onCreated(id);
     onClose();
   };
 
@@ -344,16 +400,6 @@ function ExerciseEditor({ exercise, all, onClose, onCreated }: { exercise?: Exer
       </div>
       <label className="field"><span>やり方（シートの合わせ方と動かし方）</span>
         <textarea className="input" rows={3} value={howTo} onChange={(e) => setHowTo(e.target.value)} />
-      </label>
-      <label className="field"><span>マシンが空いていないときの代替種目</span>
-        <select className="input" value={altId} onChange={(e) => setAltId(e.target.value)}>
-          <option value="">なし</option>
-          {groupByCategory(all.filter((e) => e.id !== exercise?.id)).map((g) => (
-            <optgroup key={g.category} label={g.category}>
-              {g.items.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </optgroup>
-          ))}
-        </select>
       </label>
     </Sheet>
   );

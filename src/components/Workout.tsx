@@ -8,6 +8,7 @@ import { formatMD } from '../lib/date';
 import { useRestTimer } from './RestTimer';
 import { useToast } from './Toast';
 import { db } from '../db';
+import { categoryOf, optionsOf } from '../lib/exerciseCategory';
 
 interface Props {
   date: string;
@@ -78,7 +79,7 @@ export function WorkoutSection({ date, menu, day, settings, exercises, sets, pla
                 menu={menu}
                 main={main}
                 ex={ex}
-                alt={main.altId ? exercises.get(main.altId) : undefined}
+                options={[main, ...optionsOf(main).flatMap((o) => exercises.get(o) ?? [])]}
                 day={day}
                 sets={sets}
                 settings={settings}
@@ -117,7 +118,8 @@ interface CardProps {
   menu: WorkoutMenu;
   main: Exercise;
   ex: Exercise;
-  alt?: Exercise;
+  /** この枠で選べる種目（先頭がメニューの種目） */
+  options: Exercise[];
   day?: DayRecord;
   sets: WorkoutSet[];
   settings: Settings;
@@ -177,19 +179,20 @@ function NextWeight({ ex, from, weight, known }: { ex: Exercise; from: number; w
   );
 }
 
-function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedSets }: CardProps) {
+function ExerciseCard({ date, menu, main, ex, options, day, sets, settings, plannedSets }: CardProps) {
   const toast = useToast();
   const timer = useRestTimer();
   const last = lastSession(ex.id, date, sets);
   const sug = suggestWeight(ex, last);
-  const swapped = ex.id !== main.id;
   const todays = sets.filter((s) => s.date === date && s.exerciseId === ex.id);
   const doneCount = todays.filter((s) => s.done).length;
 
-  const toggleSwap = () => {
+  // この枠でやる種目を選ぶ（メニューの種目に戻すときは記録から外す）
+  const choose = (id: string) => {
+    if (id === ex.id) return;
     const swaps = { ...day?.swaps };
-    if (swapped) delete swaps[main.id];
-    else if (alt) swaps[main.id] = alt.id;
+    if (id === main.id) delete swaps[main.id];
+    else swaps[main.id] = id;
     void patchDay(date, { swaps });
   };
 
@@ -209,15 +212,21 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
     <div className={`card ex-card ${doneCount >= ex.sets ? 'all-done' : ''}`} data-testid={`exercise-${ex.id}`}>
       <div className="ex-head">
         <div className="grow">
+          <div className="eyebrow">{categoryOf(main)}</div>
           <div className="ex-name">{ex.name}</div>
-          <div className="ex-target num">
-            {ex.repMin}〜{ex.repMax}回 × {ex.sets}セット{swapped ? <span className="muted">（{main.name}の代わり）</span> : null}
-          </div>
+          <div className="ex-target num">{ex.repMin}〜{ex.repMax}回 × {ex.sets}セット</div>
         </div>
         <span className={`chip num ${doneCount >= ex.sets ? 'ok' : ''}`} aria-label={`${ex.name} ${doneCount}/${ex.sets}セット完了`}>
           {doneCount >= ex.sets ? '✓ ' : ''}{doneCount}/{ex.sets}
         </span>
       </div>
+      {options.length > 1 && (
+        <div className="ex-options" role="group" aria-label={`${categoryOf(main)}：今日やる種目`}>
+          {options.map((o) => (
+            <button key={o.id} aria-pressed={o.id === ex.id} onClick={() => choose(o.id)}>{o.name}</button>
+          ))}
+        </div>
+      )}
       {sug.increase && sug.from != null && sug.weight != null ? (
         <NextWeight key={`${ex.id}-${sug.from}`} ex={ex} from={sug.from} weight={sug.weight} known={!!sug.known} />
       ) : (
@@ -254,11 +263,6 @@ function ExerciseCard({ date, menu, main, ex, alt, day, sets, settings, plannedS
           <summary>やり方</summary>
           <p className="sub">{ex.howTo}</p>
         </details>
-        {(alt || swapped) && (
-          <button className="btn small ghost" onClick={toggleSwap}>
-            ⇄ {swapped ? `${main.name}に戻す` : `空いていない → ${alt!.name}`}
-          </button>
-        )}
       </div>
     </div>
   );

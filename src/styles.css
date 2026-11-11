@@ -534,3 +534,18 @@ input[type='time'].input::-webkit-date-and-time-value {
 /* 種目の分類：7つを2段に並べる */
 .ex-cat-seg { flex-wrap: wrap; }
 .ex-cat-seg button { flex: 1 0 22%; min-height: 40px; }
+/* 筋トレ：同じ枠で選べる種目（横にスクロール） */
+.ex-options { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: -2px -16px 0; padding: 0 16px 2px; }
+.ex-options::-webkit-scrollbar { display: none; }
+.ex-options button {
+  flex-shrink: 0; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text-2); font-size: var(--fs-small); font-weight: var(--fw-semibold); white-space: nowrap; cursor: pointer;
+}
+.ex-options button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+/* 設定：メニューの1枠（メニューの種目＋この枠で選べる種目） */
+.menu-slot { border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.menu-slot .list-row { border-bottom: none; }
+.slot-options { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.slot-chip { display: inline-flex; align-items: center; gap: 2px; padding-left: 10px; border-radius: 999px; background: var(--card-2); font-size: var(--fs-small); font-weight: var(--fw-semibold); }
+.slot-chip button { width: 32px; height: 32px; border: none; background: none; color: var(--muted); cursor: pointer; font-size: 14px; }
+.slot-add { min-height: 32px; border-radius: 999px; border: 1px dashed var(--border); background: var(--card); color: var(--accent); font-size: var(--fs-small); font-weight: var(--fw-semibold); padding: 0 10px; width: 7.5em; }

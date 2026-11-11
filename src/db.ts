@@ -559,6 +559,15 @@ export class AppDB extends Dexie {
           if (!e.category && SEED_CATEGORY[e.id]) e.category = SEED_CATEGORY[e.id];
         });
       });
+    // v67: 代わりの種目を1つ（altId）から複数（altIds）に。同じ枠で何種目からでも選べるように
+    this.version(67)
+      .stores({})
+      .upgrade(async (tx) => {
+        await tx.table<Exercise, string>('exercises').toCollection().modify((e) => {
+          if (!e.altIds && e.altId) e.altIds = [e.altId];
+          delete e.altId;
+        });
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());

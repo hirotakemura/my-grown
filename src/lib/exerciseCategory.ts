@@ -22,3 +22,8 @@ export function categoryOf(ex: Exercise): ExerciseCategory {
 export function groupByCategory<T extends Exercise>(list: T[]): { category: ExerciseCategory; items: T[] }[] {
   return EXERCISE_CATEGORIES.map((category) => ({ category, items: list.filter((e) => categoryOf(e) === category) })).filter((g) => g.items.length > 0);
 }
+
+/** その種目の枠で選べるほかの種目のid（古いデータの altId も読む） */
+export function optionsOf(ex: Exercise): string[] {
+  return ex.altIds ?? (ex.altId ? [ex.altId] : []);
+}
