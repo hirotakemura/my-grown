@@ -15,7 +15,7 @@ export const VERIFIED = new Set([
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
   'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen', 'f-mentai-mayo-atsuyaki-tamago',
-  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper',
+  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper', 'home-sanwa-yuba-nabe',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -252,6 +252,7 @@ export const ADDED_IN: Record<number, string[]> = {
   63: ['l-cheese-manpuku-noko-buta-ramen'],
   64: ['home-seseri-250'],
   65: ['7-protein20-chicken-bar-smoke-pepper'],
+  69: ['home-sanwa-yuba-nabe'],
 };
 
 // ファミリーマート
@@ -318,6 +319,7 @@ const other: Row[] = [
   ['home-karaage-skinless', '鶏むね肉の唐揚げ（皮なし・1枚分）', '自炊', 540, 60, 30.3, 10.8],
   // 「約」の値なので目安
   ['home-seseri-250', 'せせり（250g）', '自炊', 523, 41.5, 39.8, 0],
+  ['home-sanwa-yuba-nabe', '三和豆水庵 とろける湯葉鍋 鰹と昆布のおだし（1セット）', '自炊', 315, 24.7, 18.5, 13.3],
   ['home-kewpie-arrabbiata', 'キユーピー アラビアータ ソース（1人前・ソースのみ）', '自炊', 101, 2.2, 5.5, 10.6],
   // kcalは表示のPFCから計算（4×P＋9×F＋4×C）
   ['home-alpron-soy-strawberry', 'ALPRON ソイプロテイン ストロベリー風味（1杯30g）', '自炊', 112, 20.5, 0.8, 5.8],
