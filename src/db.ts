@@ -3,8 +3,8 @@ import type { CategoryRule, DayRecord, Exercise, Expense, MealItem, MealRecord, 
 import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12, UPDATED_TO_OFFICIAL_V16 } from './data/products';
 import { ASSIST_EXERCISES, DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_CATEGORY, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
-import { restoreMenu } from './lib/menuRestore';
-import { menuSlots } from './lib/exerciseCategory';
+import { movePullBackToB, restoreMenu } from './lib/menuRestore';
+import { menuSlots, optionsOf } from './lib/exerciseCategory';
 
 export const DB_NAME = 'my-grown';
 
@@ -588,6 +588,22 @@ export class AppDB extends Dexie {
         const products = tx.table<Product, string>('products');
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[69].includes(p.id) && !have.has(p.id)));
+      });
+    // v70: 押す日（メニューA）に入ってしまったラットプルダウンなど引く日の背中の種目を、引く日（メニューB）へ移す
+    this.version(70)
+      .stores({})
+      .upgrade(async (tx) => {
+        const settingsTable = tx.table<Settings, string>('settings');
+        const s = await settingsTable.get('main');
+        if (!s) return;
+        const exercises = new Map((await tx.table<Exercise, string>('exercises').toArray()).map((e) => [e.id, e]));
+        const moved = movePullBackToB({
+          menuA: s.menuA ?? [],
+          menuB: s.menuB ?? [],
+          pullBackIds: DEFAULT_MENU_B.filter((id) => SEED_CATEGORY[id] === '背中'),
+          optionsOf: (id) => { const e = exercises.get(id); return e ? optionsOf(e) : []; },
+        });
+        if (moved.menuA.length !== (s.menuA ?? []).length) await settingsTable.update('main', moved);
       });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {

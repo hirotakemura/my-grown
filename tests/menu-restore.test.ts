@@ -56,3 +56,40 @@ describe('メニューの種目を記録から戻す', () => {
     db.close();
   });
 });
+
+describe('押す日に入った背中の種目を引く日へ戻す', () => {
+  it('ラットプルダウンを押す日から外し、引く日になければ足す（枠で選べる種目も対象）', async () => {
+    const { movePullBackToB } = await import('../src/lib/menuRestore');
+    const opts = (id: string) => (id === 'lat-pulldown' ? ['assisted-pullup'] : []);
+    const pullBackIds = ['lat-pulldown', 'seated-row'];
+    expect(movePullBackToB({ menuA: [...DEFAULT_MENU_A, 'lat-pulldown'], menuB: ['leg-curl', 'pec-fly'], pullBackIds, optionsOf: opts }))
+      .toEqual({ menuA: DEFAULT_MENU_A, menuB: ['leg-curl', 'pec-fly', 'lat-pulldown'] });
+    // 引く日にもうあれば外すだけ
+    expect(movePullBackToB({ menuA: [...DEFAULT_MENU_A, 'assisted-pullup'], menuB: DEFAULT_MENU_B, pullBackIds, optionsOf: opts }))
+      .toEqual({ menuA: DEFAULT_MENU_A, menuB: DEFAULT_MENU_B });
+    // 何もなければそのまま
+    expect(movePullBackToB({ menuA: DEFAULT_MENU_A, menuB: DEFAULT_MENU_B, pullBackIds, optionsOf: opts }))
+      .toEqual({ menuA: DEFAULT_MENU_A, menuB: DEFAULT_MENU_B });
+  });
+
+  it('v70：保存されたメニューも直る（押す日のほかの種目・記録はそのまま）', async () => {
+    const name = 'v69-pull-in-a';
+    names.push(name);
+    const v69 = new Dexie(name);
+    v69.version(69).stores({
+      settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId',
+      expenses: 'id, date', categoryRules: 'name',
+    });
+    await v69.table('settings').put({ ...defaultSettings('2026-10-01'), menuA: [...DEFAULT_MENU_A, 'lat-pulldown'], menuB: DEFAULT_MENU_B.filter((id) => id !== 'lat-pulldown') });
+    await v69.table('products').bulkAdd(SEED_PRODUCTS);
+    await v69.table('exercises').bulkAdd(SEED_EXERCISES);
+    await v69.table('workoutSets').add(done('2026-11-09', 'lat-pulldown', 1));
+    v69.close();
+    const db = new AppDB(name);
+    const s = await db.settings.get('main');
+    expect(s?.menuA).toEqual(DEFAULT_MENU_A);
+    expect(s?.menuB).toContain('lat-pulldown');
+    expect(await db.workoutSets.count()).toBe(1);
+    db.close();
+  });
+});

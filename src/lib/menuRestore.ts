@@ -45,3 +45,25 @@ export function restoreMenu(opts: {
     .sort((a, b) => order(a) - order(b));
   return [...current, ...missing];
 }
+
+/**
+ * 押す日（メニューA）に入ってしまった、引く日（メニューB）の背中の種目を引く日へ移す。
+ * 初期メニューBの背中の種目（ラットプルダウン・シーテッドロウ）と、その枠で選べる種目が対象。
+ * 引く日にもうあれば押す日から外すだけ、なければ引く日の後ろに足す。
+ */
+export function movePullBackToB(opts: {
+  menuA: string[];
+  menuB: string[];
+  pullBackIds: string[];
+  optionsOf: (id: string) => string[];
+}): { menuA: string[]; menuB: string[] } {
+  const { menuA, menuB, pullBackIds, optionsOf } = opts;
+  const pull = new Set(pullBackIds.flatMap((id) => [id, ...optionsOf(id)]));
+  const moving = menuA.filter((id) => pull.has(id));
+  if (moving.length === 0) return { menuA, menuB };
+  const inB = new Set(menuB.flatMap((id) => [id, ...optionsOf(id)]));
+  return {
+    menuA: menuA.filter((id) => !pull.has(id)),
+    menuB: [...menuB, ...moving.filter((id) => !inB.has(id))],
+  };
+}
