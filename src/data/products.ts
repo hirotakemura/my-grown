@@ -15,7 +15,7 @@ export const VERIFIED = new Set([
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
   'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen', 'f-mentai-mayo-atsuyaki-tamago',
-  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen',
+  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -134,6 +134,7 @@ const seven: Row[] = [
   ['7-chicken-bar', 'セブン サラダチキンバー', 'チキン・肉', 70, 11, 2, 1.5],
   // kcalは表示のPFCから計算（4×P＋9×F＋4×C）
   ['7-chicken-bar-smoke-pepper', 'セブン 糖質0gサラダチキンバー スモークペッパー', 'チキン・肉', 63, 13.6, 0.9, 0.1],
+  ['7-protein20-chicken-bar-smoke-pepper', 'セブン たんぱく質20gチキンバー（スモークペッパー）', 'チキン・肉', 100, 20.1, 1.3, 2],
   ['7-nitamago', 'セブン 味付け半熟ゆで卵', '卵・乳製品', 80, 6.5, 5.5, 1],
   ['7-yakitori', 'セブン 炭火焼き鳥（塩）1本', 'チキン・肉', 66, 9.6, 3, 0.3],
   ['7-saba', 'セブン さばの塩焼き', 'チキン・肉', 260, 18, 20, 1],
@@ -250,6 +251,7 @@ export const ADDED_IN: Record<number, string[]> = {
   62: ['eo-mcd-chee-chee-double-sausage-muffin'],
   63: ['l-cheese-manpuku-noko-buta-ramen'],
   64: ['home-seseri-250'],
+  65: ['7-protein20-chicken-bar-smoke-pepper'],
 };
 
 // ファミリーマート
