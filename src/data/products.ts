@@ -15,7 +15,7 @@ export const VERIFIED = new Set([
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
   'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen', 'f-mentai-mayo-atsuyaki-tamago',
-  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper', 'home-sanwa-yuba-nabe', '7-onigiri-tonkotsu-shoyu-nitamago', '7-atsugiri-tanshio-80',
+  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper', 'home-sanwa-yuba-nabe', '7-onigiri-tonkotsu-shoyu-nitamago', '7-atsugiri-tanshio-80', 'l-benop-soft-bar-berry-cheesecake',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -110,6 +110,7 @@ const lawson: Row[] = [
   ['l-toridango-shirataki-soup', '鶏団子としらたき麺の和風スープ', '汁物・サラダ', 127, 11.1, 5.8, 8.9],
   ['l-kake-soba', 'つゆが主役！かけそば', '麺', 272, 20.7, 1.7, 45.7],
   ['l-cheese-manpuku-noko-buta-ramen', 'とろ〜りチーズ満腹濃厚豚ラーメン', '麺', 787, 44.7, 32.8, 81.9],
+  ['l-benop-soft-bar-berry-cheesecake', 'ベノプ ソフトバー ベリーベリーチーズケーキ（1本60g）', 'プロテイン', 192, 20, 4, 26],
   ['l-nebaneba-soba', '香りとのど越し ミニネバネバそば', '麺', 238, 13.3, 4.2, 39.1],
   ['l-niku-soba', '特盛！冷し肉そば', '麺', 614, 35.2, 14, 90.7],
   ['l-hiyashi-chuka', '冷し中華', '麺', 432, 21, 10.5, 65.6],
@@ -257,6 +258,7 @@ export const ADDED_IN: Record<number, string[]> = {
   69: ['home-sanwa-yuba-nabe'],
   71: ['7-onigiri-tonkotsu-shoyu-nitamago'],
   72: ['7-atsugiri-tanshio-80'],
+  73: ['l-benop-soft-bar-berry-cheesecake'],
 };
 
 // ファミリーマート
