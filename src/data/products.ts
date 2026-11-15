@@ -259,6 +259,7 @@ export const ADDED_IN: Record<number, string[]> = {
   71: ['7-onigiri-tonkotsu-shoyu-nitamago'],
   72: ['7-atsugiri-tanshio-80'],
   73: ['l-benop-soft-bar-berry-cheesecake'],
+  74: ['eo-ichikakuya-shio-ichiro-ramen'],
 };
 
 // ファミリーマート
@@ -296,6 +297,8 @@ const other: Row[] = [
   // PFCは概算、kcalはPFCから計算（4×P＋9×F＋4×C）
   ['eo-kashiwa-udon', 'かしわうどん', '麺', 467, 21, 7, 80],
   ['eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '久兵衛屋 旨辛にんにく背脂肉つけ汁うどん（並盛）', '麺', 740, 24, 34, 86],
+  // 推定値なので目安
+  ['eo-ichikakuya-shio-ichiro-ramen', '壱角家 塩壱郎ラーメン（並）', '麺', 800, 32.5, 30, 85],
   ['eo-mcd-chee-chee-double-sausage-muffin', 'マクドナルド チーチーダブチソーセージマフィン', '外食・定食', 745, 30.6, 54.6, 32.7],
   // お店で見た「約」の値なので目安。チャーシュー丼の炭水化物は表示がないため、kcal・P・F から計算（(480−22×4−18×9)÷4）
   ['eo-tokusei-shoyu-ramen', '特製醤油らぁ麺（鴨×大山鶏出汁・焼き豚・鶏むね・卵）', '麺', 650, 35, 20, 75],
