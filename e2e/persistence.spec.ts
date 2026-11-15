@@ -508,7 +508,7 @@ test('筋トレ：1つの枠（胸）で、選べる種目からその日にや�
   // 設定：チェストプレスの枠に「新しい種目」でパワーラックを足す（メニューの枠の数は増えない）
   await tab(page, '設定');
   const slot = page.getByTestId('slot-chest-press');
-  await expect(slot.locator('.slot-chip')).toHaveText(['ケーブル チェストプレス✕']); // 初めから選べる種目
+  await expect(slot.locator('.slot-chip')).toHaveText(['ケーブル チェストプレス✕', 'スミスマシン チェストプレス✕']); // 初めから選べる種目
   await slot.getByLabel('チェストプレスの枠に種目を追加').selectOption('__new');
   const sheet = page.getByRole('dialog', { name: '新しい種目' });
   await sheet.getByLabel('種目名').fill('パワーラック');
@@ -520,7 +520,7 @@ test('筋トレ：1つの枠（胸）で、選べる種目からその日にや�
   await tab(page, '今日');
   await mode(page, '筋トレ');
   const choices = page.getByRole('group', { name: '胸：今日やる種目' });
-  await expect(choices.getByRole('button')).toHaveText(['チェストプレス', 'ケーブル チェストプレス', 'パワーラック']);
+  await expect(choices.getByRole('button')).toHaveText(['チェストプレス', 'ケーブル チェストプレス', 'スミスマシン チェストプレス', 'パワーラック']);
   await choices.getByRole('button', { name: 'パワーラック' }).click();
   await expect(choices.getByRole('button', { name: 'パワーラック' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByLabel('パワーラック 1セット目の重さ')).toBeVisible();

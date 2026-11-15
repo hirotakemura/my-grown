@@ -46,6 +46,8 @@ const main: Def[] = [
 const alternatives: Def[] = [
   ['smith-squat', 'スミスマシン スクワット', 10, 12, 5,
     'バーを肩の高さにセットし、足をバーより半歩前に出して肩幅に開く。太ももが床と平行になるまでしゃがみ、かかとで押して立つ。'],
+  ['smith-chest-press', 'スミスマシン チェストプレス', 8, 10, 2.5,
+    'ベンチをバーの真下に置いて仰向けになり、バーが胸の中央（乳首の高さ）に下りる位置に合わせる。肩甲骨を寄せて胸を張り、胸の手前まで下ろして真上に押し上げる。安全ストッパーを胸より少し下にセットする。'],
   ['cable-chest-press', 'ケーブル チェストプレス', 8, 10, 2.5,
     'ケーブルを胸の高さに合わせ、両手にハンドルを持ってマシンに背を向けて一歩前に出る。胸の前に押し出し、肘が体の横に来るまで戻す。'],
   ['smith-shoulder-press', 'スミスマシン ショルダープレス', 10, 12, 2.5,
@@ -75,7 +77,7 @@ export const ASSIST_EXERCISES = ['assisted-pullup'];
 
 /** 初期の種目の分類 */
 export const SEED_CATEGORY: Record<string, ExerciseCategory> = {
-  'chest-press': '胸', 'cable-chest-press': '胸', 'pec-fly': '胸', 'cable-crossover': '胸',
+  'chest-press': '胸', 'cable-chest-press': '胸', 'smith-chest-press': '胸', 'pec-fly': '胸', 'cable-crossover': '胸',
   'lat-pulldown': '背中', 'seated-row': '背中', 'assisted-pullup': '背中', 'one-arm-row': '背中', 'back-extension': '背中',
   'shoulder-press': '肩', 'smith-shoulder-press': '肩', 'cable-lateral': '肩', 'machine-lateral': '肩',
   'pushdown': '腕', 'overhead-extension': '腕', 'cable-curl': '腕', 'machine-curl': '腕',
@@ -89,6 +91,13 @@ const toExercise = ([id, name, repMin, repMax, increment, howTo, altId]: Def): E
   ...(ASSIST_EXERCISES.includes(id) ? { assist: true } : {}),
 });
 
-export const SEED_EXERCISES: Exercise[] = [...main, ...alternatives].map(toExercise);
+/** 枠で選べる種目を2つ以上持つもの（Def の altId は1つだけなので、ここで足す） */
+export const EXTRA_OPTIONS: Record<string, string[]> = {
+  'chest-press': ['smith-chest-press'],
+};
+
+export const SEED_EXERCISES: Exercise[] = [...main, ...alternatives].map(toExercise).map((e) =>
+  EXTRA_OPTIONS[e.id] ? { ...e, altIds: [...(e.altIds ?? []), ...EXTRA_OPTIONS[e.id]] } : e,
+);
 export const DEFAULT_MENU_A = main.slice(0, 6).map((d) => d[0]);
 export const DEFAULT_MENU_B = main.slice(6, 12).map((d) => d[0]);

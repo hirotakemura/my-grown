@@ -4,7 +4,7 @@ import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12, UPDATED_T
 import { ASSIST_EXERCISES, DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_CATEGORY, SEED_EXERCISES } from './data/exercises';
 import { todayISO } from './lib/date';
 import { movePullBackToB, restoreMenu } from './lib/menuRestore';
-import { menuSlots, optionsOf } from './lib/exerciseCategory';
+import { categoryOf, menuSlots, optionsOf } from './lib/exerciseCategory';
 
 export const DB_NAME = 'my-grown';
 
@@ -636,6 +636,23 @@ export class AppDB extends Dexie {
         const products = tx.table<Product, string>('products');
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[74].includes(p.id) && !have.has(p.id)));
+      });
+    // v75: スミスマシン チェストプレスを追加し、胸の枠（チェストプレス）で選べるようにする
+    this.version(75)
+      .stores({})
+      .upgrade(async (tx) => {
+        const table = tx.table<Exercise, string>('exercises');
+        const seed = SEED_EXERCISES.find((e) => e.id === 'smith-chest-press')!;
+        const { altIds: _, ...plain } = seed;
+        if (!(await table.get(seed.id))) await table.add(plain);
+        // チェストプレスがメニューになければ、押す日の最初の胸の種目の枠に入れる
+        const s = await tx.table<Settings, string>('settings').get('main');
+        const all = new Map((await table.toArray()).map((e) => [e.id, e]));
+        const menus = [...(s?.menuA ?? []), ...(s?.menuB ?? [])];
+        const slotId = menus.includes('chest-press') ? 'chest-press'
+          : (s?.menuA ?? []).find((id) => { const e = all.get(id); return e && categoryOf(e) === '胸'; }) ?? 'chest-press';
+        const slot = all.get(slotId);
+        if (slot && slot.id !== seed.id && !optionsOf(slot).includes(seed.id)) await table.update(slotId, { altIds: [...optionsOf(slot), seed.id] });
       });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {

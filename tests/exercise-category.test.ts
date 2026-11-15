@@ -64,7 +64,7 @@ describe('同じ枠で選べる種目', () => {
     v66.close();
     const db = new AppDB(name);
     const chest = await db.exercises.get('chest-press');
-    expect(chest?.altIds).toEqual(['cable-chest-press']);
+    expect(chest?.altIds?.[0]).toBe('cable-chest-press');
     expect(chest?.altId).toBeUndefined();
     db.close();
   });
@@ -104,5 +104,32 @@ describe('メニューの枠がだぶらない', () => {
     const db = new AppDB(name);
     expect((await db.settings.get('main'))?.menuA).toEqual(['leg-press', 'chest-press']);
     db.close();
+  });
+});
+
+describe('スミスマシン チェストプレス', () => {
+  it('v75：種目を足し、胸の枠（チェストプレス）で選べるようにする（今の選べる種目は残す）', async () => {
+    const name = 'v74-smith-chest';
+    names.push(name);
+    const v74 = new Dexie(name);
+    v74.version(74).stores({
+      settings: 'id', products: 'id, category', mySets: 'id', days: 'date', meals: 'id, date', exercises: 'id', workoutSets: 'id, date, exerciseId',
+      expenses: 'id, date', categoryRules: 'name',
+    });
+    await v74.table('settings').put(defaultSettings('2026-10-01'));
+    await v74.table('products').bulkAdd(SEED_PRODUCTS);
+    await v74.table('exercises').bulkAdd([
+      ...SEED_EXERCISES.filter((e) => e.id !== 'smith-chest-press').map((e) => (e.id === 'chest-press' ? { ...e, altIds: ['cable-chest-press', 'mine'], nextWeights: { '35': 40 } } : e)),
+      { id: 'mine', name: 'パワーラック', repMin: 8, repMax: 10, increment: 2.5, howTo: '', sets: 3 },
+    ]);
+    v74.close();
+    const db = new AppDB(name);
+    expect(await db.exercises.get('smith-chest-press')).toMatchObject({ name: 'スミスマシン チェストプレス', category: '胸' });
+    expect(await db.exercises.get('chest-press')).toMatchObject({ altIds: ['cable-chest-press', 'mine', 'smith-chest-press'], nextWeights: { '35': 40 } });
+    db.close();
+  });
+
+  it('新しく使い始めたときも胸の枠で選べる', () => {
+    expect(SEED_EXERCISES.find((e) => e.id === 'chest-press')?.altIds).toEqual(['cable-chest-press', 'smith-chest-press']);
   });
 });
