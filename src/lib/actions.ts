@@ -1,6 +1,5 @@
 import { db, newId } from '../db';
-import type { DayRecord, Expense, ISODate, MealItem, MealSlot, MySet, Product, Settings, WorkoutSet } from '../types';
-import { ruleKey } from './receipt';
+import type { DayRecord, ISODate, MealItem, MealSlot, MySet, Product, Settings, WorkoutSet } from '../types';
 import type { Suggestion } from '../data/menus';
 
 export async function patchDay(date: ISODate, patch: Partial<DayRecord>): Promise<void> {
@@ -91,15 +90,3 @@ export async function saveSet(set: WorkoutSet): Promise<void> {
 // ---- 支出 ----
 
 /** 支出を保存し、品名→費目を覚える（次のレシートから同じ品名は同じ費目になる） */
-export async function saveExpense(expense: Expense): Promise<void> {
-  await db.transaction('rw', db.expenses, db.categoryRules, async () => {
-    await db.expenses.put(expense);
-    await db.categoryRules.bulkPut(
-      expense.items.filter((i) => i.name.trim()).map((i) => ({ name: ruleKey(i.name), category: i.category })),
-    );
-  });
-}
-
-export async function deleteExpense(id: string): Promise<void> {
-  await db.expenses.delete(id);
-}

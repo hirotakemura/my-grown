@@ -29,7 +29,9 @@ function dbGet(page: Page, store: string, key: string) {
 
 const tab = (page: Page, name: string) => page.getByRole('navigation').getByRole('button', { name, exact: true }).click();
 /** 今日の画面の「食事／筋トレ」の切り替え */
-const mode = (page: Page, name: '食事' | '筋トレ') => page.getByRole('tab', { name: new RegExp(`^${name}`) }).click();
+const mode = (page: Page, name: '食事' | '筋トレ') => page.getByRole('navigation').getByRole('button', { name, exact: true }).click();
+/** 下のタブの「筋トレ」が選ばれているか */
+const workoutTab = (page: Page) => page.getByRole('navigation').getByRole('button', { name: '筋トレ', exact: true });
 
 /** 食事の枠の「食べたものを選ぶ」から商品名で探して1つ記録する */
 async function eat(page: Page, slot: string, name: string, store?: string) {
@@ -48,7 +50,7 @@ async function enterWeight(page: Page, value: string) {
   await page.locator('#weight').fill(value);
   await page.getByTestId('weight-card').getByRole('button', { name: '記録' }).click();
   await expect.poll(() => dbGet(page, 'days', '2026-09-28')).toMatchObject({ weight: Number(value) });
-  await tab(page, '今日');
+  await tab(page, '食事');
 }
 
 /** 記録タブの体重欄 */
@@ -70,7 +72,7 @@ test('記録した食事・体重・セットがリロード後も残る', async
   await enterWeight(page, '71.6');
 
   // レッグプレス 1セット目（筋トレに切り替える）
-  await tab(page, '今日');
+  await tab(page, '食事');
   await mode(page, '筋トレ');
   const lp = page.getByTestId('exercise-leg-press');
   await lp.getByLabel('レッグプレス 1セット目の重さ').fill('60');
@@ -82,14 +84,14 @@ test('記録した食事・体重・セットがリロード後も残る', async
 
   // トレの途中で開き直すと筋トレから表示される
   const lp2 = page.getByTestId('exercise-leg-press');
-  await expect(page.getByRole('tab', { name: /^筋トレ/ })).toHaveAttribute('aria-selected', 'true');
+  await expect(workoutTab(page)).toHaveAttribute('aria-current', 'page');
   await expect(lp2.getByLabel('レッグプレス 1セット目の重さ')).toHaveValue('60');
   await expect(lp2.getByLabel('レッグプレス 1セット目の回数')).toHaveValue('12');
   await expect(lp2.getByRole('button', { name: '1セット目を完了' })).toHaveAttribute('aria-pressed', 'true');
   await mode(page, '食事');
   await expect(page.getByTestId('meal-lunch').getByText('✓ 食べた')).toBeVisible();
   await expect(await weightInput(page)).toHaveValue('71.6');
-  await tab(page, '今日');
+  await tab(page, '食事');
 
   // 記録タブにも反映される
   await page.getByRole('navigation').getByRole('button', { name: '記録' }).click();
@@ -252,7 +254,7 @@ test('オフラインでも起動でき、データも読める', async ({ page,
   await expect(page.getByTestId('current-date')).toContainText('9/28(月)');
   await expect(await weightInput(page)).toHaveValue('71.2');
   // 数字のフォント（Inter）はアプリに同梱していて、オフラインでも読み込める
-  await tab(page, '今日');
+  await tab(page, '食事');
   expect(await page.evaluate(async () => { await document.fonts.load('700 28px Inter'); return document.fonts.check('700 28px Inter'); })).toBe(true);
   await context.setOffline(false);
 });
@@ -407,7 +409,7 @@ test('今日：食事と筋トレを切り替えて表示し、切り替えて�
   await page.getByLabel('レッグプレス 1セット目の回数').fill('12');
   await page.getByTestId('exercise-leg-press').getByRole('button', { name: '1セット目を完了' }).click();
   await expect(page.getByTestId('exercise-leg-press')).toContainText('1/3');
-  await expect(page.getByRole('tab', { name: /^筋トレ/ })).toContainText('1/18');
+  await expect(page.getByTestId('workout')).toContainText('1 / 18 セット');
   // iPhoneの幅で横にはみ出さない（筋トレ・食事とも）
   const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(await overflow()).toBeLessThanOrEqual(0);
@@ -419,7 +421,7 @@ test('今日：食事と筋トレを切り替えて表示し、切り替えて�
   await mode(page, '食事');
   await expect(page.getByTestId('next-action')).toContainText('トレ中：1 / 18 セット完了');
   await page.getByTestId('next-action').getByRole('button', { name: '筋トレを開く' }).click();
-  await expect(page.getByRole('tab', { name: /^筋トレ/ })).toHaveAttribute('aria-selected', 'true');
+  await expect(workoutTab(page)).toHaveAttribute('aria-current', 'page');
   await expect(weight).toHaveValue('55');
 });
 
@@ -517,7 +519,7 @@ test('筋トレ：1つの枠（胸）で、選べる種目からその日にや�
   await expect.poll(async () => ((await dbGet(page, 'settings', 'main')) as { menuA: string[] }).menuA.length).toBe(6);
 
   // 今日：胸の枠でパワーラックを選ぶと、その種目の入力になる
-  await tab(page, '今日');
+  await tab(page, '食事');
   await mode(page, '筋トレ');
   const choices = page.getByRole('group', { name: '胸：今日やる種目' });
   await expect(choices.getByRole('button')).toHaveText(['チェストプレス', 'ケーブル チェストプレス', 'スミスマシン チェストプレス', 'パワーラック']);
@@ -544,9 +546,22 @@ test('筋トレ：前に別の枠として足した種目を、ほかの枠の�
   await mode(page, '筋トレ');
   await expect(page.locator('[data-testid="workout"] .ex-card')).toHaveCount(6);
   await expect(page.getByRole('group', { name: '胸：今日やる種目' })).toHaveCount(1);
-  await expect(page.getByRole('tab', { name: /^筋トレ/ })).toContainText('0/18');
+  await expect(page.getByTestId('workout')).toContainText('0 / 18 セット');
   // 設定の「＋ 種目を追加」にも、もう出ない
   await tab(page, '設定');
   const add = page.getByLabel('メニューA（押す日）に種目を追加');
   await expect(add.locator('option', { hasText: 'ケーブル チェストプレス' })).toHaveCount(0);
+});
+
+test('下のタブ：支出はなく、食事・筋トレ・記録・設定の4つ。食事タブにサマリー、筋トレタブに筋トレだけが出る', async ({ page }) => {
+  await openApp(page);
+  const nav = page.getByRole('navigation');
+  await expect(nav.getByRole('button')).toHaveText(['食事', '筋トレ', '記録', '設定']);
+  await expect(page.getByTestId('progress')).toBeVisible();
+  await expect(page.getByTestId('workout')).toBeHidden();
+  await mode(page, '筋トレ');
+  await expect(page.getByTestId('workout')).toBeVisible();
+  await expect(page.getByTestId('progress')).toBeHidden();
+  await expect(page.getByTestId('meal-lunch')).toBeHidden();
+  await expect(page.getByTestId('current-date')).toContainText('9/28(月)');
 });

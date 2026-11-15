@@ -3,28 +3,26 @@ import { useAppData, useToday } from './hooks';
 import { Today } from './screens/Today';
 import { Records } from './screens/Records';
 import { SettingsScreen } from './screens/SettingsScreen';
-import { Money } from './screens/Money';
 import { ToastProvider } from './components/Toast';
 import { ConfirmProvider } from './components/Confirm';
 import { RestTimerProvider } from './components/RestTimer';
-import type { TodayMode } from './components/TodaySummary';
 
-type Tab = 'today' | 'records' | 'money' | 'settings';
+type Tab = 'meal' | 'workout' | 'records' | 'settings';
 
 const icons: Record<Tab, JSX.Element> = {
-  today: (
+  meal: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /><path d="m9 15 2 2 4-4" />
+      <path d="M4 3v7a3 3 0 0 0 3 3v8M7 3v6M10 3v7a3 3 0 0 1-3 3" /><path d="M17 21V3c-2.2 1.2-3.5 3.5-3.5 6.5V14H17" />
+    </svg>
+  ),
+  workout: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11" />
     </svg>
   ),
   records: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d="M3 3v18h18" /><path d="m7 15 4-4 3 3 5-6" />
-    </svg>
-  ),
-  money: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z" /><path d="m9 8 3 3 3-3M12 11v5M9.5 13h5" />
     </svg>
   ),
   settings: (
@@ -35,16 +33,23 @@ const icons: Record<Tab, JSX.Element> = {
   ),
 };
 
-const labels: Record<Tab, string> = { today: '今日', records: '記録', money: '支出', settings: '設定' };
+const labels: Record<Tab, string> = { meal: '食事', workout: '筋トレ', records: '記録', settings: '設定' };
 
 export default function App() {
   const data = useAppData();
   const today = useToday();
-  const [tab, setTab] = useState<Tab>('today');
+  // 最初は食事。今日のトレの途中で開き直したときは筋トレから
+  const [chosenTab, setTab] = useState<Tab | null>(null);
+  const tab: Tab = chosenTab ?? (data?.days.get(today)?.gymStatus === 'started' ? 'workout' : 'meal');
   const [date, setDate] = useState<string | null>(null); // null = いつも今日
-  // 食事／筋トレ：最初は食事。今日のトレの途中で開き直したときは筋トレから
-  const [chosenMode, setTodayMode] = useState<TodayMode | null>(null);
-  const todayMode: TodayMode = chosenMode ?? (data?.days.get(today)?.gymStatus === 'started' ? 'workout' : 'meal');
+  // 食事・筋トレのタブごとに、どこまでスクロールしていたかを覚えておく
+  const [scrollOf] = useState<Partial<Record<Tab, number>>>({});
+  const go = (next: Tab) => {
+    if (next === tab) return;
+    scrollOf[tab] = window.scrollY;
+    setTab(next);
+    requestAnimationFrame(() => window.scrollTo(0, next === 'meal' || next === 'workout' ? scrollOf[next] ?? 0 : 0));
+  };
 
   return (
     <ToastProvider>
@@ -53,25 +58,24 @@ export default function App() {
         <div className="app">
           {!data ? (
             <p className="muted" style={{ padding: 24, textAlign: 'center' }}>読み込み中…</p>
-          ) : tab === 'today' ? (
+          ) : tab === 'meal' || tab === 'workout' ? (
+            // 食事と筋トレは同じ画面を使い回すので、タブを移っても入力中の内容は消えない
             <Today
               data={data}
               date={date ?? today}
               setDate={(d) => setDate(d === today ? null : d)}
-              mode={todayMode}
-              setMode={setTodayMode}
-              onOpenRecords={() => { setTab('records'); window.scrollTo(0, 0); }}
+              mode={tab}
+              setMode={go}
+              onOpenRecords={() => go('records')}
             />
           ) : tab === 'records' ? (
             <Records data={data} />
-          ) : tab === 'money' ? (
-            <Money data={data} />
           ) : (
             <SettingsScreen data={data} />
           )}
           <nav className="tabbar" aria-label="メイン">
             {(Object.keys(labels) as Tab[]).map((t) => (
-              <button key={t} aria-current={tab === t ? 'page' : undefined} onClick={() => { setTab(t); window.scrollTo(0, 0); }}>
+              <button key={t} aria-current={tab === t ? 'page' : undefined} onClick={() => go(t)}>
                 {icons[t]}
                 {labels[t]}
               </button>

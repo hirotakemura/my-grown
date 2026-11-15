@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AppData } from '../hooks';
 import { useNow } from '../hooks';
 import type { MealItem, MealSlot } from '../types';
@@ -66,51 +66,23 @@ export function Today({ data, date, setDate, mode, setMode, onOpenRecords }: Pro
   const holiday = holidayName(date);
   const auto = autoDayKind(date);
 
-  // 上の日付バーの高さ（切り替えボタンをその下に貼り付けるため）
+  // 上の日付バーの高さ（「次にやること」から食事の枠へ移るとき、バーに隠れないように）
   const topRef = useRef<HTMLElement>(null);
-  // 切り替えボタンの本来の位置（貼り付いても動かない目印）
-  const anchorRef = useRef<HTMLDivElement>(null);
-  const [topH, setTopH] = useState(0);
-  useLayoutEffect(() => {
-    const el = topRef.current;
-    if (!el) return;
-    const update = () => setTopH(el.getBoundingClientRect().height);
-    update();
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
-    ro?.observe(el);
-    return () => ro?.disconnect();
-  }, []);
-
-  // 食事／筋トレのそれぞれで、どこまでスクロールしていたかを覚えておく
-  const scrollOf = useRef<Partial<Record<TodayMode, number>>>({});
   const [focusSlot, setFocusSlot] = useState<MealSlot | null>(null);
-  const panelTop = () => (anchorRef.current ? Math.max(0, anchorRef.current.getBoundingClientRect().top + window.scrollY - topH) : 0);
-  const switchMode = (next: TodayMode, slot?: MealSlot) => {
-    if (next !== mode) {
-      const top = panelTop();
-      scrollOf.current[mode] = window.scrollY;
-      setMode(next);
-      if (!slot) {
-        requestAnimationFrame(() => {
-          // 切り替えボタンより上を見ていたらそのまま。下まで読み進めていたら、前にその表示で見ていた位置（なければ先頭）へ
-          if (window.scrollY <= top) return;
-          const saved = scrollOf.current[next];
-          window.scrollTo(0, saved != null && saved > top ? saved : top);
-        });
-      }
-    }
+  const go = (next: TodayMode, slot?: MealSlot) => {
+    if (next !== mode) setMode(next);
     if (slot) setFocusSlot(slot);
   };
   // 「次にやること」から食事を開いたら、その枠まで移動して少し目立たせる
   useEffect(() => {
     if (!focusSlot || mode !== 'meal') return;
     const el = document.querySelector<HTMLElement>(`[data-testid="meal-${focusSlot}"]`);
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - topH - 56, behavior: 'smooth' });
+    const topH = topRef.current?.getBoundingClientRect().height ?? 0;
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - topH - 12, behavior: 'smooth' });
     const id = window.setTimeout(() => setFocusSlot(null), 1600);
     return () => window.clearTimeout(id);
-  }, [focusSlot, mode, topH]);
+  }, [focusSlot, mode]);
 
-  const plannedLabel = status.menu === 'rest' ? '休み' : `${status.doneSets}/${status.plannedSets}`;
 
   return (
     <div className="screen">
@@ -125,36 +97,26 @@ export function Today({ data, date, setDate, mode, setMode, onOpenRecords }: Pro
         </div>
       </header>
 
-      <TodaySummary
-        date={date}
-        today={today}
-        status={status}
-        progress={progress}
-        kind={status.kind}
-        autoKind={auto}
-        action={action}
-        onGo={switchMode}
-        onOpenRecords={onOpenRecords}
-      />
-
-      <div ref={anchorRef} className="mode-anchor" aria-hidden />
-      <div className="mode-switch" style={{ top: topH }}>
-        <div className="seg tall" role="tablist" aria-label="食事か筋トレか">
-          <button role="tab" aria-selected={mode === 'meal'} aria-pressed={mode === 'meal'} aria-controls="panel-meal" onClick={() => switchMode('meal')}>
-            食事
-          </button>
-          <button role="tab" aria-selected={mode === 'workout'} aria-pressed={mode === 'workout'} aria-controls="panel-workout" onClick={() => switchMode('workout')}>
-            筋トレ <span className="seg-badge num">{plannedLabel}</span>
-          </button>
-        </div>
+      {/* 食事と筋トレはどちらも画面に残したまま隠すので、タブを移っても入力中の内容は消えない */}
+      <div className="panel" hidden={mode !== 'meal'}>
+        <TodaySummary
+          date={date}
+          today={today}
+          status={status}
+          progress={progress}
+          kind={status.kind}
+          autoKind={auto}
+          action={action}
+          onGo={go}
+          onOpenRecords={onOpenRecords}
+        />
       </div>
 
-      {/* どちらも画面に残したまま隠すので、切り替えても入力中の内容は消えない */}
-      <div id="panel-meal" role="tabpanel" className="panel" hidden={mode !== 'meal'}>
+      <div id="panel-meal" className="panel" hidden={mode !== 'meal'}>
         {ordered.map((slot) => <MealCard key={slot} {...mealProps(slot)} focused={focusSlot === slot} />)}
       </div>
 
-      <div id="panel-workout" role="tabpanel" className="panel" hidden={mode !== 'workout'}>
+      <div id="panel-workout" className="panel" hidden={mode !== 'workout'}>
         <WorkoutSection
           date={date}
           menu={status.menu}

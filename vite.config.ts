@@ -31,16 +31,7 @@ export default defineConfig(({ command, isPreview }) => ({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,webmanifest,woff2}'],
-        // レシート読み取りの本体・日本語データ（数MB）は最初に全部は入れず、使ったときにキャッシュする
-        globIgnores: ['ocr/**'],
         navigateFallback: 'index.html',
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) => url.pathname.includes('/ocr/'),
-            handler: 'CacheFirst',
-            options: { cacheName: 'ocr-assets', expiration: { maxEntries: 10 } },
-          },
-        ],
       },
     }),
   ],

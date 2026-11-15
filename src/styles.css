@@ -368,18 +368,6 @@ html:has(.app.timer-on) { scroll-padding-bottom: calc(var(--tab-h) + var(--safe-
 .table td, .table th { padding: 8px 4px; border-bottom: 1px solid var(--border); text-align: left; font-variant-numeric: tabular-nums; }
 .table th { font-size: var(--fs-caption); color: var(--muted); font-weight: var(--fw-semibold); }
 
-.expense-row { display: grid; grid-template-columns: 1fr 96px; grid-template-areas: 'name price' 'cat del'; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-.expense-row > :nth-child(1) { grid-area: name; }
-.expense-row > :nth-child(2) { grid-area: price; }
-.expense-row > :nth-child(3) { grid-area: cat; }
-.expense-row > :nth-child(4) { grid-area: del; justify-self: end; }
-.past-search { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--card-2); }
-.past-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; overscroll-behavior: contain; }
-.past-item { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); text-align: left; cursor: pointer; font: inherit; }
-.past-item .grow { display: flex; flex-direction: column; min-width: 0; }
-.past-name { font-weight: var(--fw-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.past-item .muted { font-size: 12px; }
-.past-add { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-weight: var(--fw-bold); flex: none; }
 .ex-group { border: 1px solid var(--border); border-radius: var(--radius-s); padding: 0 12px; }
 .ex-group summary { gap: 8px; color: var(--text); }
 .ex-group summary::before { content: '▸'; color: var(--muted); transition: transform 0.15s; }
@@ -399,7 +387,6 @@ html:has(.app.timer-on) { scroll-padding-bottom: calc(var(--tab-h) + var(--safe-
 .list-row { display: flex; align-items: center; gap: 8px; min-height: 48px; border-bottom: 1px solid var(--border); }
 .list-row:last-child { border-bottom: none; }
 .list-count { font-size: var(--fs-small); font-weight: var(--fw-regular); margin-left: 8px; }
-.scroll-list { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; border-bottom: 1px solid var(--border); }
 .weekday-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .weekday-picker button { min-height: 44px; border-radius: var(--radius-xs); border: 1px solid var(--border); background: var(--card); font-weight: var(--fw-semibold); cursor: pointer; }
 .weekday-picker button[aria-pressed='true'] { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -471,18 +458,7 @@ input[type='time'].input::-webkit-date-and-time-value {
 .sum-more summary { min-height: 32px; font-size: var(--fs-small); }
 .sum-goal { background: none; border: none; padding: 0; text-align: left; cursor: pointer; min-height: 28px; margin-top: -6px; }
 
-/* ---- 食事／筋トレの切り替え（日付バーの下に貼り付く） ---- */
-.mode-switch {
-  position: sticky; z-index: 15; margin: 0 -12px; padding: 6px 12px;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-}
-.mode-switch .seg { background: var(--card); border: 1px solid var(--border); }
-.mode-switch .seg button { font-size: var(--fs-body); }
-.mode-switch .seg button[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); box-shadow: 0 1px 3px rgb(31 157 85 / 0.3); }
-.seg-badge { font-family: var(--font-num), var(--font-sans); font-size: var(--fs-caption); font-weight: var(--fw-semibold); padding: 1px 7px; border-radius: 999px; background: var(--card-2); color: var(--text-2); }
-.mode-switch .seg button[aria-pressed='true'] .seg-badge { background: color-mix(in srgb, var(--accent-ink) 22%, transparent); color: var(--accent-ink); }
-.mode-anchor { height: 0; margin-bottom: -12px; }
+/* ---- 食事／筋トレの表示（下のタブで切り替える） ---- */
 .panel { display: flex; flex-direction: column; gap: 12px; }
 .panel[hidden] { display: none; }
 /* 切り替えたときに軽くフェードイン（隠していた表示を出すたびに動く） */
