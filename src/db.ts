@@ -654,6 +654,14 @@ export class AppDB extends Dexie {
         const slot = all.get(slotId);
         if (slot && slot.id !== seed.id && !optionsOf(slot).includes(seed.id)) await table.update(slotId, { altIds: [...optionsOf(slot), seed.id] });
       });
+    // v76: ローソン 3種チーズ仕立て 海老ドリア
+    this.version(76)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[76].includes(p.id) && !have.has(p.id)));
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());
