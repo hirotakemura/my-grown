@@ -15,7 +15,7 @@ export const VERIFIED = new Set([
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
   'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen', 'f-mentai-mayo-atsuyaki-tamago',
-  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper', 'home-sanwa-yuba-nabe', '7-onigiri-tonkotsu-shoyu-nitamago', '7-atsugiri-tanshio-80', 'l-benop-soft-bar-berry-cheesecake', 'l-3cheese-ebi-doria',
+  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper', 'home-sanwa-yuba-nabe', '7-onigiri-tonkotsu-shoyu-nitamago', '7-atsugiri-tanshio-80', 'l-benop-soft-bar-berry-cheesecake', 'l-3cheese-ebi-doria', 'f-crispy-chicken-plain',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -263,6 +263,7 @@ export const ADDED_IN: Record<number, string[]> = {
   73: ['l-benop-soft-bar-berry-cheesecake'],
   74: ['eo-ichikakuya-shio-ichiro-ramen'],
   76: ['l-3cheese-ebi-doria'],
+  77: ['f-crispy-chicken-plain', 'f-gokuuma-kurobuta-man', 'f-spam-musubi'],
 };
 
 // ファミリーマート
@@ -272,6 +273,11 @@ const famima: Row[] = [
   ['f-onigiri-benishake', 'ファミマ 手巻 紅しゃけ', 'おにぎり', 174, 4.7, 1.3, 35.8],
   ['f-fukuchan-tonkotsu-ramen', 'ファミマル ふくちゃんラーメン監修 コクとキレの豚骨ラーメン', '麺', 496, 12.5, 19.9, 66.8],
   ['f-mentai-mayo-atsuyaki-tamago', 'ファミマル だしがじゅわ！明太マヨ厚焼き玉子', '卵・乳製品', 180, 11.7, 12.2, 6.1],
+  // 公式の値（0250610）
+  ['f-crispy-chicken-plain', 'ファミマ クリスピーチキン（プレーン）', 'ホットスナック', 183, 12.2, 9.6, 11.9],
+  // 公式ページを確かめられなかったので、紹介記事の値を目安にする
+  ['f-gokuuma-kurobuta-man', 'ファミマ 極旨 黒豚まん', 'ホットスナック', 258, 9.5, 7.7, 37.6],
+  ['f-spam-musubi', 'ファミマ SPAMむすび', 'おにぎり', 376, 10.4, 16.7, 46.5],
 ];
 
 // どのコンビニでも買えるもの
