@@ -264,6 +264,7 @@ export const ADDED_IN: Record<number, string[]> = {
   74: ['eo-ichikakuya-shio-ichiro-ramen'],
   76: ['l-3cheese-ebi-doria'],
   77: ['f-crispy-chicken-plain', 'f-gokuuma-kurobuta-man', 'f-spam-musubi'],
+  78: ['f-carbo-gohan'],
 };
 
 // ファミリーマート
@@ -278,6 +279,8 @@ const famima: Row[] = [
   // 公式ページを確かめられなかったので、紹介記事の値を目安にする
   ['f-gokuuma-kurobuta-man', 'ファミマ 極旨 黒豚まん', 'ホットスナック', 258, 9.5, 7.7, 37.6],
   ['f-spam-musubi', 'ファミマ SPAMむすび', 'おにぎり', 376, 10.4, 16.7, 46.5],
+  // kcal（336）は紹介記事の値。P・F・C は表示が見つからないため、もち麦ごはん・チーズ・ベーコン・卵黄風ソースから見積もり
+  ['f-carbo-gohan', 'ファミマル 4種のチーズで濃厚 カルボごはん（冷凍）', '外食・定食', 336, 11, 13, 44],
 ];
 
 // どのコンビニでも買えるもの
