@@ -268,6 +268,7 @@ export const ADDED_IN: Record<number, string[]> = {
   77: ['f-crispy-chicken-plain', 'f-gokuuma-kurobuta-man', 'f-spam-musubi'],
   78: ['f-carbo-gohan'],
   79: ['l-butter-pepper-doria'],
+  80: ['home-sunagimo-broccoli'],
 };
 
 // ファミリーマート
@@ -344,6 +345,8 @@ const other: Row[] = [
   // 「約」の値なので目安
   ['home-seseri-250', 'せせり（250g）', '自炊', 523, 41.5, 39.8, 0],
   ['home-sanwa-yuba-nabe', '三和豆水庵 とろける湯葉鍋 鰹と昆布のおだし（1セット）', '自炊', 315, 24.7, 18.5, 13.3],
+  // 砂肝150g（生 100gあたり86kcal・P18.3・F1.8）＋ブロッコリー100g（茹で）＋油 大さじ1 で計算
+  ['home-sunagimo-broccoli', '砂肝とブロッコリー炒め（1皿・砂肝150g）', '自炊', 270, 31.4, 15.1, 4.3],
   ['home-kewpie-arrabbiata', 'キユーピー アラビアータ ソース（1人前・ソースのみ）', '自炊', 101, 2.2, 5.5, 10.6],
   // kcalは表示のPFCから計算（4×P＋9×F＋4×C）
   ['home-alpron-soy-strawberry', 'ALPRON ソイプロテイン ストロベリー風味（1杯30g）', '自炊', 112, 20.5, 0.8, 5.8],
