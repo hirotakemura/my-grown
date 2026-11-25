@@ -15,7 +15,7 @@ export const VERIFIED = new Set([
   'f-tan-stick-yuzu', 'f-chicken-nanban', 'f-onigiri-benishake', 'eo-yoshinoya-kakuni-teishoku',
   'l-yakitori-harami-sunagimo', '7-dashimusubi-nikumiso', 'belc-potato-salad',
   'eo-kyubeiya-ninniku-seabura-tsukejiru-udon', '7-yuzu-dashi-tonshabu-nabe', 'l-bouillabaisse-soup', 'l-tonshabu-lettuce-paitan-soup', '7-onigiri-sausage-garlic-mayo', 'l-goro-yasai-pot-au-feu', 'l-sunagimo-ninniku', 'f-fukuchan-tonkotsu-ramen', 'f-mentai-mayo-atsuyaki-tamago',
-  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper', 'home-sanwa-yuba-nabe', '7-onigiri-tonkotsu-shoyu-nitamago', '7-atsugiri-tanshio-80', 'l-benop-soft-bar-berry-cheesecake', 'l-3cheese-ebi-doria', 'f-crispy-chicken-plain',
+  'eo-mcd-chee-chee-double-sausage-muffin', 'l-cheese-manpuku-noko-buta-ramen', '7-protein20-chicken-bar-smoke-pepper', 'home-sanwa-yuba-nabe', '7-onigiri-tonkotsu-shoyu-nitamago', '7-atsugiri-tanshio-80', 'l-benop-soft-bar-berry-cheesecake', 'l-3cheese-ebi-doria', 'f-crispy-chicken-plain', 'l-butter-pepper-doria',
 ]);
 
 /** v16 でローソン公式サイトの値に見直した商品 */
@@ -112,6 +112,8 @@ const lawson: Row[] = [
   ['l-cheese-manpuku-noko-buta-ramen', 'とろ〜りチーズ満腹濃厚豚ラーメン', '麺', 787, 44.7, 32.8, 81.9],
   // 公式の値（1532660）
   ['l-3cheese-ebi-doria', '3種チーズ仕立て 海老ドリア', '外食・定食', 346, 11.5, 10.6, 52.1],
+  // 公式の値（1533832）
+  ['l-butter-pepper-doria', 'じゅわっとバターのペッパードリア', '外食・定食', 403, 10.7, 15.1, 57.5],
   ['l-benop-soft-bar-berry-cheesecake', 'ベノプ ソフトバー ベリーベリーチーズケーキ（1本60g）', 'プロテイン', 192, 20, 4, 26],
   ['l-nebaneba-soba', '香りとのど越し ミニネバネバそば', '麺', 238, 13.3, 4.2, 39.1],
   ['l-niku-soba', '特盛！冷し肉そば', '麺', 614, 35.2, 14, 90.7],
@@ -265,6 +267,7 @@ export const ADDED_IN: Record<number, string[]> = {
   76: ['l-3cheese-ebi-doria'],
   77: ['f-crispy-chicken-plain', 'f-gokuuma-kurobuta-man', 'f-spam-musubi'],
   78: ['f-carbo-gohan'],
+  79: ['l-butter-pepper-doria'],
 };
 
 // ファミリーマート
