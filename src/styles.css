@@ -528,3 +528,5 @@ input[type='time'].input::-webkit-date-and-time-value {
 /* 長い種目名でも画面からはみ出さない */
 .slot-chip { max-width: 100%; overflow-wrap: anywhere; line-height: 1.35; }
 .ex-chip { max-width: 100%; overflow-wrap: anywhere; }
+.chart .marker { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.chart .marker-label { fill: var(--warn); font-size: 10px; }

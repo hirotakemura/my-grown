@@ -4,7 +4,8 @@ import { formatMD } from '../lib/date';
 export interface Point { date: string; value: number; note?: string }
 
 /** 1系列の折れ線。タップ／ホバーで一番近い点の値を出す */
-export function LineChart({ points, unit, label }: { points: Point[]; unit: string; label: string }) {
+/** marker：この日から区切りの縦線を引く（ジムを変えた日など） */
+export function LineChart({ points, unit, label, marker }: { points: Point[]; unit: string; label: string; marker?: { date: string; label: string } }) {
   const [active, setActive] = useState<number | null>(null);
   if (points.length === 0) return <p className="muted">まだ記録がありません。</p>;
 
@@ -30,6 +31,9 @@ export function LineChart({ points, unit, label }: { points: Point[]; unit: stri
 
   const sp = points[shown];
   const xLabels = points.length === 1 ? [0] : [0, points.length - 1];
+  // 区切りの日の前後の点の間に線を引く（前にも後にも点があるときだけ）
+  const after = marker ? points.findIndex((p) => p.date >= marker.date) : -1;
+  const markerX = marker && after > 0 ? (x(after - 1) + x(after)) / 2 : null;
 
   return (
     <div>
@@ -54,6 +58,12 @@ export function LineChart({ points, unit, label }: { points: Point[]; unit: stri
         {xLabels.map((i) => (
           <text key={i} x={x(i)} y={H - 8} textAnchor={i === 0 && points.length > 1 ? 'start' : 'end'}>{formatMD(points[i].date)}</text>
         ))}
+        {markerX !== null && (
+          <g data-testid="chart-marker">
+            <line className="marker" x1={markerX} x2={markerX} y1={T} y2={H - B} />
+            <text x={markerX + 4} y={T + 10} className="marker-label">{marker!.label}</text>
+          </g>
+        )}
         {active !== null && <line className="cross" x1={x(active)} x2={x(active)} y1={T} y2={H - B} />}
         <path className="line" d={path} />
         {points.map((p, i) => (

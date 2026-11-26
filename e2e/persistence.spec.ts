@@ -565,3 +565,33 @@ test('下のタブ：支出はなく、食事・筋トレ・記録・設定の4�
   await expect(page.getByTestId('meal-lunch')).toBeHidden();
   await expect(page.getByTestId('current-date')).toContainText('9/28(月)');
 });
+
+test('ジムを変える：マシンは前のジムの重さを使わず新しく始め、スミスは前回を引き継ぐ。記録は残る', async ({ page }) => {
+  await openApp(page);
+  await dbPut(page, 'workoutSets', [0, 1, 2].flatMap((i) => [
+    { id: `2026-09-25|leg-press|${i}`, date: '2026-09-25', exerciseId: 'leg-press', index: i, weight: 80, reps: 12, done: true },
+    { id: `2026-09-25|smith-squat|${i}`, date: '2026-09-25', exerciseId: 'smith-squat', index: i, weight: 40, reps: 10, done: true },
+  ]));
+  await page.reload();
+  await mode(page, '筋トレ');
+  await expect(page.getByTestId('exercise-leg-press')).toContainText('前回 80kg →');
+
+  await tab(page, '設定');
+  const card = page.getByTestId('gym-card');
+  await expect(card).toContainText('新しく始める');
+  await card.getByRole('button', { name: 'ジムを変える（今日から）' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'ジムを変える' }).click();
+  await expect(card).toContainText('9/28');
+  await expect.poll(async () => ((await dbGet(page, 'settings', 'main')) as { gymChangedOn?: string }).gymChangedOn).toBe('2026-09-28');
+
+  await mode(page, '筋トレ');
+  const lp = page.getByTestId('exercise-leg-press');
+  await expect(lp).toContainText('はじめて');
+  await expect(lp).not.toContainText('前回 9/25');
+  // 同じ枠のスミスマシン スクワットは前回を引き継ぐ
+  await page.getByRole('group', { name: '脚：今日やる種目' }).first().getByRole('button', { name: 'スミスマシン スクワット' }).click();
+  await expect(page.getByTestId('exercise-smith-squat')).toContainText('前回 9/25');
+  // 記録タブには前のジムの記録も残る
+  await tab(page, '記録');
+  await expect(page.getByTestId('exercise-history')).toContainText('40×10');
+});

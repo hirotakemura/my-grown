@@ -89,3 +89,13 @@ export function isPersonalBest(set: WorkoutSet, previous: WorkoutSet[], ex: Pick
 export function totalVolume(sets: WorkoutSet[]): number {
   return sets.reduce((t, s) => (s.done && s.weight && s.reps ? t + s.weight * s.reps : t), 0);
 }
+
+/**
+ * 前回・重さの提案・自己ベストに使うセット。
+ * ジムを変えた日からは、記録を引き継がない種目（マシン・ケーブルなど）で、その日より前のセットを使わない。
+ * ジムを変えた日より前の日を見ているときは、今までどおり全部使う。
+ */
+export function setsForProgress(ex: Exercise, sets: WorkoutSet[], date: ISODate, gymChangedOn?: ISODate): WorkoutSet[] {
+  if (!gymChangedOn || ex.carryOver || date < gymChangedOn) return sets;
+  return sets.filter((s) => s.exerciseId !== ex.id || s.date >= gymChangedOn);
+}

@@ -126,6 +126,10 @@ export interface Exercise {
   howTo: string;
   /** 古い形（代わりの種目が1つだけ）。読むときは optionsOf を使う */
   altId?: string;
+  /** ジムを変えても前のジムの記録を引き継ぐ（スミス・ダンベルなど、どこでも同じ器具）。false ならジムを変えた日から新しく始める */
+  carryOver?: boolean;
+  /** ジムを変えたときに外した「次の重さ」（取り消したら戻す） */
+  nextWeightsBeforeGym?: Record<string, number>;
   /** 同じ枠で選べるほかの種目（例：チェストプレスの枠でケーブル チェストプレス・パワーラック） */
   altIds?: string[];
   sets: number;
@@ -158,6 +162,8 @@ export interface Settings {
   gymTime: string;
   menuA: string[];
   menuB: string[];
+  /** ジムを変えた日。この日からは「新しく始める」種目で、前のジムの記録を前回・重さの提案・自己ベストに使わない */
+  gymChangedOn?: ISODate;
 }
 
 // ---- 支出（レシート） ----

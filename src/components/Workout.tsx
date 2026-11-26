@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import weightUpIcon from '../assets/ui/weight-up.png';
 import type { DayRecord, Exercise, Settings, WorkoutMenu, WorkoutSet } from '../types';
 import { gymTimeOf, menuExerciseIds } from '../lib/plan';
-import { lastSession, isPersonalBest, suggestWeight } from '../lib/progression';
+import { lastSession, isPersonalBest, setsForProgress, suggestWeight } from '../lib/progression';
 import { patchDay, saveSet, setId } from '../lib/actions';
 import { formatMD } from '../lib/date';
 import { useRestTimer } from './RestTimer';
@@ -182,7 +182,9 @@ function NextWeight({ ex, from, weight, known }: { ex: Exercise; from: number; w
 function ExerciseCard({ date, menu, main, ex, options, day, sets, settings, plannedSets }: CardProps) {
   const toast = useToast();
   const timer = useRestTimer();
-  const last = lastSession(ex.id, date, sets);
+  // ジムを変えた日からは、前のジムの記録を使わない種目がある
+  const usable = setsForProgress(ex, sets, date, settings.gymChangedOn);
+  const last = lastSession(ex.id, date, usable);
   const sug = suggestWeight(ex, last);
   const todays = sets.filter((s) => s.date === date && s.exerciseId === ex.id);
   const doneCount = todays.filter((s) => s.done).length;
@@ -197,7 +199,7 @@ function ExerciseCard({ date, menu, main, ex, options, day, sets, settings, plan
   };
 
   const onDone = async (set: WorkoutSet, row: HTMLElement | null) => {
-    const previous = sets.filter((s) => s.done && s.exerciseId === set.exerciseId && s.id !== set.id && s.date <= date);
+    const previous = usable.filter((s) => s.done && s.exerciseId === set.exerciseId && s.id !== set.id && s.date <= date);
     const pb = isPersonalBest(set, previous, ex);
     await saveSet(set);
     // 予定の全セットが終わったら自動で完了にする

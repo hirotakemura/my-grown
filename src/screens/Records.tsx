@@ -154,6 +154,7 @@ export function Records({ data }: { data: AppData }) {
             ))}
             {current && <h3 className="card-title" style={{ fontSize: 15, marginTop: 4 }}>{current.name}</h3>}
             {current && sessions.length > 0 && <LineChart
+              marker={data.settings.gymChangedOn && !current.carryOver ? { date: data.settings.gymChangedOn, label: 'ジム変更' } : undefined}
               label={current.assist ? `${current.name}の補助の重さ（少ないほど上達）` : `${current.name}の最高重量`}
               unit="kg"
               points={sessions.map((s) => {

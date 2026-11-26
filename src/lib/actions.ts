@@ -90,3 +90,30 @@ export async function saveSet(set: WorkoutSet): Promise<void> {
 // ---- 支出 ----
 
 /** 支出を保存し、品名→費目を覚える（次のレシートから同じ品名は同じ費目になる） */
+
+/**
+ * ジムを変える。この日からは、引き継がない種目（マシン・ケーブルなど）の前回・重さの提案・自己ベストに前のジムの記録を使わない。
+ * マシンごとに覚えた「次の重さ」も前のジムのものなので外しておく（取り消せば戻る）。記録はそのまま。
+ */
+export async function changeGym(date: ISODate): Promise<void> {
+  await db.transaction('rw', db.settings, db.exercises, async () => {
+    await db.settings.update('main', { gymChangedOn: date });
+    await db.exercises.toCollection().modify((e) => {
+      if (e.carryOver || !e.nextWeights) return;
+      e.nextWeightsBeforeGym = e.nextWeights;
+      delete e.nextWeights;
+    });
+  });
+}
+
+/** ジムを変えたのを取り消す（外した「次の重さ」も戻す。新しいジムで覚えた分はそのまま優先） */
+export async function undoGymChange(): Promise<void> {
+  await db.transaction('rw', db.settings, db.exercises, async () => {
+    await db.settings.update('main', { gymChangedOn: undefined });
+    await db.exercises.toCollection().modify((e) => {
+      if (!e.nextWeightsBeforeGym) return;
+      e.nextWeights = { ...e.nextWeightsBeforeGym, ...e.nextWeights };
+      delete e.nextWeightsBeforeGym;
+    });
+  });
+}

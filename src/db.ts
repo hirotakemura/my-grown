@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { CategoryRule, DayRecord, Exercise, Expense, MealItem, MealRecord, MySet, Product, Settings, WorkoutSet } from './types';
 import { ADDED_IN, SEED_BY_ID, SEED_PRODUCTS, UPDATED_TO_OFFICIAL_V12, UPDATED_TO_OFFICIAL_V16 } from './data/products';
-import { ASSIST_EXERCISES, DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_CATEGORY, SEED_EXERCISES } from './data/exercises';
+import { ASSIST_EXERCISES, CARRY_OVER_IDS, DEFAULT_MENU_A, DEFAULT_MENU_B, SEED_CATEGORY, SEED_EXERCISES, carryOverByName } from './data/exercises';
 import { todayISO } from './lib/date';
 import { movePullBackToB, restoreMenu } from './lib/menuRestore';
 import { categoryOf, menuSlots, optionsOf } from './lib/exerciseCategory';
@@ -701,6 +701,15 @@ export class AppDB extends Dexie {
         const products = tx.table<Product, string>('products');
         const have = new Set(await products.toCollection().primaryKeys());
         await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[81].includes(p.id) && !have.has(p.id)));
+      });
+    // v82: ジムを変えても記録を引き継ぐ種目（スミス・ダンベル・パワーラックなど）に印を付ける。自分で決めた分はそのまま
+    this.version(82)
+      .stores({})
+      .upgrade(async (tx) => {
+        await tx.table<Exercise, string>('exercises').toCollection().modify((e) => {
+          if (e.carryOver !== undefined) return;
+          if (CARRY_OVER_IDS.includes(e.id) || (!SEED_CATEGORY[e.id] && carryOverByName(e.name))) e.carryOver = true;
+        });
       });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {

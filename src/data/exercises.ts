@@ -91,13 +91,19 @@ const toExercise = ([id, name, repMin, repMax, increment, howTo, altId]: Def): E
   ...(ASSIST_EXERCISES.includes(id) ? { assist: true } : {}),
 });
 
+/** ジムを変えても記録を引き継ぐ種目（どこでも同じ器具）。名前からの判定は carryOverByName */
+export const CARRY_OVER_IDS = ['smith-squat', 'smith-shoulder-press', 'smith-chest-press'];
+export const carryOverByName = (name: string) => /スミス|パワーラック|ダンベル|バーベル|ベンチプレス|懸垂(?!マシン)|ディップス(?!マシン)/.test(name);
+
 /** 枠で選べる種目を2つ以上持つもの（Def の altId は1つだけなので、ここで足す） */
 export const EXTRA_OPTIONS: Record<string, string[]> = {
   'chest-press': ['smith-chest-press'],
 };
 
-export const SEED_EXERCISES: Exercise[] = [...main, ...alternatives].map(toExercise).map((e) =>
-  EXTRA_OPTIONS[e.id] ? { ...e, altIds: [...(e.altIds ?? []), ...EXTRA_OPTIONS[e.id]] } : e,
-);
+export const SEED_EXERCISES: Exercise[] = [...main, ...alternatives].map(toExercise).map((e) => ({
+  ...e,
+  ...(EXTRA_OPTIONS[e.id] ? { altIds: [...(e.altIds ?? []), ...EXTRA_OPTIONS[e.id]] } : {}),
+  ...(CARRY_OVER_IDS.includes(e.id) ? { carryOver: true } : {}),
+}));
 export const DEFAULT_MENU_A = main.slice(0, 6).map((d) => d[0]);
 export const DEFAULT_MENU_B = main.slice(6, 12).map((d) => d[0]);

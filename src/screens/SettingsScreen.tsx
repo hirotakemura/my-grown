@@ -4,8 +4,9 @@ import { EXERCISE_CATEGORIES, STORE_LABEL, type Exercise, type ExerciseCategory,
 import { categoryOf, groupByCategory, guessCategory, optionsOf } from '../lib/exerciseCategory';
 import { fmtNut } from '../lib/format';
 import { db, newId, requestPersistence, type StorageStatus } from '../db';
-import { patchSettings } from '../lib/actions';
-import { WEEKDAY_LABEL } from '../lib/date';
+import { carryOverByName } from '../data/exercises';
+import { changeGym, patchSettings, undoGymChange } from '../lib/actions';
+import { WEEKDAY_LABEL, formatMD, todayISO } from '../lib/date';
 import { backupFileName, exportBackup, importBackup, parseBackup } from '../lib/backup';
 import { sortProducts } from '../components/ProductPicker';
 import { ProductEditor } from '../components/ProductEditor';
@@ -265,6 +266,8 @@ export function SettingsScreen({ data }: { data: AppData }) {
         <p className="muted">ジムの時間は、今日の画面でその日だけ変えることもできます。トレ後の食事はジムの75分後に表示します。</p>
       </section>
 
+      <GymCard settings={settings} exercises={[...data.exercises.values()]} menuIds={[...settings.menuA, ...settings.menuB]} />
+
       <section className="card">
         <h2 className="card-title">種目</h2>
         <p className="muted">種目名をタップすると、回数・やり方・分類を編集できます。「この枠で選べる」に足した種目は、今日の筋トレでその枠から選べます。</p>
@@ -353,6 +356,9 @@ function ExerciseEditor({ exercise, onClose, onCreated }: { exercise?: Exercise;
   // 選んでいなければ名前から推測した分類を使う
   const [category, setCategory] = useState<ExerciseCategory | ''>(exercise?.category ?? '');
   const effectiveCategory = category || guessCategory(name);
+  // ジムを変えても記録を引き継ぐか（新しい種目は名前から：スミス・ダンベルなどは引き継ぐ）
+  const [carry, setCarry] = useState<boolean | null>(exercise ? !!exercise.carryOver : null);
+  const effectiveCarry = carry ?? carryOverByName(name);
   const valid = name.trim() !== '' && Number(repMin) > 0 && Number(repMax) >= Number(repMin) && Number(sets) > 0 && Number(increment) > 0;
 
   const save = async () => {
@@ -361,6 +367,7 @@ function ExerciseEditor({ exercise, onClose, onCreated }: { exercise?: Exercise;
     const fields = {
       name: name.trim(),
       category: effectiveCategory,
+      carryOver: effectiveCarry,
       repMin: Number(repMin),
       repMax: Number(repMax),
       sets: Math.round(Number(sets)),
@@ -401,9 +408,79 @@ function ExerciseEditor({ exercise, onClose, onCreated }: { exercise?: Exercise;
           </div>
         </label>
       </div>
+      <label className="row" style={{ minHeight: 44, gap: 10 }}>
+        <input type="checkbox" checked={effectiveCarry} onChange={(e) => setCarry(e.target.checked)} style={{ width: 22, height: 22 }} />
+        <span className="grow">
+          前のジムの記録を引き継ぐ
+          <span className="muted" style={{ display: 'block' }}>スミス・ダンベルなど、どこでも同じ器具はオン。メーカーが違うマシンはオフ（ジムを変えた日から重さを探し直す）</span>
+        </span>
+      </label>
       <label className="field"><span>やり方（シートの合わせ方と動かし方）</span>
         <textarea className="input" rows={3} value={howTo} onChange={(e) => setHowTo(e.target.value)} />
       </label>
     </Sheet>
+  );
+}
+
+/** ジムを変える：その日から、マシン・ケーブルなどは新しく始める（前のジムの重さを使わない） */
+function GymCard({ settings, exercises, menuIds }: { settings: Settings; exercises: Exercise[]; menuIds: string[] }) {
+  const confirm = useConfirm();
+  const toast = useToast();
+  const byId = new Map(exercises.map((e) => [e.id, e]));
+  // メニューとその枠で選べる種目だけを並べる（使っていない種目まで出すと長くなるため）
+  const used = [...new Set(menuIds.flatMap((id) => { const e = byId.get(id); return e ? [id, ...optionsOf(e)] : []; }))]
+    .flatMap((id) => byId.get(id) ?? []);
+  const carry = used.filter((e) => e.carryOver);
+  const fresh = used.filter((e) => !e.carryOver);
+  const since = settings.gymChangedOn;
+
+  const change = async () => {
+    const today = todayISO();
+    const ok = await confirm({
+      title: `今日（${formatMD(today)}）からジムを変えますか？`,
+      message: `マシン・ケーブルなど${fresh.length}種目は、新しいジムで重さを探し直します（前回・重さの提案・自己ベストに前のジムの記録を使いません）。\nスミスなど${carry.length}種目は記録を引き継ぎます。\nこれまでの記録はすべて残ります。`,
+      confirmLabel: 'ジムを変える',
+    });
+    if (!ok) return;
+    await changeGym(today);
+    toast('ジムを変えました。今日から新しいジムの記録になります');
+  };
+  const undo = async () => {
+    const ok = await confirm({
+      title: 'ジムを変えたのを取り消しますか？',
+      message: '前のジムの記録をまた前回・重さの提案に使います。',
+      confirmLabel: '取り消す',
+      danger: true,
+    });
+    if (ok) await undoGymChange();
+  };
+
+  return (
+    <section className="card" data-testid="gym-card">
+      <h2 className="card-title">ジム</h2>
+      {since ? (
+        <>
+          <p className="sub"><b className="num">{formatMD(since)}</b> から新しいジム。マシン・ケーブルなどは、この日からの記録で前回・重さの提案・自己ベストを出しています。</p>
+          <label className="field">
+            <span>ジムを変えた日</span>
+            <input className="input" type="date" value={since} onChange={(e) => e.target.value && patchSettings({ gymChangedOn: e.target.value })} />
+          </label>
+          <button className="btn small ghost" style={{ alignSelf: 'flex-start' }} onClick={undo}>取り消す</button>
+        </>
+      ) : (
+        <>
+          <p className="sub">ジムを変えた日に押してください。メーカーが違うマシンは重さが合わないので、その日から新しく始めます。記録は消えません。</p>
+          <button className="btn primary" onClick={change}>ジムを変える（今日から）</button>
+        </>
+      )}
+      <details>
+        <summary>種目ごとの扱い（新しく始める {fresh.length}・引き継ぐ {carry.length}）</summary>
+        <div className="stack">
+          <p className="muted">種目名をタップして「前のジムの記録を引き継ぐ」で変えられます。</p>
+          <div className="sub"><b>引き継ぐ：</b>{carry.map((e) => e.name).join('、') || 'なし'}</div>
+          <div className="sub"><b>新しく始める：</b>{fresh.map((e) => e.name).join('、') || 'なし'}</div>
+        </div>
+      </details>
+    </section>
   );
 }
