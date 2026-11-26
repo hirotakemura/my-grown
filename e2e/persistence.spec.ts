@@ -584,7 +584,11 @@ test('ジムを変える：マシンは前のジムの重さを使わず新し�
   await expect(card).toContainText('9/28');
   await expect.poll(async () => ((await dbGet(page, 'settings', 'main')) as { gymChangedOn?: string }).gymChangedOn).toBe('2026-09-28');
 
+  // 期間は3か月後の月末まで、メニューは新しいジムのものになる
+  await expect(card).toContainText('12/31');
   await mode(page, '筋トレ');
+  await expect(page.getByTestId('new-gym-week')).toContainText('重さを探す週');
+  await expect(page.getByTestId('exercise-rack-bench-press')).toContainText('6〜8回 × 4セット');
   const lp = page.getByTestId('exercise-leg-press');
   await expect(lp).toContainText('はじめて');
   await expect(lp).not.toContainText('前回 9/25');
@@ -594,4 +598,24 @@ test('ジムを変える：マシンは前のジムの重さを使わず新し�
   // 記録タブには前のジムの記録も残る
   await tab(page, '記録');
   await expect(page.getByTestId('exercise-history')).toContainText('40×10');
+});
+
+test('お酒を記録でき、朝の体重を記録するよう促し、週の平均が出る', async ({ page }) => {
+  await openApp(page);
+  await expect(page.getByTestId('weight-prompt')).toBeVisible();
+  await page.getByTestId('meal-dinner').getByRole('button', { name: '食べたものを選ぶ' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('button', { name: 'お酒' }).click();
+  await dialog.getByRole('button', { name: /^生ビール（中ジョッキ）/ }).first().click();
+  await dialog.getByRole('button', { name: '食べた', exact: true }).click();
+  await expect(page.getByTestId('meal-dinner')).toContainText('生ビール（中ジョッキ）');
+
+  await dbPut(page, 'days', [{ date: '2026-09-20', weight: 67.4 }, { date: '2026-09-22', weight: 67.0 }]);
+  await page.getByTestId('weight-prompt').click();
+  await page.locator('#weight').fill('66.6');
+  await page.getByTestId('weight-card').getByRole('button', { name: '記録' }).click();
+  await expect(page.getByTestId('weekly-weight')).toContainText('66.8kg');
+  await expect(page.getByTestId('weekly-weight')).toContainText('-0.6kg');
+  await tab(page, '食事');
+  await expect(page.getByTestId('weight-prompt')).toHaveCount(0);
 });

@@ -6,6 +6,7 @@ import { fmtNut } from '../lib/format';
 import { db, newId, requestPersistence, type StorageStatus } from '../db';
 import { carryOverByName } from '../data/exercises';
 import { changeGym, patchSettings, undoGymChange } from '../lib/actions';
+import { planForNewGym } from '../lib/gymPlan';
 import { WEEKDAY_LABEL, formatMD, todayISO } from '../lib/date';
 import { backupFileName, exportBackup, importBackup, parseBackup } from '../lib/backup';
 import { sortProducts } from '../components/ProductPicker';
@@ -266,7 +267,7 @@ export function SettingsScreen({ data }: { data: AppData }) {
         <p className="muted">ジムの時間は、今日の画面でその日だけ変えることもできます。トレ後の食事はジムの75分後に表示します。</p>
       </section>
 
-      <GymCard settings={settings} exercises={[...data.exercises.values()]} menuIds={[...settings.menuA, ...settings.menuB]} />
+      <GymCard settings={settings} exercises={data.exercises} />
 
       <section className="card">
         <h2 className="card-title">種目</h2>
@@ -422,33 +423,42 @@ function ExerciseEditor({ exercise, onClose, onCreated }: { exercise?: Exercise;
   );
 }
 
-/** ジムを変える：その日から、マシン・ケーブルなどは新しく始める（前のジムの重さを使わない） */
-function GymCard({ settings, exercises, menuIds }: { settings: Settings; exercises: Exercise[]; menuIds: string[] }) {
+/** ジムを変える：その日から新しいジムのメニュー・期間にし、マシン・ケーブルなどは新しく始める（前のジムの重さを使わない） */
+function GymCard({ settings, exercises }: { settings: Settings; exercises: Map<string, Exercise> }) {
   const confirm = useConfirm();
   const toast = useToast();
-  const byId = new Map(exercises.map((e) => [e.id, e]));
-  // メニューとその枠で選べる種目だけを並べる（使っていない種目まで出すと長くなるため）
-  const used = [...new Set(menuIds.flatMap((id) => { const e = byId.get(id); return e ? [id, ...optionsOf(e)] : []; }))]
-    .flatMap((id) => byId.get(id) ?? []);
-  const carry = used.filter((e) => e.carryOver);
-  const fresh = used.filter((e) => !e.carryOver);
   const since = settings.gymChangedOn;
+  const today = todayISO();
+  // 切り替えたあと（または切り替えたら）のメニュー
+  const plan = since ? null : planForNewGym(today, settings, exercises);
+  const menuA = plan?.menuA ?? settings.menuA;
+  const menuB = plan?.menuB ?? settings.menuB;
+  const optsOf = (id: string) => plan?.updates[id]?.altIds ?? (exercises.get(id) ? optionsOf(exercises.get(id)!) : []);
+  const nameOf = (id: string) => (plan?.updates[id]?.name ?? exercises.get(id)?.name ?? id);
+  const used = [...new Set([...menuA, ...menuB].flatMap((id) => [id, ...optsOf(id)]))].flatMap((id) => exercises.get(id) ?? []);
+  const isCarry = (e: Exercise) => plan?.updates[e.id]?.carryOver ?? !!e.carryOver;
+  const carry = used.filter(isCarry);
+  const fresh = used.filter((e) => !isCarry(e));
+  const repsOf = (id: string) => {
+    const u = plan?.updates[id];
+    const e = exercises.get(id);
+    return `${u?.repMin ?? e?.repMin}〜${u?.repMax ?? e?.repMax}回×${u?.sets ?? e?.sets}`;
+  };
 
   const change = async () => {
-    const today = todayISO();
     const ok = await confirm({
       title: `今日（${formatMD(today)}）からジムを変えますか？`,
-      message: `マシン・ケーブルなど${fresh.length}種目は、新しいジムで重さを探し直します（前回・重さの提案・自己ベストに前のジムの記録を使いません）。\nスミスなど${carry.length}種目は記録を引き継ぎます。\nこれまでの記録はすべて残ります。`,
+      message: `・新しいジムのメニューに切り替えます（下の「メニュー」）\n・期間を ${formatMD(today)}〜${plan ? formatMD(plan.goalDate) : ''} にします\n・マシン・ケーブルなど${fresh.length}種目は重さを探し直します\n・スミス・ダンベルなど${carry.length}種目は記録を引き継ぎます\nこれまでの記録はすべて残ります。取り消しもできます。`,
       confirmLabel: 'ジムを変える',
     });
     if (!ok) return;
     await changeGym(today);
-    toast('ジムを変えました。今日から新しいジムの記録になります');
+    toast('ジムを変えました。最初の1週間は重さを探す週です');
   };
   const undo = async () => {
     const ok = await confirm({
       title: 'ジムを変えたのを取り消しますか？',
-      message: '前のジムの記録をまた前回・重さの提案に使います。',
+      message: '前のメニュー・回数・期間に戻し、前のジムの記録をまた前回・重さの提案に使います。',
       confirmLabel: '取り消す',
       danger: true,
     });
@@ -460,7 +470,7 @@ function GymCard({ settings, exercises, menuIds }: { settings: Settings; exercis
       <h2 className="card-title">ジム</h2>
       {since ? (
         <>
-          <p className="sub"><b className="num">{formatMD(since)}</b> から新しいジム。マシン・ケーブルなどは、この日からの記録で前回・重さの提案・自己ベストを出しています。</p>
+          <p className="sub"><b className="num">{formatMD(since)}</b> から新しいジム（期間は {formatMD(settings.goalDate)} まで）。マシン・ケーブルなどは、この日からの記録で前回・重さの提案・自己ベストを出しています。</p>
           <label className="field">
             <span>ジムを変えた日</span>
             <input className="input" type="date" value={since} onChange={(e) => e.target.value && patchSettings({ gymChangedOn: e.target.value })} />
@@ -469,10 +479,27 @@ function GymCard({ settings, exercises, menuIds }: { settings: Settings; exercis
         </>
       ) : (
         <>
-          <p className="sub">ジムを変えた日に押してください。メーカーが違うマシンは重さが合わないので、その日から新しく始めます。記録は消えません。</p>
+          <p className="sub">新しいジムに入会した日に押してください。新しいジムのメニューと、その日から3か月後の月末までの期間に切り替えます。メーカーが違うマシンは重さを探し直します。記録は消えません。</p>
           <button className="btn primary" onClick={change}>ジムを変える（今日から）</button>
         </>
       )}
+      <details>
+        <summary>{since ? 'メニュー' : 'ジムを変えたあとのメニュー'}</summary>
+        <div className="stack">
+          {[['押す日（A）', menuA], ['引く日（B）', menuB]].map(([label, ids]) => (
+            <div key={label as string} className="sub">
+              <b>{label as string}</b>
+              <ol className="steps">
+                {(ids as string[]).map((id) => (
+                  <li key={id}>{nameOf(id)}　<span className="muted num">{repsOf(id)}</span>
+                    {optsOf(id).length > 0 && <span className="muted">（{optsOf(id).map(nameOf).join('・')}も選べる）</span>}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+      </details>
       <details>
         <summary>種目ごとの扱い（新しく始める {fresh.length}・引き継ぐ {carry.length}）</summary>
         <div className="stack">

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { DayRecord, ISODate } from '../types';
 import { patchDay } from '../lib/actions';
 import { formatMD } from '../lib/date';
+import { weeklyWeight } from '../lib/plan';
 import { useToast } from './Toast';
 
 interface Props {
@@ -76,7 +77,25 @@ export function WeightCard({ date, days, inputId = 'weight' }: Props) {
         {prev?.weight != null ? `前回 ${formatMD(prev.date)}：${prev.weight}kg` : 'はじめての記録です'}
         {diff != null && `（${diff > 0 ? '+' : ''}${diff}kg）`}
       </p>
-      <p className="muted">毎朝、トイレのあと・食べる前に量ると比べやすいです。</p>
+      <WeeklyWeight date={date} days={days} />
+      <p className="muted">毎朝、トイレのあと・食べる前に量ると比べやすいです。体重は1日で1kgくらい上下するので、週の平均で見ます。</p>
     </section>
+  );
+}
+
+/** 直近7日と前の7日の平均。2週続けて下がっていなければ、目標カロリーを少し下げる目安 */
+function WeeklyWeight({ date, days }: Props) {
+  const { thisWeek, lastWeek, diff } = weeklyWeight(date, days);
+  if (!thisWeek) return null;
+  return (
+    <div className="weekly-weight num" data-testid="weekly-weight">
+      <div><span className="muted">直近7日の平均</span><b>{thisWeek.avg}kg</b><span className="muted">（{thisWeek.count}日分）</span></div>
+      {lastWeek && (
+        <div>
+          <span className="muted">前の7日</span><b>{lastWeek.avg}kg</b>
+          <span className={diff! < 0 ? 'ok-text' : diff! > 0 ? 'warn-text' : 'muted'}>{diff! > 0 ? '+' : ''}{diff}kg</span>
+        </div>
+      )}
+    </div>
   );
 }

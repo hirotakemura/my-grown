@@ -81,3 +81,80 @@ describe('v82', () => {
     d.close();
   });
 });
+
+describe('新しいジムのメニュー・期間', () => {
+  beforeEach(async () => { await db.delete(); await db.open(); });
+
+  it('3か月後の月末までにする', async () => {
+    const { endOfMonthAfter } = await import('../src/lib/date');
+    expect(endOfMonthAfter('2026-12-05', 3)).toBe('2027-03-31');
+    expect(endOfMonthAfter('2026-12-31', 3)).toBe('2027-03-31');
+    expect(endOfMonthAfter('2026-11-30', 3)).toBe('2027-02-28');
+  });
+
+  it('ジムを変えると、新しいメニュー・回数・期間になり、取り消すと元に戻る', async () => {
+    // 自分で作ったパワーラックが押す日にある（記録をつなげたい）
+    await db.exercises.add({ id: 'mine-rack', name: 'パワーラック', repMin: 10, repMax: 12, increment: 2.5, howTo: '', sets: 3, altIds: ['chest-press'] });
+    const before = (await db.settings.get('main'))!;
+    await db.settings.update('main', { menuA: [...before.menuA.filter((id) => id !== 'chest-press'), 'mine-rack'] });
+    const prev = (await db.settings.get('main'))!;
+    const latBefore = await db.exercises.get('lat-pulldown');
+
+    await changeGym('2026-12-05');
+    const s = (await db.settings.get('main'))!;
+    expect(s.menuA).toEqual(['mine-rack', 'leg-press', 'shoulder-press', 'leg-extension', 'pushdown', 'abdominal']);
+    expect(s.menuB[0]).toBe('lat-pulldown');
+    expect(s).toMatchObject({ startDate: '2026-12-05', goalDate: '2027-03-31', gymChangedOn: '2026-12-05' });
+    expect(await db.exercises.get('mine-rack')).toMatchObject({ name: 'パワーラック ベンチプレス', repMin: 6, repMax: 8, sets: 4, carryOver: true, altIds: ['smith-chest-press', 'chest-press'] });
+    expect(await db.exercises.get('lat-pulldown')).toMatchObject({ repMin: 6, repMax: 8, sets: 4 });
+    expect(await db.exercises.get('assisted-pullup')).toMatchObject({ repMin: 6, repMax: 8, sets: 4 });
+    expect((await db.exercises.get('cable-lateral'))?.altIds).toEqual(['dumbbell-lateral']);
+    expect((await db.exercises.get('leg-curl'))?.altIds).toEqual([]);
+
+    await undoGymChange();
+    const u = (await db.settings.get('main'))!;
+    expect(u).toMatchObject({ menuA: prev.menuA, menuB: prev.menuB, startDate: prev.startDate, goalDate: prev.goalDate });
+    expect(u.gymChangedOn).toBeUndefined();
+    expect(await db.exercises.get('mine-rack')).toMatchObject({ name: 'パワーラック', repMin: 10, repMax: 12, sets: 3, altIds: ['chest-press'] });
+    expect(await db.exercises.get('lat-pulldown')).toMatchObject({ repMin: latBefore!.repMin, repMax: latBefore!.repMax, sets: latBefore!.sets, altIds: latBefore!.altIds });
+  });
+
+  it('自分のパワーラックがなければ、用意したパワーラック ベンチプレスを使う', async () => {
+    await changeGym('2026-12-05');
+    expect((await db.settings.get('main'))!.menuA[0]).toBe('rack-bench-press');
+    expect(await db.exercises.get('rack-bench-press')).toMatchObject({ category: '胸', carryOver: true });
+  });
+});
+
+describe('停滞したら10%軽く', () => {
+  const sess = (date: string, weight: number, reps: number[]) => ({ date, sets: reps.map((r, i) => ({ id: `${date}|x|${i}`, date, exerciseId: 'x', index: i, weight, reps: r, done: true })) });
+  it('同じ重さで2回続けて回数が落ちたら、10%軽くを提案する', async () => {
+    const { isStalling, suggestWeight } = await import('../src/lib/progression');
+    const lp = ex('lat-pulldown');
+    const h = [sess('11-09', 45, [12, 12, 12]), sess('11-13', 45, [12, 11, 10]), sess('11-17', 45, [10, 8, 8])];
+    expect(isStalling(lp, h)).toBe(true);
+    expect(suggestWeight(lp, h[2], h)).toMatchObject({ weight: 40.5, reset: true });
+    // 回数が戻っていれば、いつもどおり
+    const ok = [h[0], h[1], sess('11-24', 45, [12, 12, 11])];
+    expect(isStalling(lp, ok)).toBe(false);
+    // 重さを変えていたら停滞とは見ない
+    expect(isStalling(lp, [h[0], h[1], sess('11-17', 50, [8, 8, 8])])).toBe(false);
+    // アシストは補助を10%増やす
+    const ap = ex('assisted-pullup');
+    expect(suggestWeight(ap, h[2], h)).toMatchObject({ weight: 49.5, reset: true });
+  });
+});
+
+describe('体重の週平均', () => {
+  it('直近7日と前の7日の平均と差', async () => {
+    const { weeklyWeight } = await import('../src/lib/plan');
+    const days = new Map([
+      ['2026-12-20', { date: '2026-12-20', weight: 66.0 }],
+      ['2026-12-18', { date: '2026-12-18', weight: 66.4 }],
+      ['2026-12-12', { date: '2026-12-12', weight: 67.0 }],
+      ['2026-12-10', { date: '2026-12-10', weight: 66.8 }],
+      ['2026-12-01', { date: '2026-12-01', weight: 70 }],
+    ]);
+    expect(weeklyWeight('2026-12-20', days)).toEqual({ thisWeek: { avg: 66.2, count: 2 }, lastWeek: { avg: 66.9, count: 2 }, diff: -0.7 });
+  });
+});

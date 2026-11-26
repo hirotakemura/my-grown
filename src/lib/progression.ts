@@ -26,6 +26,8 @@ export function lastSession(exerciseId: string, before: ISODate, sets: WorkoutSe
 export interface WeightSuggestion {
   weight: number | null;
   increase: boolean;
+  /** 2回続けて回数が落ちたので、10%軽くして立て直す */
+  reset?: boolean;
   text: string;
   /** 重くするとき：前回の重さと、次の重さがマシンに合わせて覚えた値かどうか */
   from?: number;
@@ -42,7 +44,38 @@ export function nextWeightOf(ex: Exercise, top: number): { weight: number; known
   return { weight: ex.assist ? Math.max(0, round(top - ex.increment)) : round(top + ex.increment), known: false };
 }
 
-export function suggestWeight(ex: Exercise, last: Session | undefined): WeightSuggestion {
+/** いちばんきつかった重さ（アシストマシンは補助がいちばん少ないセット） */
+const topOf = (ex: Pick<Exercise, 'assist'>, s: Session) => {
+  const w = s.sets.map((x) => x.weight ?? 0);
+  return ex.assist ? Math.min(...w) : Math.max(...w);
+};
+const repsAt = (s: Session, top: number) => s.sets.filter((x) => x.weight === top).reduce((t, x) => t + (x.reps ?? 0), 0);
+
+/**
+ * 同じ重さで、2回続けて回数が落ちている（直近3回で 回数 a > b > c）。疲れがたまって停滞しているサイン。
+ */
+export function isStalling(ex: Pick<Exercise, 'assist'>, history: Session[]): boolean {
+  const last3 = history.slice(-3);
+  if (last3.length < 3) return false;
+  const tops = last3.map((s) => topOf(ex, s));
+  if (!tops.every((t) => t === tops[0]) || tops[0] <= 0) return false;
+  const [a, b, c] = last3.map((s) => repsAt(s, tops[0]));
+  return b < a && c < b;
+}
+
+/** 10%軽くした重さ（アシストマシンは補助を10%増やす）。0.5kg 単位 */
+export const resetWeightOf = (ex: Pick<Exercise, 'assist'>, top: number) => Math.round(top * (ex.assist ? 1.1 : 0.9) * 2) / 2;
+
+/** history：この種目の前回までの記録（古い順）。あれば停滞を見て「10%軽く」を出す */
+export function suggestWeight(ex: Exercise, last: Session | undefined, history: Session[] = []): WeightSuggestion {
+  if (last && isStalling(ex, history)) {
+    const top = topOf(ex, last);
+    const w = resetWeightOf(ex, top);
+    return {
+      weight: w, increase: false, reset: true,
+      text: `2回続けて回数が落ちています。今日は10%${ex.assist ? '補助を増やして' : '軽く'}（${w}kg）、回数を取り戻しましょう`,
+    };
+  }
   if (!last) {
     return { weight: null, increase: false, text: `はじめて。${ex.repMin}〜${ex.repMax}回で限界が来る重さを探しましょう` };
   }

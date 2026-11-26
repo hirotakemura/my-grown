@@ -70,10 +70,23 @@ const alternatives: Def[] = [
     '肩の関節がマシンの回転軸と一直線になるようにシートを合わせる。肘のパッドを外側へ押し上げ、肩の高さで止めてゆっくり戻す。'],
   ['machine-curl', 'マシン アームカール', 12, 15, 2.5,
     '脇の下がパッドの上端に来るようにシートを合わせ、腕をパッドに乗せる。肘を固定したまま巻き上げ、伸び切る手前まで戻す。'],
+  // ---- 新しいジム（LifeFit）で使う種目 ----
+  ['rack-bench-press', 'パワーラック ベンチプレス', 6, 8, 2.5,
+    'ベンチをラックの中に置き、セーフティバーを胸より少し下にセットする。肩甲骨を寄せて胸を張り、バーを胸の中央（乳首の高さ）まで下ろして真上に押し上げる。足は床につけて踏ん張る。'],
+  ['plate-leg-press', 'プレートレッグプレス', 8, 10, 5,
+    'プレートを付けて使うレッグプレス。足は肩幅でプレートの中央に置き、膝が90度くらいまで下ろして、かかとで押し戻す。膝は伸ばし切らない。'],
+  ['dumbbell-shoulder-press', 'ダンベル ショルダープレス', 8, 10, 2,
+    'ベンチの背もたれを垂直に近く立てて座り、ダンベルを耳の横に構える。真上に押し上げ、肘が肩の高さになるまでゆっくり下ろす。'],
+  ['assisted-dips', 'アシスト ディップス', 12, 15, 5,
+    'アシストチンニング×ディップスのマシンで、膝をパッドに乗せる。体をやや前に倒さず起こしたまま、肘を後ろに曲げて下り、肘を伸ばして押し上げる（二の腕に効かせる）。数値が大きいほど楽。'],
+  ['dumbbell-lateral', 'ダンベル サイドレイズ', 12, 15, 1,
+    'ダンベルを体の横に持ち、肘を軽く曲げたまま肩の高さまで横に上げる。肩をすくめず、ゆっくり下ろす。'],
+  ['dumbbell-curl', 'ダンベル カール', 10, 12, 1,
+    'ダンベルを体の横に持ち、肘を脇腹に固定したまま小指側から巻き上げる。反動を使わず、伸び切る手前まで下ろす。'],
 ];
 
 /** 補助の重さを選ぶマシン（数値が大きいほど楽。上達したら数値を小さくする） */
-export const ASSIST_EXERCISES = ['assisted-pullup'];
+export const ASSIST_EXERCISES = ['assisted-pullup', 'assisted-dips'];
 
 /** 初期の種目の分類 */
 export const SEED_CATEGORY: Record<string, ExerciseCategory> = {
@@ -83,6 +96,7 @@ export const SEED_CATEGORY: Record<string, ExerciseCategory> = {
   'pushdown': '腕', 'overhead-extension': '腕', 'cable-curl': '腕', 'machine-curl': '腕',
   'leg-press': '脚', 'leg-press-low': '脚', 'leg-extension': '脚', 'leg-curl': '脚', 'smith-squat': '脚',
   'abdominal': 'お腹', 'cable-crunch': 'お腹',
+  'rack-bench-press': '胸', 'plate-leg-press': '脚', 'dumbbell-shoulder-press': '肩', 'assisted-dips': '腕', 'dumbbell-lateral': '肩', 'dumbbell-curl': '腕',
 };
 
 const toExercise = ([id, name, repMin, repMax, increment, howTo, altId]: Def): Exercise => ({
@@ -92,7 +106,7 @@ const toExercise = ([id, name, repMin, repMax, increment, howTo, altId]: Def): E
 });
 
 /** ジムを変えても記録を引き継ぐ種目（どこでも同じ器具）。名前からの判定は carryOverByName */
-export const CARRY_OVER_IDS = ['smith-squat', 'smith-shoulder-press', 'smith-chest-press'];
+export const CARRY_OVER_IDS = ['smith-squat', 'smith-shoulder-press', 'smith-chest-press', 'rack-bench-press', 'dumbbell-shoulder-press', 'dumbbell-lateral', 'dumbbell-curl'];
 export const carryOverByName = (name: string) => /スミス|パワーラック|ダンベル|バーベル|ベンチプレス|懸垂(?!マシン)|ディップス(?!マシン)/.test(name);
 
 /** 枠で選べる種目を2つ以上持つもの（Def の altId は1つだけなので、ここで足す） */
@@ -107,3 +121,42 @@ export const SEED_EXERCISES: Exercise[] = [...main, ...alternatives].map(toExerc
 }));
 export const DEFAULT_MENU_A = main.slice(0, 6).map((d) => d[0]);
 export const DEFAULT_MENU_B = main.slice(6, 12).map((d) => d[0]);
+
+/**
+ * 新しいジム（LifeFit イオンタウン小郡）のメニュー。ジムを変えた日に切り替える。
+ * 各日の1つ目は重く（6〜8回×4）、次に8〜10回、仕上げに12〜15回。重さの停滞を動かすための組み方。
+ * options：その枠で選べる種目（ない器具のマシン ラテラルレイズ・マシン アームカール・バックエクステンションは外す）
+ */
+export const NEW_GYM_PLAN = {
+  menuA: ['rack-bench-press', 'leg-press', 'shoulder-press', 'leg-extension', 'pushdown', 'abdominal'],
+  menuB: ['lat-pulldown', 'seated-row', 'leg-curl', 'pec-fly', 'cable-lateral', 'cable-curl'],
+  options: {
+    'rack-bench-press': ['smith-chest-press', 'chest-press'],
+    'leg-press': ['smith-squat', 'plate-leg-press'],
+    'shoulder-press': ['smith-shoulder-press', 'dumbbell-shoulder-press'],
+    'leg-extension': ['leg-press-low'],
+    'pushdown': ['overhead-extension', 'assisted-dips'],
+    'abdominal': ['cable-crunch'],
+    'lat-pulldown': ['assisted-pullup'],
+    'seated-row': ['one-arm-row'],
+    'leg-curl': [],
+    'pec-fly': ['cable-crossover'],
+    'cable-lateral': ['dumbbell-lateral'],
+    'cable-curl': ['dumbbell-curl'],
+  } as Record<string, string[]>,
+  /** 回数とセット数（枠で選べる種目にも同じ回数・セット数を使う） */
+  reps: {
+    'rack-bench-press': [6, 8, 4],
+    'lat-pulldown': [6, 8, 4],
+    'leg-press': [8, 10, 3],
+    'shoulder-press': [8, 10, 3],
+    'seated-row': [8, 10, 3],
+    'leg-curl': [10, 12, 3],
+    'cable-curl': [10, 12, 3],
+    'leg-extension': [12, 15, 3],
+    'pushdown': [12, 15, 3],
+    'abdominal': [12, 15, 3],
+    'pec-fly': [12, 15, 3],
+    'cable-lateral': [12, 15, 3],
+  } as Record<string, [number, number, number]>,
+};

@@ -54,10 +54,12 @@ interface Props {
   /** 食事／筋トレの表示を切り替え、必要ならその食事の枠まで移動する */
   onGo: (mode: TodayMode, slot?: MealSlot) => void;
   onOpenRecords: () => void;
+  /** その日の体重（未記録なら記録を促す） */
+  weight?: number;
 }
 
 /** 今日のサマリー：達成状況・カロリー・たんぱく質・次にやること */
-export function TodaySummary({ date, today, status, progress, kind, autoKind, action, onGo, onOpenRecords }: Props) {
+export function TodaySummary({ date, today, status, progress, kind, autoKind, action, onGo, onOpenRecords, weight }: Props) {
   const t = pfcTargets(status.target);
   const e = status.eaten;
   const ratio = pfcRatio(e);
@@ -109,6 +111,9 @@ export function TodaySummary({ date, today, status, progress, kind, autoKind, ac
         </div>
       </details>
 
+      {isToday && weight == null && (
+        <button className="btn small sum-weight" onClick={onOpenRecords} data-testid="weight-prompt">⚖ 今朝の体重を記録する ›</button>
+      )}
       <button className="sum-goal muted num" onClick={onOpenRecords} data-testid="goal-brief">
         ゴールまで{progress.daysLeft}日・連続{progress.streak}日・達成{progress.achievedDays}日 <span aria-hidden>›</span>
       </button>

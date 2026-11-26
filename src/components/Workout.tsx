@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import weightUpIcon from '../assets/ui/weight-up.png';
 import type { DayRecord, Exercise, Settings, WorkoutMenu, WorkoutSet } from '../types';
 import { gymTimeOf, menuExerciseIds } from '../lib/plan';
-import { lastSession, isPersonalBest, setsForProgress, suggestWeight } from '../lib/progression';
+import { lastSession, isPersonalBest, sessionsOf, setsForProgress, suggestWeight } from '../lib/progression';
 import { patchDay, saveSet, setId } from '../lib/actions';
-import { formatMD } from '../lib/date';
+import { addDays, formatMD } from '../lib/date';
 import { useRestTimer } from './RestTimer';
 import { useToast } from './Toast';
 import { db } from '../db';
@@ -59,6 +59,9 @@ export function WorkoutSection({ date, menu, day, settings, exercises, sets, pla
                 />
               </label>
             </div>
+            {settings.gymChangedOn && date >= settings.gymChangedOn && date < addDays(settings.gymChangedOn, 7) && (
+              <p className="note" data-testid="new-gym-week">新しいジムの1週目：重さを探す週です。限界の2〜3回手前で止めて、フォームと座席の位置を覚えましょう。</p>
+            )}
             <div className="bar thin" role="progressbar" aria-valuenow={doneToday} aria-valuemax={plannedSets} aria-label="今日のセットの進み具合">
               <div style={{ width: `${pct}%` }} />
             </div>
@@ -185,7 +188,7 @@ function ExerciseCard({ date, menu, main, ex, options, day, sets, settings, plan
   // ジムを変えた日からは、前のジムの記録を使わない種目がある
   const usable = setsForProgress(ex, sets, date, settings.gymChangedOn);
   const last = lastSession(ex.id, date, usable);
-  const sug = suggestWeight(ex, last);
+  const sug = suggestWeight(ex, last, sessionsOf(ex.id, usable).filter((x) => x.date < date));
   const todays = sets.filter((s) => s.date === date && s.exerciseId === ex.id);
   const doneCount = todays.filter((s) => s.done).length;
 
@@ -232,7 +235,7 @@ function ExerciseCard({ date, menu, main, ex, options, day, sets, settings, plan
       {sug.increase && sug.from != null && sug.weight != null ? (
         <NextWeight key={`${ex.id}-${sug.from}`} ex={ex} from={sug.from} weight={sug.weight} known={!!sug.known} />
       ) : (
-        <div className="suggest">{sug.text}</div>
+        <div className={`suggest ${sug.reset ? 'reset' : ''}`} data-testid={`suggest-${ex.id}`}>{sug.text}</div>
       )}
       <div className="set-table">
         <div className="set-cols" aria-hidden>

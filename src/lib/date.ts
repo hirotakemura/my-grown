@@ -69,3 +69,9 @@ export function validatePeriod(start: ISODate, goal: ISODate): string | null {
   if (diffDays(start, goal) + 1 > MAX_PERIOD_DAYS) return `期間は${MAX_PERIOD_DAYS}日以内にしてください`;
   return null;
 }
+
+/** months か月後の月の末日（例：12/5 の3か月後の月末 → 3/31） */
+export function endOfMonthAfter(date: ISODate, months: number): ISODate {
+  const d = parseISO(date);
+  return toISO(new Date(d.getFullYear(), d.getMonth() + months + 1, 0));
+}

@@ -272,6 +272,7 @@ export const ADDED_IN: Record<number, string[]> = {
   79: ['l-butter-pepper-doria'],
   80: ['home-sunagimo-broccoli'],
   81: ['7-irodori-bento-shiokoji-chicken'],
+  84: ['alc-draft-beer-medium', 'alc-beer-350', 'alc-beer-500', 'alc-highball', 'alc-highball-mega', 'alc-lemon-sour', 'alc-chuhai-350', 'alc-strong-350', 'alc-sake-1go', 'alc-shochu-rock', 'alc-wine-glass'],
 };
 
 // ファミリーマート
@@ -302,6 +303,18 @@ const common: Row[] = [
   ['natto', '納豆', '卵・乳製品', 90, 8, 4.5, 6],
   ['tofu', '豆腐', '卵・乳製品', 80, 7, 4.5, 2.5],
   ['banana', 'バナナ', 'その他', 90, 1, 0.2, 22],
+  // お酒（目安）。kcal にはアルコールの分が入るので、P・F・C を足しても kcal にならない
+  ['alc-draft-beer-medium', '生ビール（中ジョッキ）', 'お酒', 175, 1.3, 0, 13.5],
+  ['alc-beer-350', '缶ビール（350ml）', 'お酒', 140, 1.1, 0, 10.9],
+  ['alc-beer-500', '缶ビール（500ml）', 'お酒', 200, 1.5, 0, 15.5],
+  ['alc-highball', 'ハイボール（ジョッキ）', 'お酒', 90, 0, 0, 0],
+  ['alc-highball-mega', 'ハイボール（メガ・大ジョッキ）', 'お酒', 200, 0, 0, 0],
+  ['alc-lemon-sour', 'レモンサワー（ジョッキ）', 'お酒', 120, 0, 0, 8],
+  ['alc-chuhai-350', '缶チューハイ（350ml・5%）', 'お酒', 160, 0, 0, 14],
+  ['alc-strong-350', 'ストロング缶チューハイ（350ml・9%）', 'お酒', 200, 0, 0, 10],
+  ['alc-sake-1go', '日本酒（1合）', 'お酒', 193, 0.7, 0, 8.8],
+  ['alc-shochu-rock', '焼酎（ロック・水割り 1杯）', 'お酒', 110, 0, 0, 0],
+  ['alc-wine-glass', 'ワイン（グラス1杯）', 'お酒', 90, 0.1, 0, 2.4],
 ];
 
 // 出社日の夜に、外で食べる・家の作り置きを食べるとき用

@@ -11,7 +11,7 @@ describe('IndexedDB への保存', () => {
     const db = new AppDB(NAME);
     expect(await db.settings.get('main')).toMatchObject({ goalDate: '2026-11-30', trainProtein: 135, restSeconds: 90 });
     expect(await db.products.count()).toBe(SEED_PRODUCTS.length);
-    expect(await db.exercises.count()).toBe(25);
+    expect(await db.exercises.count()).toBe(31);
     db.close();
   });
 

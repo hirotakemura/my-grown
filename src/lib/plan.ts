@@ -273,3 +273,19 @@ export function nextAction({ menu, settings, day, meals, nowMinutes }: NextActio
   const due = open.filter((e) => e.at <= nowMinutes);
   return (due.length ? due[due.length - 1] : open[0]).action;
 }
+
+/** その日までの7日間（その日を含む）と、その前の7日間の体重の平均。1日ごとの上下（水分など）に振り回されないよう週で比べる */
+export function weeklyWeight(date: ISODate, days: Map<ISODate, DayRecord>) {
+  const avg = (from: number, to: number) => {
+    const ws: number[] = [];
+    for (let i = from; i <= to; i++) {
+      const w = days.get(addDays(date, -i))?.weight;
+      if (w != null) ws.push(w);
+    }
+    return ws.length ? { avg: Math.round((ws.reduce((a, b) => a + b, 0) / ws.length) * 10) / 10, count: ws.length } : null;
+  };
+  const thisWeek = avg(0, 6);
+  const lastWeek = avg(7, 13);
+  const diff = thisWeek && lastWeek ? Math.round((thisWeek.avg - lastWeek.avg) * 10) / 10 : null;
+  return { thisWeek, lastWeek, diff };
+}

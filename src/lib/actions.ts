@@ -1,4 +1,5 @@
 import { db, newId } from '../db';
+import { planForNewGym } from './gymPlan';
 import type { DayRecord, ISODate, MealItem, MealSlot, MySet, Product, Settings, WorkoutSet } from '../types';
 import type { Suggestion } from '../data/menus';
 
@@ -92,24 +93,42 @@ export async function saveSet(set: WorkoutSet): Promise<void> {
 /** 支出を保存し、品名→費目を覚える（次のレシートから同じ品名は同じ費目になる） */
 
 /**
- * ジムを変える。この日からは、引き継がない種目（マシン・ケーブルなど）の前回・重さの提案・自己ベストに前のジムの記録を使わない。
- * マシンごとに覚えた「次の重さ」も前のジムのものなので外しておく（取り消せば戻る）。記録はそのまま。
+ * ジムを変える。この日から：
+ * - 新しいジムのメニュー・回数に切り替え、期間を「この日から3か月後の月末まで」にする
+ * - 引き継がない種目（マシン・ケーブルなど）は、前回・重さの提案・自己ベストに前のジムの記録を使わない
+ * - マシンごとに覚えた「次の重さ」は前のジムのものなので外す
+ * どれも取り消せば戻る。記録はそのまま。
  */
 export async function changeGym(date: ISODate): Promise<void> {
   await db.transaction('rw', db.settings, db.exercises, async () => {
-    await db.settings.update('main', { gymChangedOn: date });
+    const settings = await db.settings.get('main');
+    if (!settings) return;
+    const exercises = new Map((await db.exercises.toArray()).map((e) => [e.id, e]));
+    const plan = planForNewGym(date, settings, exercises);
+    for (const [id, f] of Object.entries(plan.updates)) if (exercises.has(id)) await db.exercises.update(id, f);
     await db.exercises.toCollection().modify((e) => {
       if (e.carryOver || !e.nextWeights) return;
       e.nextWeightsBeforeGym = e.nextWeights;
       delete e.nextWeights;
     });
+    await db.settings.update('main', {
+      gymChangedOn: date, menuA: plan.menuA, menuB: plan.menuB, startDate: plan.startDate, goalDate: plan.goalDate, gymChangeBackup: plan.backup,
+    });
   });
 }
 
-/** ジムを変えたのを取り消す（外した「次の重さ」も戻す。新しいジムで覚えた分はそのまま優先） */
+/** ジムを変えたのを取り消す（メニュー・回数・期間・外した「次の重さ」を戻す。新しいジムで覚えた分はそのまま優先） */
 export async function undoGymChange(): Promise<void> {
   await db.transaction('rw', db.settings, db.exercises, async () => {
-    await db.settings.update('main', { gymChangedOn: undefined });
+    const settings = await db.settings.get('main');
+    const b = settings?.gymChangeBackup;
+    if (b) {
+      for (const [id, f] of Object.entries(b.exercises)) await db.exercises.update(id, f);
+    }
+    await db.settings.update('main', {
+      gymChangedOn: undefined, gymChangeBackup: undefined,
+      ...(b ? { startDate: b.startDate, goalDate: b.goalDate, menuA: b.menuA, menuB: b.menuB } : {}),
+    });
     await db.exercises.toCollection().modify((e) => {
       if (!e.nextWeightsBeforeGym) return;
       e.nextWeights = { ...e.nextWeightsBeforeGym, ...e.nextWeights };

@@ -530,3 +530,9 @@ input[type='time'].input::-webkit-date-and-time-value {
 .ex-chip { max-width: 100%; overflow-wrap: anywhere; }
 .chart .marker { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 4 3; }
 .chart .marker-label { fill: var(--warn); font-size: 10px; }
+.suggest.reset { color: var(--warn); }
+.weekly-weight { display: flex; flex-direction: column; gap: 2px; background: var(--card-2); border-radius: var(--radius-s); padding: 8px 12px; }
+.weekly-weight > div { display: flex; align-items: baseline; gap: 8px; }
+.weekly-weight b { font-size: 17px; }
+.warn-text { color: var(--warn); font-weight: var(--fw-semibold); }
+.sum-weight { align-self: flex-start; color: var(--accent); }

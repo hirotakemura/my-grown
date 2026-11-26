@@ -711,6 +711,23 @@ export class AppDB extends Dexie {
           if (CARRY_OVER_IDS.includes(e.id) || (!SEED_CATEGORY[e.id] && carryOverByName(e.name))) e.carryOver = true;
         });
       });
+    // v83: 新しいジムで使う種目（パワーラック ベンチプレス・ダンベル種目・アシスト ディップスなど）を足す
+    this.version(83)
+      .stores({})
+      .upgrade(async (tx) => {
+        const table = tx.table<Exercise, string>('exercises');
+        const have = new Set(await table.toCollection().primaryKeys());
+        const ids = ['rack-bench-press', 'plate-leg-press', 'dumbbell-shoulder-press', 'assisted-dips', 'dumbbell-lateral', 'dumbbell-curl'];
+        await table.bulkAdd(SEED_EXERCISES.filter((e) => ids.includes(e.id) && !have.has(e.id)));
+      });
+    // v84: お酒（生ビール・ハイボール・サワーなど）を足す
+    this.version(84)
+      .stores({})
+      .upgrade(async (tx) => {
+        const products = tx.table<Product, string>('products');
+        const have = new Set(await products.toCollection().primaryKeys());
+        await products.bulkAdd(SEED_PRODUCTS.filter((p) => ADDED_IN[84].includes(p.id) && !have.has(p.id)));
+      });
     // 初回だけ初期データを入れる
     this.on('populate', async (tx) => {
       await tx.table('settings').add(defaultSettings());

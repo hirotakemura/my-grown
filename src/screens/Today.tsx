@@ -109,6 +109,7 @@ export function Today({ data, date, setDate, mode, setMode, onOpenRecords }: Pro
           action={action}
           onGo={go}
           onOpenRecords={onOpenRecords}
+          weight={day?.weight}
         />
       </div>
 

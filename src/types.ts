@@ -11,6 +11,7 @@ export type Category =
   | 'パン'
   | '外食・定食'
   | '自炊'
+  | 'お酒'
   | 'その他';
 
 export const CATEGORIES: Category[] = [
@@ -24,6 +25,7 @@ export const CATEGORIES: Category[] = [
   'パン',
   '外食・定食',
   '自炊',
+  'お酒',
   'その他',
 ];
 
@@ -164,6 +166,14 @@ export interface Settings {
   menuB: string[];
   /** ジムを変えた日。この日からは「新しく始める」種目で、前のジムの記録を前回・重さの提案・自己ベストに使わない */
   gymChangedOn?: ISODate;
+  /** ジムを変えたときに書き換えた内容（取り消したら戻す） */
+  gymChangeBackup?: {
+    startDate: ISODate;
+    goalDate: ISODate;
+    menuA: string[];
+    menuB: string[];
+    exercises: Record<string, Partial<Pick<Exercise, 'name' | 'repMin' | 'repMax' | 'sets' | 'altIds' | 'category' | 'carryOver' | 'howTo'>>>;
+  };
 }
 
 // ---- 支出（レシート） ----
